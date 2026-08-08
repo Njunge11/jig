@@ -174,7 +174,7 @@ Deferred, to revisit after real usage. Plan: use the restructured skills on real
 
 ## Open — to discuss before building
 
-- Initializer skill design: input spec format, how it sizes features, how it authors Done conditions.
+- Initializer skill design: input spec format, how it sizes features, how it authors Done conditions. **Field notes from hand-authoring the first checklist: `docs/initializer-notes.md`** — the two context sources (decided spec + codebase grounding pass), the grounding checks, decomposition rules, and the as-executed format (behavior section is `## Backend`, not "Behaviors").
 - Which skills the initializer names per checklist (`backend-tests`/`frontend-tests`, `backend-standards`, `data-fetching`, frontend equivalents), and whether the two-phase backend/frontend split maps to separate features or phases within one. **Settled in part:** checklists carry explicit skill directives (see Checklist → Skills above); test skills collapse to `backend-tests` + `frontend-tests` with the TDD loop merged into each; the build-order rule (backend → UI → integrate) belongs to the initializer.
 - Handoff template: exact headings, length cap.
 - `/goal` wiring: whether `implement <checklist>` needs a thin skill wrapping the goal condition, or the checklist's Done section is passed verbatim.
