@@ -18,8 +18,6 @@ Rules for backend code. Each rule has one home; the [Review checklist](#review-c
 
 A feature is a folder; schema is central.
 
-**Precedence:** the layout below is the default for new ground (a fresh app or package). In a repo with an established backend layout, the repo's existing structure, file naming, and schema location win — the feature's checklist records the real paths; follow it and never introduce a parallel structure. Everything else in this skill (layer contracts, factory functions, composition root, the Never lists) holds in either layout.
-
 ```
 features/<feature>/
   checklist.md
@@ -175,7 +173,7 @@ type GetUser = inferRouterOutputs<AppRouter>["user"]["get"];
 
 Reject the change if any is true:
 
-1. A file sits outside the feature's module folder, or schema outside the repo's central schema location (per the Structure precedence rule).
+1. A file sits outside the feature tree, or schema outside `db/schema/`.
 2. A service or repo is a class or module singleton, or the db client is imported below the entry point.
 3. An entry point (router, MCP tool, or workflow) touches the DB or contains business logic.
 4. An auth check is hand-rolled inside a procedure body instead of a composed base procedure.
