@@ -42,6 +42,7 @@ db/schema/
 ```
 
 - **Schema lives centrally in `db/schema/`**, one file per domain, `schema: "./db/schema"` in `drizzle.config.ts` (drizzle-kit reads the folder recursively; every table must be exported). Central because FKs cross domains constantly — feature-local schema files would import across features.
+- **Monorepo schema placement**: tables consumed by more than one app live in the workspace db package (`packages/db` exporting schema + client — the create-t3-turbo pattern), which owns their drizzle config and migration history; an app's **private** tables stay in that app's `db/schema/` using Drizzle's multi-project safeguards — every table defined through a `pgTableCreator` name prefix (`<app>_`), `tablesFilter: ["<app>_*"]`, and its own migrations journal (`migrations: { schema: "drizzle_<app>" }`). Private tables never FK into another app's tables; the moment a second app needs a table, it moves to the db package.
 - **Services and repositories are factory functions** — `make<X>Service(deps)`, `make<X>Repo(db)` — that receive every dependency as an argument: the repo, `now()`, `uuid()`, external clients. Never classes, never module-level singletons, and nothing imports the db client except the entry point. Required for the fake-repo / injected-clock testing in `backend-tests`.
 - **The entry point is the composition root**: the router procedure or workflow step constructs the real repo and service and wires them together. Everything below it only receives dependencies.
 
@@ -173,7 +174,7 @@ type GetUser = inferRouterOutputs<AppRouter>["user"]["get"];
 
 Reject the change if any is true:
 
-1. A file sits outside the feature tree, or schema outside `db/schema/`.
+1. A file sits outside the feature tree, or schema outside its prescribed home (`db/schema/`; in a monorepo: the workspace db package for shared tables, prefixed app-local `db/schema/` for private ones).
 2. A service or repo is a class or module singleton, or the db client is imported below the entry point.
 3. An entry point (router, MCP tool, or workflow) touches the DB or contains business logic.
 4. An auth check is hand-rolled inside a procedure body instead of a composed base procedure.
