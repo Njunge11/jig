@@ -7,17 +7,16 @@ agent: backend-feature-builder
 
 # Feature Build — Backend (Phase 1)
 
-Build a feature's backend test-first, driven by its checklist. This runs in a forked subagent with the `tdd`, `testing`, `backend-standards`, and `data-fetching` skills preloaded — so the checklist file and the repo are your source of truth (no chat history). Author the checklist first, in-session, with backend-checklist.
+Build a feature's backend test-first, driven by its checklist. This runs in a forked subagent with the `backend-tests` and `backend-standards` skills preloaded — so the checklist file and the repo are your source of truth (no chat history). Author the checklist first, in-session, with backend-checklist.
 
 **Checklist:** `$ARGUMENTS` — the path to the feature's `features/<name>/checklist.md`. If none was given, locate the feature's checklist under `features/`.
 
-## The loop
+## The work
 
-1. Read the `## Backend` section of the checklist — the test list to burn down.
-2. **Pick one unchecked case** → write one real test for it (setup / invoke / assert).
-3. **Make it pass** — minimum code, layer order db → service → router.
-4. **Refactor** if needed, then **tick the item `[x]`**. Add any newly-discovered cases to the list.
-5. Repeat until **every `## Backend` item is `[x]` and `vitest --project backend` is green**. Then **return the proof**: show the checklist with all `## Backend` items `[x]` and paste the `vitest --project backend` run showing green, so a transcript-only watcher (e.g. `/goal`) can verify it.
+1. The `## Backend` section of the checklist is the test list. Burn it down with **the loop from the preloaded `backend-tests` skill** — that skill owns the loop (red → self-check → green → refactor → commit per behavior); do not improvise a variant of it here.
+2. When every `## Backend` item is `[x]`, **walk the Review checklist of the preloaded `backend-standards` skill item by item against your diff** (`git diff main`). Name each violated item, fix it, keep the suite green; commit the fixes as one commit.
+3. When the suite is green after the walk, **open the PR per the preloaded `open-feature-pr` skill** — that skill owns the branch/title/body format and the `gh` steps; do not improvise a format.
+4. **Return the proof**: show the checklist with all items `[x]`, state the standards-checklist walk result (per item: pass or fixed), paste the green `vitest --project backend` run, and show the PR URL, so a transcript-only watcher (e.g. `/goal`) can verify it.
 
 ## Rules
 
