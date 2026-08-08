@@ -39,7 +39,7 @@ Reject the test if any is true:
 7. **Shares state** with other tests — no rollback transaction (repo) or fresh fake (service).
 8. Fails the **rewrite litmus**: would break if the implementation were rewritten (ORM → raw SQL, service restructured, auth strategy swapped).
 9. **Reads poorly**: the name doesn't state the action and expected outcome, or the body contains logic (loops, conditionals) — duplication between tests is acceptable when it aids clarity.
-10. **Wrong file**: the test sits in a file that mixes layers or isn't named after the source file it tests (`<feature>.repo.test.ts` / `<feature>.service.test.ts` / `<feature>.router.test.ts`).
+10. **Wrong file**: the test sits in a file that mixes layers or isn't named after the source file it tests, using the repo's established suffix pattern (default: `<feature>.repo.test.ts` / `<feature>.service.test.ts` / `<feature>.router.test.ts`).
 
 ## What not to do — and what to do instead
 
@@ -109,9 +109,11 @@ await expect(anon.users.funnel({ period: "30d" })).rejects.toThrow(
 
 ## Harness
 
-One Vitest config, `backend` project, node environment. Tests live in each feature's `api/__tests__/` and `db/__tests__/`. Run with `vitest --project backend`.
+**Precedence:** the harness below is the default for new ground. In a repo with an established test harness, use the repo's harness entry points, file locations, and suite commands — the feature's checklist records them; never set up a parallel harness. The invariants hold everywhere: one test file per source file, no layer mixing, real Postgres semantics for repo tests, fake repo for service tests.
 
-**One test file per source file, named after it** — `<feature>.repo.test.ts`, `<feature>.service.test.ts`, `<feature>.router.test.ts`. Never mix layers in one file: each layer has its own harness (PGlite / fake repo / `createCaller`), and a mixed file tangles their setups.
+Default for new ground: one Vitest config, `backend` project, node environment. Tests live in each feature's `api/__tests__/` and `db/__tests__/`. Run with `vitest --project backend`.
+
+**One test file per source file, named after it** — default `<feature>.repo.test.ts`, `<feature>.service.test.ts`, `<feature>.router.test.ts`; follow the repo's suffix pattern where one exists. Never mix layers in one file: each layer has its own harness (PGlite / fake repo / `createCaller`), and a mixed file tangles their setups.
 
 ```ts
 // vitest.config.ts — the backend project
@@ -130,7 +132,7 @@ One Vitest config, `backend` project, node environment. Tests live in each featu
 
 Real Postgres compiled to WASM, in-process. No Docker.
 
-- **Load the schema with `drizzle-kit push`, not migration files** — push the imported schema objects into the PGlite instance at suite start (in `test/setup.backend.ts`), so FKs and constraints are real and tests are decoupled from any `drizzle/` folder.
+- **Load the schema with `drizzle-kit push`, not migration files** (default for new ground) — push the imported schema objects into the PGlite instance at suite start (in `test/setup.backend.ts`), so FKs and constraints are real and tests are decoupled from any `drizzle/` folder. An established repo may instead build its test database from the real migration set — that's deliberate (it exercises generated migrations); follow the repo's harness.
 - **Isolate with a rollback transaction** (~2–4 ms/test vs ~40–60 ms truncate-and-reseed):
 
 ```ts
