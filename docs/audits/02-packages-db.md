@@ -99,9 +99,9 @@ Both rejections were **correct literal readings of the condition**. The machiner
 
 The skills produced a correct, honest, well-evidenced refactor: behavior provably unchanged, invariants intact, clean recovery from an unanticipated hook interaction, and a PR that follows the template. What failed was **closure**: the initializer wrote gates it never ran, so the goal condition was unsatisfiable from the moment it was authored, and the run ended blocked instead of clearing. Every fix lands in the initializer and open-feature-pr skills; the build-side conduct needs no correction.
 
-## Follow-up decision (2026-08-09)
+## Follow-up decision (2026-08-09, final)
 
-Gate selection must be deterministic. The initializer no longer authors gates free-form: a closed menu in the skill maps change classes to gates (suites at baseline counts + typecheck always; renames-only diff for moves; `git grep` zero for rewritten specifiers; no-op `db:generate` for schema moves). A proof outside the menu requires asking the developer. Same steps in, same gates out.
+**The model authors no verification.** An earlier iteration tried a closed gate menu; the developer rejected it — a menu is still the model designing proof. Final rule, live at `689bbad`: `## Done` draws from exactly two deterministic sources — the repo's standing test and typecheck scripts run unmodified, and verification the spec itself explicitly states, copied verbatim. A missing proof goes to the developer to decide into the spec. The gate menu, the run-before-write rule, the git-grep rule, and initializer-authored invariants are all removed.
 
 ## Resulting plugin commits
 

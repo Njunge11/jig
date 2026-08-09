@@ -51,7 +51,7 @@ Sizing: approximately 15 behaviors make one reviewable feature/PR. Split larger 
 - Write ordered steps (`## Steps`). Each step is a concrete, completable unit: branch + baseline, create X, move Y, rewrite Z, update CI. Write mechanical rules, not vague intentions: "rewrite `@/lib/db/*` → `@ajiri/db/*` per this mapping", not "fix imports".
 - The first step is always a **baseline shown green**: run the repo's standing checks for the affected packages and record their results. The baseline makes each later regression attributable.
 - `## Done` lists verification from exactly two sources, and the initializer authors neither:
-  1. **The repo's standing checks** for the affected packages — their existing test and typecheck scripts, run unmodified, green at the baseline counts. Never gate on repo-hygiene tools (for example, knip); those run in their own workflow, outside the row.
+  1. **The repo's standing checks** for the affected packages — only their existing `test`/`test:run` and `typecheck` package scripts, run unmodified, green at the baseline counts. Nothing else qualifies as a standing check.
   2. **Verification the spec itself explicitly states**, copied verbatim. If the spec states none and a proof seems missing, ask the developer to decide it into the spec. Never write your own.
 
   Plus the tracker flip and the PR. During the audit, run the standing checks once and record their results; a check that is red on the default branch blocks authoring until the developer resolves it.
