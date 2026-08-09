@@ -50,7 +50,7 @@ Sizing: approximately 15 behaviors make one reviewable feature/PR. Split larger 
 
 - Write ordered steps (`## Steps`). Each step is a concrete, completable unit: branch + baseline, create X, move Y, rewrite Z, update CI. Write mechanical rules, not vague intentions: "rewrite `@/lib/db/*` → `@ajiri/db/*` per this mapping", not "fix imports".
 - The first step is always a **baseline shown green**: the suites and checks that must stay green, plus a no-op proof where one exists (for example, `db:generate` reports no changes). The baseline makes each later regression attributable.
-- `## Done` holds the gates: the exact commands whose green output proves that the work did not change behavior (typecheck, affected suites, no-op generates, knip). The builder pastes each output in the transcript. Add the PR and the lane's invariants.
+- `## Done` holds the gates: the exact commands whose green output proves that the work did not change behavior (typecheck, affected suites, no-op generates). Do not gate on repo-hygiene tools (for example, knip). Those tools run in their own workflow, outside the row. The builder pastes each output in the transcript. Add the PR and the lane's invariants.
 
 ## Output
 
