@@ -49,19 +49,12 @@ Sizing: approximately 15 behaviors make one reviewable feature/PR. Split larger 
 ## Decomposition — chore/refactor lane
 
 - Write ordered steps (`## Steps`). Each step is a concrete, completable unit: branch + baseline, create X, move Y, rewrite Z, update CI. Write mechanical rules, not vague intentions: "rewrite `@/lib/db/*` → `@ajiri/db/*` per this mapping", not "fix imports".
-- The first step is always a **baseline shown green**: the suites and checks that must stay green, plus a no-op proof where one exists (for example, `db:generate` reports no changes). The baseline makes each later regression attributable.
-- `## Done` holds the gates. **Gates come from this closed menu — never author a gate free-form.** Every chore row gets exactly:
-  - the affected packages' test suites, green at the baseline counts;
-  - root typecheck, plus the new package's typecheck when the row creates a package.
+- The first step is always a **baseline shown green**: run the repo's standing checks for the affected packages and record their results. The baseline makes each later regression attributable.
+- `## Done` lists verification from exactly two sources, and the initializer authors neither:
+  1. **The repo's standing checks** for the affected packages — their existing test and typecheck scripts, run unmodified, green at the baseline counts. Never gate on repo-hygiene tools (for example, knip); those run in their own workflow, outside the row.
+  2. **Verification the spec itself explicitly states**, copied verbatim. If the spec states none and a proof seems missing, ask the developer to decide it into the spec. Never write your own.
 
-  Then add one gate per matching change class, and no others:
-  - the row moves files → `git diff --name-status -M100%` over the moved paths shows renames only;
-  - the row rewrites import specifiers → `git grep` for each old specifier returns 0;
-  - the row touches the drizzle schema or its config → `db:generate` reports no changes and the tree stays clean.
-
-  If the row needs a proof that does not fit this menu, stop and ask the developer. Do not gate on repo-hygiene tools (for example, knip); those run in their own workflow, outside the row. The builder pastes each gate's output in the transcript. Add the PR and the lane's invariants.
-- **Run every gate before you write it.** During the repo audit, execute each command you intend to put in `## Done` and observe its result. Write only gates you saw green. If a check is red on the current default branch, stop and resolve it with the developer before you author the row — do not ship a gate that cannot pass.
-- Assert over tracked files with `git grep`, not a working-tree grep. Untracked local files must not be able to break a gate.
+  Plus the tracker flip and the PR. During the audit, run the standing checks once and record their results; a check that is red on the default branch blocks authoring until the developer resolves it.
 - The builder ticks each `## Done` box (`[ ]` → `[x]`) at the moment its output is pasted. Ticking the boxes is part of satisfying the row.
 
 ## Output
@@ -77,7 +70,7 @@ Write the files under a docs folder for the project (for example, `docs/<project
   - **`## Backend`** — the behavior list that `build-backend-feature` works through: unchecked boxes grouped under source-file headings.
   - **`## Frontend + Integration`** (features with UI) — the list that `build-frontend-feature` works through, split into Behavior and Visual & responsive as above.
   - **`## Manual verification`** — commands the developer runs. Verify them against the scaffold that this checklist defines.
-  - **`## Done`** — transcript-visible artifacts only: all boxes checked and shown, green suite output pasted, `git log` that shows one commit per behavior, the handoff file exists, the tracker row flipped, and the PR open with its URL and a What/Why/How/Verification body. Add the feature's invariants (for example: no migration applied; the backend phase touches no frontend files). Do not gate on a claim that a transcript cannot show.
+  - **`## Done`** — transcript-visible artifacts only: all boxes checked and shown, green suite output pasted, `git log` that shows one commit per behavior, the handoff file exists, the tracker row flipped, and the PR open with its URL and a What/Why/How/Verification body. Add only the invariants the spec explicitly states, copied verbatim — never author invariants. Do not gate on a claim that a transcript cannot show.
 
 ## Run commands
 
