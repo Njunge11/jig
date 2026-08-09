@@ -1,11 +1,11 @@
 ---
 name: initializer
-description: Use with a decided design/spec doc (`/initializer <doc-path>`) to audit the repo and author a tracker plus builder-ready checklists. Each row gets a ready-to-paste /goal run command. Feature rows get TDD checklists that drive build-backend-feature / build-frontend-feature. Chore/refactor rows get step-and-gates checklists. Refuses to invent semantics.
+description: Use with a decided design/spec doc (`/initializer <doc-path>`) to audit the repo and author a tracker plus builder-ready checklists. Each row gets a ready-to-paste /goal run command. `feat` rows get TDD checklists that drive build-backend-feature / build-frontend-feature. `chore`/`refactor` rows get step checklists. Refuses to invent semantics.
 ---
 
 # Initializer — Spec → Tracker + Checklists
 
-Turn a decided design doc into a tracker and per-row checklists. A builder must be able to run each checklist with zero further design work. Feature rows run through `build-backend-feature` or `build-frontend-feature`. Chore/refactor rows run through their own step-and-gates checklist. One ready-made `/goal` command starts each row. **This skill only authors documents. Do not write code, tests, or scaffolding. Do not create branches.**
+Turn a decided design doc into a tracker and per-row checklists. A builder must be able to run each checklist with zero further design work. `feat` rows run through `build-backend-feature` or `build-frontend-feature`. `chore`/`refactor` rows run through their own step checklist. One ready-made `/goal` command starts each row. **This skill only authors documents. Do not write code, tests, or scaffolding. Do not create branches.**
 
 **Spec:** `$ARGUMENTS` — the path to the decided design doc. Read the full document before you do anything else.
 
@@ -15,20 +15,20 @@ A checklist is a **translation, not a design**. It has exactly three inputs:
 2. **The skills — structure, naming, harness.** `backend-standards`, `backend-tests`, `frontend-standards`, and `testing` prescribe the feature tree, file suffixes, schema location, and test harnesses. Do not repeat their content. Do not override their content. The checklist only names the target app and the feature slug. Existing app code is not a reference. The skills are the standard.
 3. **The repo — an audit pass, for repo-level facts only.** Audit the codebase against the spec. Find what exists, what you must add, and what must change to make the feature work. Also record workspace wiring: package filters, script names, turbo tasks, hook chain, and dependency versions. **Verify each path, command, and version against the repo in this session before you write it into a checklist.**
 
-**The checklist speaks only to the builder.** Write instructions, mappings, target layouts, and gates. Do not write verification evidence, spec corrections, derivation rationale, or "facts this relies on" into the checklist. Give that material to the developer in the session. Put spec corrections in the spec doc, per input 1. Test each sentence: if it explains why the checklist is correct, and not what to do, remove it. Do not add provenance notes in steps ("verified at `<commit>`", "the spec missed this"). State the instruction plainly.
+**The checklist speaks only to the builder.** Write instructions, mappings, target layouts, and the `## Done` list. Do not write verification evidence, spec corrections, derivation rationale, or "facts this relies on" into the checklist. Give that material to the developer in the session. Put spec corrections in the spec doc, per input 1. Test each sentence: if it explains why the checklist is correct, and not what to do, remove it. Do not add provenance notes in steps ("verified at `<commit>`", "the spec missed this"). State the instruction plainly.
 
-## Lanes
+## Types
 
-Classify each tracker row before you decompose it:
+Classify each tracker row by its Conventional Commits type before you decompose it:
 
-- **Feature** — the row adds or changes observable behavior. It gets a TDD checklist (below). `build-backend-feature` or `build-frontend-feature` builds it.
-- **Chore/refactor** — the row preserves behavior: extractions, moves, rewires, dependency or CI changes. There is no behavior list to TDD. Correctness means "nothing changed, and the gates prove it". The row gets a step-and-gates checklist. No build skill runs it. Its `/goal` points directly at the checklist.
+- **`feat`** — the row adds or changes observable behavior. It gets a TDD checklist (below). `build-backend-feature` or `build-frontend-feature` builds it.
+- **`chore` / `refactor`** — the row preserves behavior: extractions, moves, rewires, dependency or CI changes. There is no behavior list to TDD. Correctness means "nothing changed, and the `## Done` checks prove it". The row gets a step checklist. No build skill runs it. Its `/goal` points directly at the checklist.
 
 ## Placement
 
 Build skill-governed features on the skills' ground: a new app or package laid out per the standards skills. The first feature carries the minimal scaffold. A legacy app with its own conventions is not a valid placement. Do not edit the skills to accommodate a placement conflict. Fix the placement instead.
 
-## Decomposition — feature lane
+## Decomposition — `feat` rows
 
 Backend (`## Backend`):
 
@@ -46,7 +46,7 @@ Frontend (`## Frontend + Integration`, only when the feature has UI):
 
 Sizing: approximately 15 behaviors make one reviewable feature/PR. Split larger work into separate tracker rows.
 
-## Decomposition — chore/refactor lane
+## Decomposition — `chore`/`refactor` rows
 
 - Write ordered steps (`## Steps`). Each step is a concrete, completable unit: branch + baseline, create X, move Y, rewrite Z, update CI. Write mechanical rules, not vague intentions: "rewrite `@/lib/db/*` → `@ajiri/db/*` per this mapping", not "fix imports".
 - The first step is the **baseline**. Run the repo's standing checks for the affected packages. Record the results. Show them green. The baseline shows which later step causes a regression.
@@ -64,30 +64,30 @@ Author the **tracker and all checklists in one pass**. Order the rows so that ea
 Write the files under a docs folder for the project (for example, `docs/<project>/`):
 
 - `tracker.md` — one row per feature: number, name, checklist path, status, PR, and the row's ready-to-paste **run command** (see below). Builders may edit only the Status and PR columns.
-- `checklists/NN-<slug>.md` — one per row. **Chore/refactor lane:** the sections are `## Scope` → `## Steps` → `## Done`, per the chore decomposition above. **Feature lane:** the sections, in order:
+- `checklists/NN-<slug>.md` — one per row. **`chore`/`refactor` rows:** the sections are `## Scope` → `## Steps` → `## Done`, per the chore decomposition above. **`feat` rows:** the sections, in order:
   - **`## Scope`** — what this builds, the spec pointer (doc + section), the target app + feature slug, the one-time scaffold list (first feature of an app only), and `Builds on:`.
   - **`## Skills`** — the skills the build runs under. This section is documentation only. The builder agent's preload delivers the skills, not this section.
   - **`## Backend`** — the behavior list that `build-backend-feature` works through: unchecked boxes grouped under source-file headings.
   - **`## Frontend + Integration`** (features with UI) — the list that `build-frontend-feature` works through, split into Behavior and Visual & responsive as above.
   - **`## Manual verification`** — commands the developer runs. Verify them against the scaffold that this checklist defines.
-  - **`## Done`** — transcript-visible artifacts only: all boxes checked and shown, green suite output pasted, `git log` that shows one commit per behavior, the handoff file exists, the tracker row flipped, and the PR open with its URL and a What/Why/How/Verification body. Add only the invariants that the spec states. Copy them word for word. Do not write your own invariants. Do not gate on a claim that a transcript cannot show.
+  - **`## Done`** — transcript-visible artifacts only: all boxes checked and shown, green suite output pasted, `git log` that shows one commit per behavior, the handoff file exists, the tracker row flipped, and the PR open with its URL and a What/Why/How/Verification body. Add only the invariants that the spec states. Copy them word for word. Do not write your own invariants. Do not include a claim that a transcript cannot show.
 
 ## Run commands
 
-Each tracker row carries the exact `/goal` command that the developer pastes to run it. There is one shape per lane.
+Each tracker row carries the exact `/goal` command that the developer pastes to run it. There is one shape per type.
 
-Feature lane:
+`feat` rows:
 
 ```
 /goal the build-backend-feature skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript
 ```
 
-Chore/refactor lane (no build skill — the checklist is the procedure):
+`chore`/`refactor` rows (no build skill — the checklist is the procedure):
 
 ```
-/goal every step and every Done item in docs/<project>/checklists/NN-<slug>.md is shown satisfied in the transcript; for each gate the pasted proof is the command, its final summary output, and its exit status — full output is not required
+/goal every step and every Done item in docs/<project>/checklists/NN-<slug>.md is shown satisfied in the transcript; for each Done item the pasted proof is the command, its final summary output, and its exit status — full output is not required
 ```
 
-Two rules make the feature shape work. First, name the build skill **in the command itself**. Skill invocation is only guaranteed when the skill name is in the typed prompt. A mention inside a file that the session reads guarantees nothing. Second, put "the skill was run" in the goal condition. The evaluator then enforces the machinery, not only the outcome. Both shapes: keep the condition under 4,000 characters. Gate only on things that the transcript can show. The goal evaluator calls no tools and sees only what the session surfaces. The `## Done` section is written for exactly this.
+Two rules make the `feat` shape work. First, name the build skill **in the command itself**. Skill invocation is only guaranteed when the skill name is in the typed prompt. A mention inside a file that the session reads guarantees nothing. Second, put "the skill was run" in the goal condition. The evaluator then enforces the machinery, not only the outcome. Both shapes: keep the condition under 4,000 characters. Include only items that the transcript can show. The goal evaluator calls no tools and sees only what the session surfaces. The `## Done` section is written for exactly this.
 
 **Stop at authoring.** Present the tracker and the checklists for developer review. Building is the build skills' job. The developer fires each run command when ready.

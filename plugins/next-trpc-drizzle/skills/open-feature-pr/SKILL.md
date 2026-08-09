@@ -1,14 +1,14 @@
 ---
 name: open-feature-pr
-description: Use to open a row's pull request at goal exit — feature or chore/refactor lane. The skill owns the branch/title/body conventions and the language rules. The skill opens the PR with gh and returns the URL.
+description: Use to open a row's pull request at goal exit — `feat` or `chore`/`refactor` rows. The skill owns the branch/title/body conventions and the language rules. The skill opens the PR with gh and returns the URL.
 ---
 
 # Open Feature PR
 
-Open the pull request for a completed tracker row. Make sure that the lane's conditions are true before you start.
+Open the pull request for a completed tracker row. The row's Conventional Commits type sets the entry conditions. Make sure they are true before you start.
 
-- **Feature lane:** every checklist behavior is `[x]`. The suite is green. The file `handoffs/NN-<feature>.md` exists. The tracker row is flipped.
-- **Chore/refactor lane:** the transcript shows the output of every `## Done` item. The tracker row is flipped. This lane has no handoff file and no behavior boxes.
+- **`feat` rows:** every checklist behavior is `[x]`. The suite is green. The file `handoffs/NN-<feature>.md` exists. The tracker row is flipped.
+- **`chore`/`refactor` rows:** the transcript shows the output of every `## Done` item. The tracker row is flipped. These rows have no handoff file and no behavior boxes.
 
 ## Branch and title
 
@@ -33,8 +33,8 @@ each line: can a reviewer see this in the diff? If yes, delete the line.
 Omit this section if there is nothing.
 
 ## Verification
-Feature lane: the checklist's Manual verification steps, plus the suite command and result.
-Chore/refactor lane: one row per gate — the command, its result, and what it proves.
+feat rows: the checklist's Manual verification steps, plus the suite command and result.
+chore/refactor rows: one line per Done item — the command, its result, and what it proves.
 ```
 
 ## Verification audience rule
