@@ -11,9 +11,11 @@ Turn a decided design doc into a tracker and per-row checklists executable with 
 
 A checklist is a **translation, not a design**. It has exactly three inputs:
 
-1. **The spec — semantics.** Every behavior must trace to a decided sentence in the spec. Invent zero semantics: if the spec hasn't decided a behavior (a TTL, an error shape, a screen state, a conflict rule), **stop and ask the developer** — never design on the fly. A checklist is immutable once a builder starts it. Preserve the spec's copy verbatim — never invent labels, taglines, or microcopy.
+1. **The spec — semantics.** Every behavior must trace to a decided sentence in the spec. Invent zero semantics: if the spec hasn't decided a behavior (a TTL, an error shape, a screen state, a conflict rule), **stop and ask the developer** — never design on the fly. When the audit proves the spec wrong about the repo, resolve it with the developer and **write the resolution into the spec doc** — the checklist follows the amended spec and never carries corrections or their history itself. A checklist is immutable once a builder starts it. Preserve the spec's copy verbatim — never invent labels, taglines, or microcopy.
 2. **The skills — structure, naming, harness.** `backend-standards`, `backend-tests`, `frontend-standards`, and `testing` prescribe the feature tree, file suffixes, schema location, and test harnesses. Repeat none of it, override none of it — the checklist only names the target app and feature slug. Existing app code is not a reference; the skills are the standard.
 3. **The repo — an audit pass, for repo-level facts only.** Audit the codebase against the spec: what already exists, what must be added, what must change to get the feature working — plus workspace wiring (package filters, script names, turbo tasks, hook chain, dep versions) and spec-adjacent constraints. **Never write a path, command, or version into a checklist that wasn't verified against the repo in this session.**
+
+**The checklist speaks only to the builder** — instructions, mappings, target layouts, and gates. Verification evidence, spec corrections, derivation rationale, and "facts this relies on" go to the developer in the session (and into the spec doc, per input 1) — never into the checklist. Test every sentence: if it explains *why the checklist is right* instead of *what to do*, cut it. No provenance asides inside steps ("verified at `<commit>`", "the spec missed this") — state the instruction plainly.
 
 ## Lanes
 
