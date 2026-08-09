@@ -50,7 +50,16 @@ Sizing: approximately 15 behaviors make one reviewable feature/PR. Split larger 
 
 - Write ordered steps (`## Steps`). Each step is a concrete, completable unit: branch + baseline, create X, move Y, rewrite Z, update CI. Write mechanical rules, not vague intentions: "rewrite `@/lib/db/*` → `@ajiri/db/*` per this mapping", not "fix imports".
 - The first step is always a **baseline shown green**: the suites and checks that must stay green, plus a no-op proof where one exists (for example, `db:generate` reports no changes). The baseline makes each later regression attributable.
-- `## Done` holds the gates: the exact commands whose green output proves that the work did not change behavior (typecheck, affected suites, no-op generates). Do not gate on repo-hygiene tools (for example, knip). Those tools run in their own workflow, outside the row. The builder pastes each output in the transcript. Add the PR and the lane's invariants.
+- `## Done` holds the gates. **Gates come from this closed menu — never author a gate free-form.** Every chore row gets exactly:
+  - the affected packages' test suites, green at the baseline counts;
+  - root typecheck, plus the new package's typecheck when the row creates a package.
+
+  Then add one gate per matching change class, and no others:
+  - the row moves files → `git diff --name-status -M100%` over the moved paths shows renames only;
+  - the row rewrites import specifiers → `git grep` for each old specifier returns 0;
+  - the row touches the drizzle schema or its config → `db:generate` reports no changes and the tree stays clean.
+
+  If the row needs a proof that does not fit this menu, stop and ask the developer. Do not gate on repo-hygiene tools (for example, knip); those run in their own workflow, outside the row. The builder pastes each gate's output in the transcript. Add the PR and the lane's invariants.
 - **Run every gate before you write it.** During the repo audit, execute each command you intend to put in `## Done` and observe its result. Write only gates you saw green. If a check is red on the current default branch, stop and resolve it with the developer before you author the row — do not ship a gate that cannot pass.
 - Assert over tracked files with `git grep`, not a working-tree grep. Untracked local files must not be able to break a gate.
 - The builder ticks each `## Done` box (`[ ]` → `[x]`) at the moment its output is pasted. Ticking the boxes is part of satisfying the row.

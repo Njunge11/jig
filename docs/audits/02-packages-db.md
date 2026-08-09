@@ -99,6 +99,10 @@ Both rejections were **correct literal readings of the condition**. The machiner
 
 The skills produced a correct, honest, well-evidenced refactor: behavior provably unchanged, invariants intact, clean recovery from an unanticipated hook interaction, and a PR that follows the template. What failed was **closure**: the initializer wrote gates it never ran, so the goal condition was unsatisfiable from the moment it was authored, and the run ended blocked instead of clearing. Every fix lands in the initializer and open-feature-pr skills; the build-side conduct needs no correction.
 
+## Follow-up decision (2026-08-09)
+
+Gate selection must be deterministic. The initializer no longer authors gates free-form: a closed menu in the skill maps change classes to gates (suites at baseline counts + typecheck always; renames-only diff for moves; `git grep` zero for rewritten specifiers; no-op `db:generate` for schema moves). A proof outside the menu requires asking the developer. Same steps in, same gates out.
+
 ## Resulting plugin commits
 
 - Fix 1 (knip removed from the chore-lane gate list) — committed with this audit.
