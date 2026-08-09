@@ -1,16 +1,16 @@
 ---
 name: open-feature-pr
-description: Use to open a feature's pull request at goal exit — after the handoff is written and the tracker row is flipped. Owns the branch/title/body conventions and the language rules; opens the PR with gh and returns the URL.
+description: Use to open a feature's pull request at goal exit. Use it after the builder writes the handoff and flips the tracker row. The skill owns the branch/title/body conventions and the language rules. The skill opens the PR with gh and returns the URL.
 ---
 
 # Open Feature PR
 
-Open the pull request for a completed feature. Preconditions: every checklist behavior is `[x]`, the suite is green, `handoffs/NN-<feature>.md` exists, the tracker row is flipped.
+Open the pull request for a completed feature. Make sure that these conditions are true before you start. Every checklist behavior is `[x]`. The suite is green. The file `handoffs/NN-<feature>.md` exists. The tracker row is flipped.
 
 ## Branch and title
 
-- Branch: `<type>/<feature-slug>` with a Conventional Commits type — `feat/invitations-schema`, `fix/draft-resume`.
-- Title: Conventional Commits format, imperative, ≤72 characters — `feat(invitations): add invitations schema and repo`. The title must survive a squash-merge as a valid commit message.
+- Branch: use `<type>/<feature-slug>` with a Conventional Commits type. Examples: `feat/invitations-schema`, `fix/draft-resume`.
+- Title: use the Conventional Commits format. Write the title in the imperative. Use a maximum of 72 characters. Example: `feat(invitations): add invitations schema and repo`. The title must stay a valid commit message after a squash-merge.
 
 ## Body template
 
@@ -33,15 +33,15 @@ The checklist's Manual verification steps, plus the test evidence (suite command
 
 ## Language rules (title and body)
 
-- Active voice. Imperative for the title and the What section.
-- One idea per sentence. Maximum 20 words per sentence.
-- Simple tenses only. No noun stacks over 3 words.
-- Never restate the diff file-by-file — the diff is on the PR.
-- No self-praise adjectives ("comprehensive", "robust", "significantly improves"). State what changed, not how good it is.
-- No attribution lines or AI references.
+- Use the active voice. Use the imperative for the title and the What section.
+- Write one idea per sentence. Use a maximum of 20 words per sentence.
+- Use simple tenses only. Do not write noun stacks of more than 3 words.
+- Never restate the diff file-by-file. The diff is on the PR.
+- Do not use self-praise adjectives ("comprehensive", "robust", "significantly improves"). State what changed. Do not state how good it is.
+- Do not include attribution lines or AI references.
 
 ## Open it
 
 1. Push the branch.
-2. `gh pr create --title "<title>" --body "<body>"` against the default branch.
-3. Show the PR URL in your output — a transcript-only watcher (e.g. `/goal`) verifies it.
+2. Run `gh pr create --title "<title>" --body "<body>"` against the default branch.
+3. Show the PR URL in your output. A transcript-only watcher (e.g. `/goal`) verifies it.
