@@ -49,13 +49,13 @@ Sizing: approximately 15 behaviors make one reviewable feature/PR. Split larger 
 ## Decomposition — chore/refactor lane
 
 - Write ordered steps (`## Steps`). Each step is a concrete, completable unit: branch + baseline, create X, move Y, rewrite Z, update CI. Write mechanical rules, not vague intentions: "rewrite `@/lib/db/*` → `@ajiri/db/*` per this mapping", not "fix imports".
-- The first step is always a **baseline shown green**: run the repo's standing checks for the affected packages and record their results. The baseline makes each later regression attributable.
-- `## Done` lists verification from exactly two sources, and the initializer authors neither:
-  1. **The repo's standing checks** for the affected packages — only their existing `test`/`test:run` and `typecheck` package scripts, run unmodified, green at the baseline counts. Nothing else qualifies as a standing check.
-  2. **Verification the spec itself explicitly states**, copied verbatim. If the spec states none and a proof seems missing, ask the developer to decide it into the spec. Never write your own.
+- The first step is the **baseline**. Run the repo's standing checks for the affected packages. Record the results. Show them green. The baseline shows which later step causes a regression.
+- `## Done` lists verification from two sources only. Do not write your own verification.
+  1. **The repo's standing checks**: the `test`/`test:run` and `typecheck` scripts of the affected packages. Run them without changes. They must show green at the baseline counts. No other command is a standing check.
+  2. **Verification that the spec states.** Copy it word for word. If a necessary proof is not in the spec, ask the developer. The developer writes the decision into the spec.
 
-  Plus the tracker flip and the PR. During the audit, run the standing checks once and record their results; a check that is red on the default branch blocks authoring until the developer resolves it.
-- The builder ticks each `## Done` box (`[ ]` → `[x]`) at the moment its output is pasted. Ticking the boxes is part of satisfying the row.
+  Also list the tracker flip and the PR. Run the standing checks one time during the audit. Record the results. If a check is red on the default branch, stop. Ask the developer to resolve it before you author the row.
+- The builder ticks each `## Done` box (`[ ]` → `[x]`) when the builder pastes its output. The ticked boxes are part of a satisfied row.
 
 ## Output
 
@@ -70,7 +70,7 @@ Write the files under a docs folder for the project (for example, `docs/<project
   - **`## Backend`** — the behavior list that `build-backend-feature` works through: unchecked boxes grouped under source-file headings.
   - **`## Frontend + Integration`** (features with UI) — the list that `build-frontend-feature` works through, split into Behavior and Visual & responsive as above.
   - **`## Manual verification`** — commands the developer runs. Verify them against the scaffold that this checklist defines.
-  - **`## Done`** — transcript-visible artifacts only: all boxes checked and shown, green suite output pasted, `git log` that shows one commit per behavior, the handoff file exists, the tracker row flipped, and the PR open with its URL and a What/Why/How/Verification body. Add only the invariants the spec explicitly states, copied verbatim — never author invariants. Do not gate on a claim that a transcript cannot show.
+  - **`## Done`** — transcript-visible artifacts only: all boxes checked and shown, green suite output pasted, `git log` that shows one commit per behavior, the handoff file exists, the tracker row flipped, and the PR open with its URL and a What/Why/How/Verification body. Add only the invariants that the spec states. Copy them word for word. Do not write your own invariants. Do not gate on a claim that a transcript cannot show.
 
 ## Run commands
 

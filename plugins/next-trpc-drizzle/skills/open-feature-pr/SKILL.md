@@ -8,7 +8,7 @@ description: Use to open a row's pull request at goal exit — feature or chore/
 Open the pull request for a completed tracker row. Make sure that the lane's conditions are true before you start.
 
 - **Feature lane:** every checklist behavior is `[x]`. The suite is green. The file `handoffs/NN-<feature>.md` exists. The tracker row is flipped.
-- **Chore/refactor lane:** every `## Done` gate's output is pasted in the transcript. The tracker row is flipped. There is no handoff file and there are no behavior boxes in this lane.
+- **Chore/refactor lane:** the transcript shows the output of every `## Done` item. The tracker row is flipped. This lane has no handoff file and no behavior boxes.
 
 ## Branch and title
 
@@ -17,7 +17,7 @@ Open the pull request for a completed tracker row. Make sure that the lane's con
 
 ## Body template
 
-The body follows Google's CL-description guidance (google.github.io/eng-practices): state what changed and why, in complete sentences, with enough context that a reader outside this session understands it. Use exactly these sections:
+The body follows Google's CL-description guidance (google.github.io/eng-practices). State what changed and why. Write complete sentences. Give enough context for a reader who did not see this session. Use exactly these sections:
 
 ```
 ## What
@@ -28,8 +28,8 @@ The problem it solves. Name the checklist (docs/<project>/checklists/NN-<slug>.m
 
 ## How
 One line per decision. Each line states a choice and its reason: approach chosen over
-alternatives, tradeoffs, limitations, deviations from the checklist. Before you keep a
-line, apply this test: can a reviewer read it off the diff? If yes, delete the line.
+alternatives, tradeoffs, limitations, deviations from the checklist. Apply this test to
+each line: can a reviewer see this in the diff? If yes, delete the line.
 Omit this section if there is nothing.
 
 ## Verification
@@ -39,7 +39,7 @@ Chore/refactor lane: one row per gate — the command, its result, and what it p
 
 ## Verification audience rule
 
-Write the Verification section for a reviewer who never saw this session. Do not use session-relative words ("baseline", "same as before") without their values: write "test counts equal main's: 1762 passed, 1 skipped", not "same as baseline". Do not include tool trivia ("3 successful, 3 total", exit-code narratives) — state the check and its outcome in plain words. Do not narrate process detours; the PR records the result, not the run.
+Write the Verification section for a reviewer who did not see this session. Do not write relative words such as "baseline" or "same as before" without the values. Write "test counts equal main: 1762 passed, 1 skipped". Do not copy tool noise such as "3 successful, 3 total". State each check and its result in plain words. Do not describe detours from the run. The PR records the result, not the run.
 
 ## Language rules (title and body)
 
