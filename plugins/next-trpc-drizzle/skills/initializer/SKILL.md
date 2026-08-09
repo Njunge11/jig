@@ -88,6 +88,8 @@ Each tracker row carries the exact `/goal` command that the developer pastes to 
 /goal every step and every Done item in docs/<project>/checklists/NN-<slug>.md is shown satisfied in the transcript; for each Done item the pasted proof is the command, its final summary output, and its exit status — full output is not required
 ```
 
-Two rules make the `feat` shape work. First, name the build skill **in the command itself**. Skill invocation is only guaranteed when the skill name is in the typed prompt. A mention inside a file that the session reads guarantees nothing. Second, put "the skill was run" in the goal condition. The evaluator then enforces the machinery, not only the outcome. Both shapes: keep the condition under 4,000 characters. Include only items that the transcript can show. The goal evaluator calls no tools and sees only what the session surfaces. The `## Done` section is written for exactly this.
+Two rules for the `feat` command. First, write the build skill's name in the command. Claude loads a skill reliably only when the user types its name. A name inside a file does not load the skill. Second, write "the skill was run" in the condition. The checker then blocks the finish until the conversation shows that the skill was used.
+
+Two rules for both commands. Keep the condition under 4,000 characters. Demand only evidence that can appear in the conversation: pasted output, a PR URL, a ticked checklist. The checker cannot run commands or open files. It reads only the conversation. The `## Done` section exists to supply this evidence.
 
 **Stop at authoring.** Present the tracker and the checklists for developer review. Building is the build skills' job. The developer fires each run command when ready.
