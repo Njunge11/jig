@@ -51,6 +51,9 @@ Sizing: approximately 15 behaviors make one reviewable feature/PR. Split larger 
 - Write ordered steps (`## Steps`). Each step is a concrete, completable unit: branch + baseline, create X, move Y, rewrite Z, update CI. Write mechanical rules, not vague intentions: "rewrite `@/lib/db/*` → `@ajiri/db/*` per this mapping", not "fix imports".
 - The first step is always a **baseline shown green**: the suites and checks that must stay green, plus a no-op proof where one exists (for example, `db:generate` reports no changes). The baseline makes each later regression attributable.
 - `## Done` holds the gates: the exact commands whose green output proves that the work did not change behavior (typecheck, affected suites, no-op generates). Do not gate on repo-hygiene tools (for example, knip). Those tools run in their own workflow, outside the row. The builder pastes each output in the transcript. Add the PR and the lane's invariants.
+- **Run every gate before you write it.** During the repo audit, execute each command you intend to put in `## Done` and observe its result. Write only gates you saw green. If a check is red on the current default branch, stop and resolve it with the developer before you author the row — do not ship a gate that cannot pass.
+- Assert over tracked files with `git grep`, not a working-tree grep. Untracked local files must not be able to break a gate.
+- The builder ticks each `## Done` box (`[ ]` → `[x]`) at the moment its output is pasted. Ticking the boxes is part of satisfying the row.
 
 ## Output
 
@@ -80,7 +83,7 @@ Feature lane:
 Chore/refactor lane (no build skill — the checklist is the procedure):
 
 ```
-/goal every step and every Done item in docs/<project>/checklists/NN-<slug>.md is shown satisfied in the transcript, including pasted green output for each gate
+/goal every step and every Done item in docs/<project>/checklists/NN-<slug>.md is shown satisfied in the transcript; for each gate the pasted proof is the command, its final summary output, and its exit status — full output is not required
 ```
 
 Two rules make the feature shape work. First, name the build skill **in the command itself**. Skill invocation is only guaranteed when the skill name is in the typed prompt. A mention inside a file that the session reads guarantees nothing. Second, put "the skill was run" in the goal condition. The evaluator then enforces the machinery, not only the outcome. Both shapes: keep the condition under 4,000 characters. Gate only on things that the transcript can show. The goal evaluator calls no tools and sees only what the session surfaces. The `## Done` section is written for exactly this.
