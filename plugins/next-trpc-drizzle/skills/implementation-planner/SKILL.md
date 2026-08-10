@@ -63,5 +63,6 @@ Check every file you wrote. Fix every miss, then check again.
 5. Each /goal command must match its template in Step 4: the TDD command for a TDD implementation checklist, the step command for a step implementation checklist.
 6. Every task checkbox in every implementation checklist must be `[ ]`. The builder ticks boxes, not you.
 7. Every Status in the tracker must be `Not started`.
+8. Every section heading and label in every implementation checklist must come from its template. A label copied from an older document in the repo does not belong — the template decides the format, not the documents already there.
 
 When every check passes, you are done. Author documents only: do not write code or tests, do not create branches, do not run the checklists.

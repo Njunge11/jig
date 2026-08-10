@@ -19,6 +19,7 @@ Copy the template below. Replace each `<placeholder>` with this implementation c
 
 <What this builds.> Spec: `docs/<spec>.md`, section <section>.
 Target: <app or package>, feature <slug>. Builds on: <earlier checklists, or none>.
+Type: <Conventional Commits type>. Branch: `<type>/<slug>`.
 
 Setup (only when this checklist creates a new app or package):
 - <the setup items from the How to fill it rules>

@@ -23,6 +23,7 @@ Copy the template below. Replace each `<placeholder>` with this implementation c
 
 <What this implementation checklist does.> Spec: `docs/<spec>.md`, section <section>.
 Builds on: <earlier checklists, or none>.
+Type: <Conventional Commits type>. Branch: `<type>/<slug>`.
 
 ## Steps
 
