@@ -43,6 +43,6 @@ Setup (only when this checklist creates a new app or package):
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] Tracker Status flipped to Done.
-- [ ] PR open with its URL and a What/Why/How/Verification body.
+- [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 - [ ] The `review-backend-feature` verdict pasted: one line per item, plus its suite run.
 ```

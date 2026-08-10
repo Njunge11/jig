@@ -1,9 +1,11 @@
 ---
 name: implementation-planner
-description: Converts a spec doc into a tracker and implementation checklists. Each implementation checklist is one PR and holds the tasks that implement it. The tracker lists every implementation checklist with its status and its /goal run command. Work that changes what the software does gets a TDD implementation checklist, which a builder implements with TDD. Work that only changes the code's structure gets a step implementation checklist, which a builder follows step by step. The skill audits the repo first, and asks the developer when the spec leaves a decision open. Use when the developer runs /implementation-planner with a doc path.
+description: Converts a spec doc into a tracker and implementation checklists. Each implementation checklist is one PR and holds the tasks that implement it. The tracker lists every implementation checklist with its status and its /goal run command. Work that changes what the software does gets a TDD implementation checklist, which a builder implements with TDD. Work that only changes the code's structure gets a step implementation checklist, which a builder follows step by step. The skill audits the repo first, and asks the developer when the spec leaves a decision open. Use when the developer runs /next-trpc-drizzle:implementation-planner with a doc path, or asks to plan a spec's implementation, to split a spec doc into checklists or PRs, or to write a spec's project tracker.
 ---
 
 # Implementation planner
+
+Author documents only. Do not write code or tests. Do not create branches. Do not run the implementation checklists.
 
 ## Instructions
 
@@ -36,9 +38,11 @@ Write each implementation checklist as `docs/<project>/checklists/NN-<slug>.md`.
 - No — the work only changes the code's structure: write a step implementation checklist, per `references/step-implementation-checklist.md`.
 - Work that does both: split it into two checklists. If the answer is unclear, ask the developer.
 
+Plan the spec's backend work only. The spec's frontend work is out of scope for this skill. Write no checklist for it. List it for the developer at the end of the run.
+
 Also give each implementation checklist its Conventional Commits type (`feat`, `fix`, `chore`, `refactor`, ...). The type names its branch and PR title. It does not decide which checklist to write.
 
-Then write the tracker as `docs/<project>/tracker.md` — fill `references/tracker-template.md`. The tracker carries each implementation checklist's /goal run command:
+Then write the tracker as `docs/<project>/tracker.md` — fill `assets/tracker-template.md`. The tracker carries each implementation checklist's /goal run command:
 
 For a TDD implementation checklist:
 
@@ -65,4 +69,11 @@ Check every file you wrote. Fix every miss, then check again.
 7. Every implementation checklist this run created must have Status `Not started` in the tracker. A checklist that was already in the tracker before this run keeps its Status.
 8. Every section heading and label in every implementation checklist must come from its template. A label copied from an older document in the repo does not belong — the template decides the format, not the documents already there.
 
-When every check passes, you are done. Author documents only: do not write code or tests, do not create branches, do not run the checklists.
+When every check passes, you are done.
+
+## When a step fails
+
+- **`$ARGUMENTS` is empty, or the spec doc does not exist.** Do not guess a path. Ask the developer for the spec doc's path.
+- **The developer does not resolve a gap from Step 3.** Stop and report the open question. Never design the answer yourself. Never write a checklist over a gap.
+- **`docs/<project>/tracker.md` already exists.** Add this run's rows and run commands to it. Keep every row that is already there, with its number and its Status. Never renumber an existing implementation checklist.
+- **A Step 5 check fails twice on the same file.** Stop and report the file, the failing check, and the fix you tried. A tracker with a wrong link or a wrong run command is worse than no tracker.

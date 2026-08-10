@@ -42,5 +42,5 @@ Tick each box when you paste its output.
 - [ ] <standing check command> green at baseline counts, output pasted.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] Tracker Status flipped to Done.
-- [ ] PR open with its URL and a What/Why/How/Verification body.
+- [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 ```
