@@ -51,7 +51,7 @@ Walk the checklist again on the fixed files. Repeat Steps 4–5 until every item
 
 3. `name` is kebab-case and matches the folder name.
 4. `description` states both WHAT the skill does and WHEN to use it, with specific trigger phrases a user would say. Under 1024 characters. No XML angle brackets. Not vague ("Helps with projects"), not trigger-less, not implementation jargon.
-5. The description's scope is bounded. When an adjacent skill covers a neighboring task, the description says which skill handles what — otherwise the skill over-triggers.
+5. The description's scope is precise: its own domain is named in every trigger phrase. A negative trigger ("not for X — use the Y skill") belongs only when over-triggering was observed and reported. Never add one preventively.
 
 ### Body
 

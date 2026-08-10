@@ -1,6 +1,6 @@
 ---
 name: backend-tests
-description: The quality checklist for backend tests — what an ideal TDD test looks like and what to reject. Repos on PGlite, services with fake repos, entry points (tRPC procedure, MCP tool, route handler, workflow step and function) driven through their real interfaces. Use when writing, reviewing, or planning backend tests, or wiring the backend test harness. Not for UI or component tests — this skill owns the backend suite only. Keeps tests asserting observable behavior so the tests survive refactors.
+description: The quality checklist for backend tests — what an ideal TDD test looks like and what to reject. Repos on PGlite, services with fake repos, entry points (tRPC procedure, MCP tool, route handler, workflow step and function) driven through their real interfaces. Use when writing, reviewing, or planning backend tests, or wiring the backend test harness. Keeps tests asserting observable behavior so the tests survive refactors.
 ---
 
 # Backend Tests
