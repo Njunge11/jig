@@ -7,9 +7,9 @@ agent: backend-feature-builder
 
 # Feature Build — Backend (Phase 1)
 
-Build the backend of a feature test-first. The checklist drives the work. This skill runs in a forked subagent. The subagent has the `backend-tests` and `backend-standards` skills preloaded. Thus the checklist file and the repo are your source of truth. The subagent has no chat history. Write the checklist first, in the session, with backend-checklist.
+Build the backend of a feature test-first. The checklist drives the work. This skill runs in a forked subagent. The subagent has the `backend-tests` and `backend-standards` skills preloaded. Thus the checklist file and the repo are your source of truth. The subagent has no chat history. The implementation planner writes the checklist before this skill runs.
 
-**Checklist:** `$ARGUMENTS` — the path to the checklist file of the feature. If you did not get a path, find the file in the checklist location of the repo (`features/<name>/checklist.md`, or a tracker under `docs/`).
+**Checklist:** `$ARGUMENTS` — the path to the implementation checklist (`docs/<project>/checklists/NN-<slug>.md`). If you did not get a path, find it in the tracker (`docs/<project>/tracker.md`).
 
 ## The work
 

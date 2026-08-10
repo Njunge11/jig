@@ -9,7 +9,7 @@ agent: backend-feature-reviewer
 
 An independent second walk of the backend Review checklists against a feature's diff. This runs in a forked subagent with the `backend-tests` and `backend-standards` skills preloaded — their `## Review checklist` sections are the rubric; this skill restates none of their rules.
 
-**Scope:** `$ARGUMENTS` — the feature's `features/<name>/checklist.md` path and/or a branch. The diff under review is `git diff main` (or the given branch against main).
+**Scope:** `$ARGUMENTS` — the implementation checklist path (`docs/<project>/checklists/NN-<slug>.md`) and/or a branch. The diff under review is `git diff main` (or the given branch against main).
 
 ## The work
 
