@@ -1,14 +1,14 @@
 ---
 name: open-feature-pr
-description: Use to open a row's pull request at goal exit — `feat` or `chore`/`refactor` rows. The skill owns the branch/title/body conventions and the language rules. The skill opens the PR with gh and returns the URL.
+description: Owns the branch, title, and body conventions for a pull request, plus the language rules. Use when an implementation checklist's work is complete and its PR must be opened. The skill opens the PR with gh and returns the URL.
 ---
 
 # Open Feature PR
 
-Open the pull request for a completed tracker row. The row's Conventional Commits type sets the entry conditions. Make sure they are true before you start.
+Open the pull request for a completed implementation checklist. The checklist's kind sets the entry conditions. Make sure they are true before you start.
 
-- **`feat` rows:** every checklist behavior is `[x]`. The suite is green. The file `handoffs/NN-<feature>.md` exists. The tracker row is flipped.
-- **`chore`/`refactor` rows:** the transcript shows the output of every `## Done` item. The tracker row is flipped. These rows have no handoff file and no behavior boxes.
+- **TDD implementation checklists:** every task is `[x]`. The suite is green. The file `handoffs/NN-<slug>.md` exists. The tracker Status is flipped.
+- **Step implementation checklists:** the transcript shows the output of every `## Done` item. The tracker Status is flipped. These checklists have no handoff file and no task boxes.
 
 ## Branch and title
 
@@ -33,8 +33,8 @@ each line: can a reviewer see this in the diff? If yes, delete the line.
 Omit this section if there is nothing.
 
 ## Verification
-feat rows: the checklist's Manual verification steps, plus the suite command and result.
-chore/refactor rows: one line per Done item — the command, its result, and what it proves.
+TDD checklists: the checklist's Manual verification steps, plus the suite command and result.
+Step checklists: one line per Done item — the command, its result, and what it proves.
 ```
 
 ## Verification audience rule
