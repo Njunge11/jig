@@ -1,6 +1,6 @@
 ---
 name: skill-audit
-description: Audits a skill against the skill-authoring guidelines and fixes the failures. Checks structure, frontmatter, body, category techniques, and loading paths, fixes each failure, and re-audits until every item passes. Use when the developer asks to audit, review, fix, or check a skill, a SKILL.md, or a plugin's skills against the guide.
+description: Audits a skill against a built-in quality checklist and fixes the failures. Checks structure, frontmatter, body, category techniques, and loading paths, fixes each failure, and re-audits until every item passes. Use when the developer asks to audit, review, fix, or check a skill, a SKILL.md, or a plugin's skills.
 argument-hint: [path-to-skill-folder]
 ---
 
@@ -18,7 +18,7 @@ Read the skill's `SKILL.md` and every file in its folder (`references/`, `script
 
 ### Step 2: Classify the skill
 
-Assign one guide category. The category decides which technique checks apply in Step 3.
+Assign one category. The category decides which technique checks apply in Step 3.
 
 - **Document & asset creation** — the skill produces output (documents, code, designs) to a standard.
 - **Workflow automation** — the skill drives a multi-step process.
