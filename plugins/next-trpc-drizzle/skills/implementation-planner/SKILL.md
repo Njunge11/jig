@@ -32,7 +32,7 @@ A builder is the agent that executes one implementation checklist, task by task,
 
 Write each implementation checklist as `docs/<project>/checklists/NN-<slug>.md`. One question decides which checklist to write: **does the work change what the software does?**
 
-- Yes: write a TDD implementation checklist, per `references/tdd-implementation-checklist.md`.
+- Yes: write a TDD implementation checklist, per `references/tdd-implementation-checklist.md`. Before you write the first one, invoke the `backend-tests` skill. Its Review checklist defines the tests the builder writes — write every task so its tests can pass that checklist.
 - No — the work only changes the code's structure: write a step implementation checklist, per `references/step-implementation-checklist.md`.
 - Work that does both: split it into two checklists. If the answer is unclear, ask the developer.
 
