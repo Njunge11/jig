@@ -1,6 +1,6 @@
 ---
 name: backend-tests
-description: The quality checklist for backend tests — what an ideal TDD test looks like and what to reject. Repos on PGlite, services with fake repos, entry points (tRPC procedure, MCP tool, route handler, workflow step and function) driven through their real interfaces. Use when writing, reviewing, or planning backend tests, or wiring the backend test harness. Keeps tests asserting observable behavior so the tests survive refactors.
+description: The quality checklist for backend tests — what an ideal TDD test looks like and what to reject. Repos on PGlite, services with fake repos, entry points (tRPC procedure, MCP tool, route handler, workflow step and function) driven through their real interfaces. Use when writing, reviewing, or planning backend tests, or wiring the backend test harness. Not for UI or component tests — this skill owns the backend suite only. Keeps tests asserting observable behavior so the tests survive refactors.
 ---
 
 # Backend Tests
@@ -35,6 +35,16 @@ expect(fakeRepo.users).toContainEqual(
 );
 ```
 
+**#1 — A thrown error is observable behavior too. Do assert the rejection, not only the happy path.**
+
+```ts
+// ✅ the denial is the outcome under test
+const anon = createCaller(ctxFor(null));
+await expect(anon.users.funnel({ period: "30d" })).rejects.toThrow(
+  /unauthorized/,
+);
+```
+
 **#4 — Do not paste the implementation's output as the expected value. Do derive it from the spec.**
 
 ```ts
@@ -43,19 +53,6 @@ expect(invoice.total).toBe(1042.37);
 
 // ✅ the spec says: subtotal + 16% VAT
 expect(invoice.total).toBe(FIXTURE.subtotal * 1.16);
-```
-
-**#6 — Do not mock your own service in an entry-point test. Do drive the real entry.**
-
-```ts
-// ❌ tests the mock
-vi.mock("../users.service");
-
-// ✅ real router, real service, fake repo underneath
-const caller = createCaller(ctxFor(session));
-expect(await caller.users.funnel({ period: "30d" })).toMatchObject({
-  signups: 1204,
-});
 ```
 
 **#5 — Do not read the clock. Do inject it.**
@@ -76,14 +73,17 @@ expect(fakeRepo.users).toContainEqual(
 );
 ```
 
-**#1 — Do not skip the unhappy paths. Do test errors and denials as behavior.**
+**#6 — Do not mock your own service in an entry-point test. Do drive the real entry.**
 
 ```ts
-// ✅ a rejection is observable behavior too
-const anon = createCaller(ctxFor(null));
-await expect(anon.users.funnel({ period: "30d" })).rejects.toThrow(
-  /unauthorized/,
-);
+// ❌ tests the mock
+vi.mock("../users.service");
+
+// ✅ real router, real service, fake repo underneath
+const caller = createCaller(ctxFor(session));
+expect(await caller.users.funnel({ period: "30d" })).toMatchObject({
+  signups: 1204,
+});
 ```
 
 ## Harness

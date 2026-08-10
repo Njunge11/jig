@@ -30,8 +30,9 @@ Walk the audit checklist below row by row. Give every item a verdict: **pass** o
 
 ### Step 4: Fix every failure
 
-Fix each failing item in the skill's files. Two limits:
+Fix each failing item in the skill's files. Three limits:
 
+- Fix the skill where it is versioned — the git repo the skill ships from. Never edit an installed or cached copy (for example under `~/.claude/plugins/`): the next update erases it. When the path you were given is an installed copy, find the source repo and fix there.
 - Change only what the failing item requires. Do not rewrite passing content.
 - A fix that changes the skill's meaning or scope — what it does, when it triggers, who consumes it — is the developer's decision. Ask first, with the failing item and your proposed fix.
 
