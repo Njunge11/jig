@@ -7,6 +7,7 @@ How to write a TDD implementation checklist for work that changes what the softw
 - Copy the spec's wording verbatim. Do not invent labels or microcopy.
 - For TDD, the `backend-tests` and `testing` skills are the guide. Write tasks their harness can test.
 - If the implementation checklist creates a new app or package, list its setup in Scope: package.json with the standard scripts, tsconfig, vitest setup, drizzle config, `db/schema/`.
+- `## Done` holds only what the builder can prove with output it can paste: a test run, a command, or the diff. A spec-stated check that only a human can perform goes under `## Manual verification` — the developer runs it, not the builder.
 
 ## Template
 
@@ -44,7 +45,7 @@ Setup (only when this checklist creates a new app or package):
 - [ ] Green suite output pasted.
 - [ ] `git log` shows one commit per task.
 - [ ] `handoffs/NN-<slug>.md` exists.
-- [ ] <invariants the spec states, copied word for word>
+- [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL and a What/Why/How/Verification body.
 ```
