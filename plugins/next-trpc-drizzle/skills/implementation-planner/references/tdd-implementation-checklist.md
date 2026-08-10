@@ -44,4 +44,5 @@ Setup (only when this checklist creates a new app or package):
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL and a What/Why/How/Verification body.
+- [ ] The `review-backend-feature` verdict pasted: one line per item, plus its suite run.
 ```

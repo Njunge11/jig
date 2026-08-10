@@ -18,7 +18,8 @@ Build the backend of a feature test-first. The checklist drives the work. This s
 3. **Check the Review checklist of the preloaded `backend-standards` skill item by item against your diff** (`git diff main`). Name each item that the diff violates. Fix each violation. Commit the fixes as one commit. **Gate:** every item has a recorded verdict and `vitest --project backend` is green.
 4. **Write the handoff and flip the tracker.** Write `docs/<project>/handoffs/NN-<slug>.md` — the `handoffs/` folder sits beside the checklist's folder. Use the [handoff format](#handoff-format) below. Then set this checklist's Status to `Done` in `docs/<project>/tracker.md`. **Gate:** both files exist on the branch and are committed.
 5. **Open the PR as the preloaded `open-feature-pr` skill specifies.** That skill owns the branch, title, and body format, and the `gh` steps. Do not make your own format. **Gate:** `gh` returns the PR URL.
-6. **Return the proof** in the format under [Proof format](#proof-format) below. Then a watcher that sees only the transcript (e.g. `/goal`) can verify the work. The workflow ends here.
+6. **Invoke the `review-backend-feature` skill** with the checklist path and the branch as its arguments. It runs the independent review in its own forked subagent, which has no access to this session — that separation is what keeps the review independent. Never walk its checklists yourself. **Gate:** the invocation returns the per-item verdict and a green suite run.
+7. **Return the proof** in the format under [Proof format](#proof-format) below. Then a watcher that sees only the transcript (e.g. `/goal`) can verify the work. The workflow ends here.
 
 ### Handoff format
 
@@ -55,6 +56,7 @@ handoff  docs/growth/handoffs/03-invitations-schema.md
 tracker  docs/growth/tracker.md — 03 Status: Done
 suite    <paste the full green `vitest --project backend` run>
 PR       https://github.com/<org>/<repo>/pull/<n>
+review   <paste the verdict the review-backend-feature run returned: one line per item, plus its suite run>
 ```
 
 ## The loop
@@ -85,8 +87,9 @@ While you work:
 - **A pre-commit hook rejects the commit.** Fix what the hook reports, then commit again. Never pass `--no-verify`.
 - **A `## Backend` item is wrong or missing a case.** The task list is immutable. Write the extra test under the current task. Record the difference in the handoff's **Deviations** section.
 - **`git push` or `gh` fails at step 5.** Use the **When a step fails** section of the preloaded `open-feature-pr` skill. Do not open the PR by another route.
+- **The `review-backend-feature` invocation at step 6 fails.** Retry it once. If it fails again, state the failure in the proof's `review` line and stop. Never substitute your own walk of the review checklists — that breaks the independence rule.
 
 ## Rules
 
 - **Stop at the backend.** Do not touch frontend/UI files. The `build-frontend-feature` skill owns that phase.
-- **Do not review your own work twice.** Step 3 is your self-check. The `review-backend-feature` skill runs the independent review after the PR is open.
+- **Do not review your own work twice.** Step 3 is your self-check. The independent review is step 6's invocation of `review-backend-feature` — it runs in its own fork, and you never perform it yourself.
