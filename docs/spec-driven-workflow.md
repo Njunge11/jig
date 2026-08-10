@@ -2,14 +2,14 @@
 
 Status: draft for review. Not implemented.
 
-A developer writes a product spec; an initializer agent decomposes it into an ordered, immutable list of feature checklists (one feature = one PR); each feature is then built by an agent via `/goal implement <checklist>` using red-green-refactor TDD, with context carried between features by git history and a small handoff doc.
+A developer writes a product spec; an implementation-planner agent decomposes it into an ordered, immutable list of feature checklists (one feature = one PR); each feature is then built by an agent via `/goal implement <checklist>` using red-green-refactor TDD, with context carried between features by git history and a small handoff doc.
 
 ## Roles
 
 | Role | Who | Does |
 |---|---|---|
 | Developer | Human | Writes the spec, kicks off each feature with `/goal`, reviews and merges PRs |
-| Initializer agent | Claude (new skill) | Decomposes the spec into tracker + ordered checklists. Runs once per project |
+| Implementation-planner agent | Claude (new skill) | Decomposes the spec into tracker + ordered checklists. Runs once per project |
 | Feature agent | Claude (`/goal` + existing build skills) | Builds one feature test-first, commits per behavior, writes handoff, opens PR |
 | Evaluator | Claude Code built-in (goal mode) | After every turn, judges the checklist's completion condition from visible transcript output |
 
@@ -20,7 +20,7 @@ docs/<project>/
   spec.md                      # product spec, written by the developer
   tracker.md                   # ordered feature table with status — the project's state
   checklists/
-    01-<feature>.md            # one per feature, authored by the initializer
+    01-<feature>.md            # one per feature, authored by the implementation-planner
     02-<feature>.md
   handoffs/
     01-<feature>.md            # one per feature, written by the agent that built it
@@ -33,7 +33,7 @@ docs/<project>/
 | 1 | invitations schema | checklists/01-invitations-schema.md | done | #12 |
 | 2 | invitations service | checklists/02-invitations-service.md | in progress | |
 
-Created by the initializer. **Immutable except the Status/PR columns**: a feature agent may only flip its own row. No agent adds, removes, reorders, or rewords features. (Prevents an agent from rewriting the plan to match what it built — the `passes`-flag rule from Anthropic's long-running-agent harness.)
+Created by the implementation-planner. **Immutable except the Status/PR columns**: a feature agent may only flip its own row. No agent adds, removes, reorders, or rewords features. (Prevents an agent from rewriting the plan to match what it built — the `passes`-flag rule from Anthropic's long-running-agent harness.)
 
 ### Checklist (one per feature)
 
@@ -42,7 +42,7 @@ Structure: **Scope → Behaviors → Manual verification → Done.**
 - **Scope** — exactly what this feature covers, and which prior features it builds on.
 - **Skills** — names the skills that govern the work, e.g. "built per the `backend-tests` and `backend-standards` skills." This section is documentation, not the delivery mechanism: skills reach the agent by **preload** — the executor agent's `skills:` frontmatter injects them into context at startup, unconditionally. Naming a skill in prose and hoping the model fetches it is discretionary and is never relied on; the Done section then checks the *artifacts* of compliance (failing-then-passing runs, per-behavior commits), which is the enforceable part.
 
-  Test skills are restructured for instruction-following: `tdd` + `testing` (+ `backend.md`/`ui.md`) collapse into two fully self-contained skills, `backend-tests` and `frontend-tests` — each one file with the TDD loop (red → self-check → green → refactor → commit per behavior), a what-to-assert table, do/don't examples, and harness wiring. The loop is duplicated in both by design: they're never co-loaded with a shared loop skill, and self-containment beats DRY for agent compliance. No skill references another skill (references one level deep — nested chains cause partial reads, per Anthropic's authoring guidance). The old `tdd` build-order rule (backend → UI tests → integrate) moves to the initializer's decomposition rules.
+  Test skills are restructured for instruction-following: `tdd` + `testing` (+ `backend.md`/`ui.md`) collapse into two fully self-contained skills, `backend-tests` and `frontend-tests` — each one file with the TDD loop (red → self-check → green → refactor → commit per behavior), a what-to-assert table, do/don't examples, and harness wiring. The loop is duplicated in both by design: they're never co-loaded with a shared loop skill, and self-containment beats DRY for agent compliance. No skill references another skill (references one level deep — nested chains cause partial reads, per Anthropic's authoring guidance). The old `tdd` build-order rule (backend → UI tests → integrate) moves to the implementation-planner's decomposition rules.
 
   **Checklist convention:** every standards-type skill (standards, tests — not thin orchestrators) ends with a section titled `## Review checklist`, opening `Reject the <unit> if any is true:`, followed by numbered, violation-phrased items — numbered so other sections can cite `#4`, violation-phrased so each item is a binary reject condition walked row-by-row. `backend-standards` and `backend-tests` conform; future skills must too.
 - **Behaviors** — the work, written as a list of tests. Each behavior is one red-green-refactor cycle and one commit. Immutable: the agent checks items off, never edits them.
@@ -73,7 +73,7 @@ That's it. Code is the authority — the handoff is a pointer, not documentation
 ┌────────────────────────────────────────────────────────────────────────┐
 │  SETUP (once per project)                                              │
 │                                                                        │
-│  Developer                Initializer skill                            │
+│  Developer                Implementation-planner skill                            │
 │  ┌─────────┐   /decompose  ┌──────────────────┐                        │
 │  │ spec.md │ ────────────▶ │ split into ordered│                       │
 │  └─────────┘               │ features, author  │                       │
@@ -135,7 +135,7 @@ That's it. Code is the authority — the handoff is a pointer, not documentation
 
 ```
 Developer: write spec.md
-Developer: run initializer → tracker + checklists (review them once)
+Developer: run implementation-planner → tracker + checklists (review them once)
 
 For each feature, in order:
   Developer:  /goal implement docs/<project>/checklists/NN-<feature>.md
@@ -174,8 +174,8 @@ Deferred, to revisit after real usage. Plan: use the restructured skills on real
 
 ## Open — to discuss before building
 
-- Initializer skill design: input spec format, how it sizes features, how it authors Done conditions. **Field notes from hand-authoring the first checklist: `docs/initializer-notes.md`** — the two context sources (decided spec + codebase grounding pass), the grounding checks, decomposition rules, and the as-executed format (behavior section is `## Backend`, not "Behaviors").
-- Which skills the initializer names per checklist (`backend-tests`/`frontend-tests`, `backend-standards`, `data-fetching`, frontend equivalents), and whether the two-phase backend/frontend split maps to separate features or phases within one. **Settled in part:** checklists carry explicit skill directives (see Checklist → Skills above); test skills collapse to `backend-tests` + `frontend-tests` with the TDD loop merged into each; the build-order rule (backend → UI → integrate) belongs to the initializer.
+- Implementation-planner skill design: input spec format, how it sizes features, how it authors Done conditions. **Field notes from hand-authoring the first checklist: `docs/implementation-planner-notes.md`** — the two context sources (decided spec + codebase grounding pass), the grounding checks, decomposition rules, and the as-executed format (behavior section is `## Backend`, not "Behaviors").
+- Which skills the implementation-planner names per checklist (`backend-tests`/`frontend-tests`, `backend-standards`, `data-fetching`, frontend equivalents), and whether the two-phase backend/frontend split maps to separate features or phases within one. **Settled in part:** checklists carry explicit skill directives (see Checklist → Skills above); test skills collapse to `backend-tests` + `frontend-tests` with the TDD loop merged into each; the build-order rule (backend → UI → integrate) belongs to the implementation-planner.
 - Handoff template: exact headings, length cap.
 - `/goal` wiring: whether `implement <checklist>` needs a thin skill wrapping the goal condition, or the checklist's Done section is passed verbatim.
 - ~~Executor choice~~ **Settled:** the feature is built by the `backend-feature-builder` agent (frontmatter now preloads `backend-tests` + `backend-standards`), not the main session — preload is the only mechanism that guarantees the skills are in context. `/goal` supplies the completion gate around it.

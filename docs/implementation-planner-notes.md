@@ -1,13 +1,13 @@
-# Initializer Notes — How Backend Checklists Get Authored
+# Implementation-planner Notes — How Backend Checklists Get Authored
 
-Raw material for the future initializer skill. Distilled from hand-authoring the first real checklist (`ajiri-monorepo/docs/mcp-server/checklists/01-idempotency-store.md`, 2026-08-08) — including two authoring mistakes that got caught and reversed the same day.
+Raw material for the future implementation-planner skill. Distilled from hand-authoring the first real checklist (`ajiri-monorepo/docs/mcp-server/checklists/01-idempotency-store.md`, 2026-08-08) — including two authoring mistakes that got caught and reversed the same day.
 
 ## Where the context comes from
 
 A checklist is a **translation, not a design**. It has three inputs:
 
 1. **The spec, with semantics already decided.** Every behavior in the idempotency checklist traces to a decided sentence in `docs/mcp-server-design.md` §3 — server-derived key, atomic reserve, store-and-replay including failures, in-flight repeat waits, TTL ~1h, inline cleanup, no cron. Those decisions were made in design sessions *before* checklist time, each verified against sources. The checklist author invented zero semantics.
-   - **Implication:** the initializer must refuse to fill spec gaps. If the spec hasn't decided a behavior, it surfaces the question to the developer — it never designs on the fly, because a checklist is immutable once the builder starts.
+   - **Implication:** the implementation-planner must refuse to fill spec gaps. If the spec hasn't decided a behavior, it surfaces the question to the developer — it never designs on the fly, because a checklist is immutable once the builder starts.
 2. **The skills — authoritative for structure, naming, and harness.** `backend-standards` and `backend-tests` prescribe the feature tree, file suffixes, schema location, and test harness. The checklist repeats none of it and overrides none of it; it just names the feature slug and the app the feature lands in. The skills exist precisely because existing app code can't be trusted as a reference — they are the standard; code conforms to them.
 3. **The repo, via a grounding pass — for repo-level facts only.** Workspace wiring (package filters, script names, turbo tasks, hook chain), what already exists vs what the scaffold must create, spec-adjacent constraints (where the shared database's migrations live). Rule: **never write a path or command into a checklist that wasn't verified against the repo.** (Session evidence: a first draft written from memory had four errors.)
 
@@ -38,7 +38,7 @@ Sections: `## Scope` → `## Skills` → `## Backend` → `## Manual verificatio
 - **Manual verification**: commands the developer actually runs, verified against the scaffold the checklist itself defines.
 - **Done**: transcript-visible artifacts only — checked items shown, green suite output, `git log` one-commit-per-behavior, handoff file exists, tracker row flipped, PR open with URL + What/Why/How/Verification body, plus invariants (no migration applied, no frontend files).
 
-## For the initializer skill, when it's built
+## For the implementation-planner skill, when it's built
 
 - It reads the skills for structure/harness and never contradicts them; the grounding pass covers repo-level wiring only.
 - It asks the developer about undecided semantics instead of inventing them.

@@ -10,13 +10,13 @@ Every session writes `~/.claude/projects/<project-slug>/<session-id>.jsonl` (for
 ls -t ~/.claude/projects/<project-slug>/*.jsonl | head -3
 ```
 
-Confirm identity by grepping the candidate for the exact `/goal` or `/initializer` command the developer pasted.
+Confirm identity by grepping the candidate for the exact `/goal` or `/implementation-planner` command the developer pasted.
 
 ## 2. Extract facts from the transcript
 
 Pull with `jq`/grep; each extraction answers a specific audit question:
 
-- **`Skill` tool invocations** — was the prescribed skill (initializer, build-backend-feature) actually invoked, and at what point in the run?
+- **`Skill` tool invocations** — was the prescribed skill (implementation-planner, build-backend-feature) actually invoked, and at what point in the run?
 - **Bash calls + results, in order** — did each test run red *before* the implementing edit (the failing run must precede it in the stream)? one commit per behavior? hooks never bypassed (`--no-verify` absent)? no migration applied?
 - **Write/Edit calls** — only prescribed paths touched? checklist file never reworded (it is immutable — only `[ ]` → `[x]`)?
 - **Goal-evaluator turns** — what it rejected and why, and whether it cleared only on real pasted proof (green suite output, git log, PR URL actually present in the transcript at clear time).
@@ -36,7 +36,7 @@ Any claim in the transcript contradicted by an artifact is itself a finding.
 
 One row per rule, for every skill that governed the run:
 
-- **initializer** — grounding (no unverified path/command/version), no invented semantics, lane classification, checklist format, run commands.
+- **implementation-planner** — grounding (no unverified path/command/version), no invented semantics, lane classification, checklist format, run commands.
 - **backend-tests** — the loop (red → self-check → green → refactor → commit → tick) plus its 10-item test review checklist, applied per test.
 - **backend-standards** — the 21-item review checklist against the final diff.
 - **open-feature-pr** — branch naming, title, What/Why/How/Verification body.
@@ -52,7 +52,7 @@ Every deviation gets exactly one cause and its fix:
 | Rule missing from the skill | Add the rule |
 | Rule ambiguous | Tighten the wording |
 | Rule clear but ignored | Strengthen the instruction, or move enforcement into the `## Done` gates |
-| Checklist itself wrong | Initializer bug — fix the initializer skill |
+| Checklist itself wrong | Implementation-planner bug — fix the implementation-planner skill |
 
 Commit the fixes to the plugin, update the installed plugin, run the next pilot. Each pilot is an iteration on the skills, not just a build.
 
