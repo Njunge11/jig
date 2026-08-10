@@ -40,7 +40,7 @@ Setup (only when this checklist creates a new app or package):
 - [ ] Every task box above is checked and shown.
 - [ ] Green suite output pasted.
 - [ ] `git log` shows one commit per task.
-- [ ] `handoffs/NN-<slug>.md` exists.
+- [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL and a What/Why/How/Verification body.

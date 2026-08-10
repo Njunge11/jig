@@ -7,7 +7,7 @@ description: Owns the branch, title, and body conventions for a pull request, pl
 
 Open the pull request for a completed implementation checklist. The checklist's kind sets the entry conditions. Make sure they are true before you start.
 
-- **TDD implementation checklists:** every task is `[x]`. The suite is green. The file `handoffs/NN-<slug>.md` exists. The tracker Status is flipped.
+- **TDD implementation checklists:** every task is `[x]`. The suite is green. The file `docs/<project>/handoffs/NN-<slug>.md` exists. The tracker Status is flipped.
 - **Step implementation checklists:** the transcript shows the output of every `## Done` item. The tracker Status is flipped. These checklists have no handoff file and no task boxes.
 
 ## Branch and title
