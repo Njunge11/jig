@@ -25,10 +25,6 @@ Type: <Conventional Commits type>. Branch: `<type>/<slug>`.
 Setup (only when this checklist creates a new app or package):
 - <the setup items from the How to fill it rules>
 
-## Skills
-
-<the skills the build runs under — documentation only; the builder's preload delivers them>
-
 ## Backend
 
 ### <source file>
