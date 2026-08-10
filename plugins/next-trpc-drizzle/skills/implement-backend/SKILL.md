@@ -7,17 +7,55 @@ agent: backend-feature-builder
 
 # Feature Build — Backend (Phase 1)
 
-Build the backend of a feature test-first. The checklist drives the work. This skill runs in a forked subagent. The subagent has the `backend-tests` and `backend-standards` skills preloaded. Thus the checklist file and the repo are your source of truth. The subagent has no chat history. The implementation planner writes the checklist before this skill runs.
+Build the backend of a feature test-first. The checklist drives the work. This skill runs in a forked subagent. The subagent has no chat history. Thus the checklist file and the repo are your source of truth. The subagent has the `backend-tests`, `backend-standards`, and `open-feature-pr` skills preloaded. The implementation planner writes the checklist before this skill runs.
 
 **Checklist:** `$ARGUMENTS` — the path to the implementation checklist (`docs/<project>/checklists/NN-<slug>.md`). If you did not get a path, find it in the tracker (`docs/<project>/tracker.md`).
 
 ## The work
 
-1. **Create the feature branch before any commit**: `git checkout -b <type>/<feature-slug>` off an up-to-date `main`. Use the branch names from the preloaded `open-feature-pr` skill. If the session is already on the branch of this feature, continue on that branch. Never commit feature work to `main` or an unrelated branch.
-2. The `## Backend` section of the checklist is the task list. Work through it with [the loop](#the-loop) below.
-3. When every `## Backend` item is `[x]`, **check the Review checklist of the preloaded `backend-standards` skill item by item against your diff** (`git diff main`). Name each item that the diff violates. Fix each violation. Keep the suite green. Commit the fixes as one commit.
-4. When the suite is green after this check, **open the PR as the preloaded `open-feature-pr` skill specifies**. That skill owns the branch/title/body format and the `gh` steps. Do not make your own format.
-5. **Return the proof**: show the checklist with all items `[x]`. State the result of the standards checklist (per item: pass or fixed). Paste the green `vitest --project backend` run. Show the PR URL. Then a watcher that sees only the transcript (e.g. `/goal`) can verify the work.
+1. **Create the feature branch before any commit**: `git checkout -b <type>/<feature-slug>` off an up-to-date `main`. Use the branch names from the preloaded `open-feature-pr` skill. If the session is already on the branch of this feature, continue on that branch. Never commit feature work to `main` or an unrelated branch. **Gate:** `git branch --show-current` prints the feature branch, not `main`.
+2. The `## Backend` section of the checklist is the task list. Work through it with [the loop](#the-loop) below. **Gate:** every `## Backend` item is `[x]` and `vitest --project backend` is green.
+3. **Check the Review checklist of the preloaded `backend-standards` skill item by item against your diff** (`git diff main`). Name each item that the diff violates. Fix each violation. Commit the fixes as one commit. **Gate:** every item has a recorded verdict and `vitest --project backend` is green.
+4. **Write the handoff and flip the tracker.** Write `docs/<project>/handoffs/NN-<slug>.md` — the `handoffs/` folder sits beside the checklist's folder. Use the [handoff format](#handoff-format) below. Then set this checklist's Status to `Done` in `docs/<project>/tracker.md`. **Gate:** both files exist on the branch and are committed.
+5. **Open the PR as the preloaded `open-feature-pr` skill specifies.** That skill owns the branch, title, and body format, and the `gh` steps. Do not make your own format. **Gate:** `gh` returns the PR URL.
+6. **Return the proof** in the format under [Proof format](#proof-format) below. Then a watcher that sees only the transcript (e.g. `/goal`) can verify the work. The workflow ends here.
+
+### Handoff format
+
+```markdown
+# NN — <checklist name>
+
+## What shipped
+
+- <one line per `## Backend` task, in checklist order>
+
+## Deviations
+
+- <every change to the feature's scope, and why — or "None.">
+
+## Follow-ups
+
+- <what the next checklist needs from this one — or "None.">
+```
+
+### Proof format
+
+```
+checklist docs/growth/checklists/03-invitations-schema.md
+ [x] repo.create stores the invitation with a hashed token
+ [x] repo.revoke marks the invitation revoked
+ ... one line per Backend item, first to last
+
+backend-standards
+ 1 pass
+ 2 fixed — src/features/invites/api/invites.router.ts:41 (query moved into the service)
+ ... one line per item, first to last
+
+handoff  docs/growth/handoffs/03-invitations-schema.md
+tracker  docs/growth/tracker.md — 03 Status: Done
+suite    <paste the full green `vitest --project backend` run>
+PR       https://github.com/<org>/<repo>/pull/<n>
+```
 
 ## The loop
 
@@ -30,14 +68,25 @@ Do these steps for each task, in order. A task can need several tests. Write the
 3. **Green.** Change the **code** until this test and all previous tests pass. Do nothing more. Do not refactor yet. Never make the tests pass by a change to a test. Do not edit assertions. Do not delete or skip tests. The only permitted test edit here is a fix to a test that contradicts the spec.
 4. **Repeat** steps 1–3 until the task's tests cover the task.
 5. **Refactor (optional).** Now improve the design, but only as far as this feature needs. Duplication alone is not a reason to extract. Tests stay green through this step.
-6. **Commit.** One commit per task, when the task's tests pass. Never batch several tasks into one commit. The message follows the enforced convention of the repo. With commitlint present, that convention is Conventional Commits (`feat(scope): subject`). Message language: imperative, active voice, one idea per sentence, ≤20 words per sentence, simple tenses, no self-praise adjectives. State what changed, not how good it is. The git log becomes the step-by-step record of the feature. **Never bypass hooks** (`--no-verify` is banned). A failing pre-commit hook is part of the work. Diagnose and fix the hook failure. Hooks can auto-fix and re-stage files (Prettier/ESLint). That result is expected, not an error.
+6. **Commit.** One commit per task, when the task's tests pass. Never batch several tasks into one commit. The message follows the enforced convention of the repo. With commitlint present, that convention is Conventional Commits (`feat(scope): subject`). Write the message under the **Language rules** of the preloaded `open-feature-pr` skill. The git log becomes the step-by-step record of the feature. **Never bypass hooks** (`--no-verify` is banned). A failing pre-commit hook is part of the work. Diagnose and fix the hook failure. Hooks can auto-fix and re-stage files (Prettier/ESLint). That result is expected, not an error.
 7. **Check the task off.** Then take the next task. The work is done when the list is empty.
 
 While you work:
 
 - A missing case discovered mid-task gets its test. The checklist stays unchanged.
-- A change to the feature's scope goes in the deviations note of the handoff. Never include it silently.
+- A change to the feature's scope goes in the **Deviations** section of the handoff you write in step 4. Never make it silently.
+
+## When a step fails
+
+- **The checklist path does not exist.** Do not guess a path. Open `docs/<project>/tracker.md` and take the path from the row of this checklist. If the tracker has no such row, stop and report the missing file.
+- **`git checkout -b` reports that the branch exists.** Run `git branch --show-current`. If it is that branch, continue on it. If it is not, run `git checkout <branch>` and continue.
+- **A new test passes before you write the implementation.** The test does not test the new behavior. Rewrite the test to assert the behavior the task states. Never continue from a green Red step.
+- **A task will not go green.** Fix the code, never the test. The only permitted test edit is a fix to a test that contradicts the spec. If the spec and the checklist conflict, stop and report the conflict.
+- **A pre-commit hook rejects the commit.** Fix what the hook reports, then commit again. Never pass `--no-verify`.
+- **A `## Backend` item is wrong or missing a case.** The task list is immutable. Write the extra test under the current task. Record the difference in the handoff's **Deviations** section.
+- **`git push` or `gh` fails at step 5.** Use the **When a step fails** section of the preloaded `open-feature-pr` skill. Do not open the PR by another route.
 
 ## Rules
 
-- **Stop at the backend.** Do not touch frontend/UI files — that's a separate phase and your review gate.
+- **Stop at the backend.** Do not touch frontend/UI files. The `build-frontend-feature` skill owns that phase.
+- **Do not review your own work twice.** Step 3 is your self-check. The `review-backend-feature` skill runs the independent review after the PR is open.
