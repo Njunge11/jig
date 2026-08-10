@@ -1,7 +1,7 @@
 ---
 name: skill-audit
 description: Audits a skill against a built-in quality checklist and fixes the failures. Checks structure, frontmatter, body, category techniques, and loading paths, fixes each failure, and re-audits until every item passes. Use when the developer asks to audit, review, fix, or check a skill, a SKILL.md, or a plugin's skills.
-argument-hint: [path-to-skill-folder]
+argument-hint: "[path-to-skill-folder]"
 ---
 
 # Skill Audit
