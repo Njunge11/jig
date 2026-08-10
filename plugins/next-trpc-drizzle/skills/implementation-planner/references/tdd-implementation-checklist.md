@@ -1,6 +1,6 @@
 # TDD implementation checklist
 
-How to write a TDD implementation checklist for work that changes what the software does. The builder (build-backend-feature) implements it with TDD, one task at a time.
+How to write a TDD implementation checklist for work that changes what the software does. The builder (implement-backend) implements it with TDD, one task at a time.
 
 ## How to fill it
 

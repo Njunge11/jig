@@ -1,6 +1,6 @@
 ---
 name: backend-checklist
-description: Use after agreeing a feature's backend design to turn it into the `## Backend` test list in features/<name>/checklist.md — one behavior per line, ready to drive build-backend-feature. Owns the checklist file shape.
+description: Use after agreeing a feature's backend design to turn it into the `## Backend` test list in features/<name>/checklist.md — one behavior per line, ready to drive implement-backend. Owns the checklist file shape.
 ---
 
 # Backend Checklist
@@ -22,4 +22,4 @@ Turn the backend design agreed **in this conversation** into the `## Backend` se
 
 - Cover the whole behavior space, not just the happy path — include edge cases, error/failure paths, and authz outcomes (per tdd).
 - Write only the title and `## Backend`. The frontend section is frontend-checklist's job, in Phase 2.
-- **Stop at authoring.** Present it for review; don't build — that's build-backend-feature.
+- **Stop at authoring.** Present it for review; don't build — that's implement-backend.

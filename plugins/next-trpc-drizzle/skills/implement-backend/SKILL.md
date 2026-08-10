@@ -1,5 +1,5 @@
 ---
-name: build-backend-feature
+name: implement-backend
 description: Use this skill to build the BACKEND of a feature test-first. This is Phase 1, before any frontend. The skill drives the feature's checklist + TDD loop to a green backend suite. tRPC + Drizzle + Vitest/PGlite.
 context: fork
 agent: backend-feature-builder

@@ -43,7 +43,7 @@ Then write the tracker as `docs/<project>/tracker.md` — fill `references/track
 For a TDD implementation checklist:
 
 ```
-/goal the build-backend-feature skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript
+/goal the implement-backend skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript
 ```
 
 For a step implementation checklist:
