@@ -20,7 +20,6 @@ A feature is a folder. The schema is central.
 
 ```
 features/<feature>/
-  checklist.md
   api/
     <feature>.router.ts        ← entry: tRPC
     <feature>.service.ts
@@ -45,6 +44,39 @@ db/schema/
 - **Monorepo schema placement**: tables that more than one app uses live in the workspace db package. That package is `packages/db`, which exports the schema and the client — the create-t3-turbo pattern. That package owns their drizzle config and their migration history. An app's **private** tables stay in that app's `db/schema/`, with Drizzle's multi-project safeguards. Define every private table through a `pgTableCreator` name prefix (`<app>_`). Set `tablesFilter: ["<app>_*"]`. Give the app its own migrations journal (`migrations: { schema: "drizzle_<app>" }`). Private tables never FK into another app's tables. When a second app needs a table, move that table to the db package.
 - **Services and repositories are factory functions** — `make<X>Service(deps)`, `make<X>Repo(db)`. Each factory receives every dependency as an argument: the repo, `now()`, `uuid()`, and the external clients. Never write them as classes. Never write them as module-level singletons. Only the entry point imports the db client. The fake-repo and injected-clock tests in `backend-tests` require this pattern.
 - **The entry point is the composition root**. The router procedure or the workflow step constructs the real repo and the real service and connects them. Each layer below the entry point only receives its dependencies.
+
+The three files in that shape:
+
+```ts
+// db/invites.repo.ts — takes the handle, no db import
+export const makeInvitesRepo = (db: Db | Tx) => ({
+  create: (row: typeof invites.$inferInsert) =>
+    db.insert(invites).values(row).returning({ id: invites.id }),
+});
+
+// api/invites.service.ts — every dependency is an argument
+export const makeInvitesService = (deps: {
+  repo: ReturnType<typeof makeInvitesRepo>;
+  now: () => Date;
+  uuid: () => string;
+}) => ({
+  invite: async (email: string) =>
+    deps.repo.create({ id: deps.uuid(), email, createdAt: deps.now() }),
+});
+
+// api/invites.router.ts — the composition root
+export const invitesRouter = createTRPCRouter({
+  invite: orgProcedure
+    .input(z.object({ email: z.string().email() }))
+    .mutation(({ ctx, input }) =>
+      makeInvitesService({
+        repo: makeInvitesRepo(ctx.db),
+        now: () => new Date(),
+        uuid: crypto.randomUUID,
+      }).invite(input.email),
+    ),
+});
+```
 
 ## Layers
 
@@ -73,26 +105,13 @@ This entry is the tRPC procedure. **Does:** validate the input (`.input(zod)`). 
 
 Use a workflow for multi-step work that must survive crashes and waits — LLM calls, external APIs, human approval.
 
-- **`index.ts` — the workflow function**, marked `"use workflow"`. **Does:** it orchestrates the steps and branches on their results. The runtime sandboxes this function and replays it from the event log. Thus the function must be **deterministic**: no I/O, no clock, no randomness, no service calls.
-  **Never:** business logic or side effects — put those in steps.
-- **`steps.ts` — step functions**, marked `"use step"`. A step has the full Node runtime. The step is the place that calls the services. The step performs the router's role: it composes the real service and invokes it. Steps retry automatically — 3 attempts by default. Adjust the count per step with `fn.maxRetries = n`. Keep the steps in a file separate from the workflow function — this prevents bundler issues.
-- **Orchestrator state comes only from the step returns and the triggering input** — branch on nothing else. Every side effect lives inside a step. Each step checks whether its work is already complete before it does the work. A retried step executes again from the top, so error classification alone does not make a retry safe.
-- **Classify errors inside steps** (`import { FatalError, RetryableError } from "workflow"`). Throw `FatalError` for failures with no recovery (a bad credential) — it stops the retries. Throw `RetryableError` with `retryAfter` (a duration string, ms, or a Date) for rate limits and custom backoff. An error that you do not classify consumes the default retries.
-- **Pause** with `await sleep("30d")` — this suspends the workflow and consumes no resources. Or pause with `createWebhook()` — the workflow resumes on external input. This is the human-approval pattern.
-- **Start** runs from the application code: call `start(workflow, [input])` from `"workflow/api"`. The result is `await run.returnValue`.
+**Load `references/workflow-entry.md` before you write or review a workflow.** It holds the rules for the `"use workflow"` function and the `"use step"` functions: determinism, the check-before-write on each step, the retry counts, the `FatalError`/`RetryableError` classification, the pause primitives, and the start call. It backs Review checklist items 5–7.
 
 ### Entry — MCP tool (`mcp/*.tool.ts`)
 
 A tool is a router for an external agent (Claude/ChatGPT). The client owns the conversation and the loop. Each call is stateless.
 
-- **Define each tool with `registerTool(name, config, handler)`**. Give it a Zod `inputSchema` — the SDK validates the input before the handler runs. Write the `description` for the model: state the preconditions, and state when *not* to call the tool. Agents obey the description, not separate policy docs. Add an `outputSchema` when the result is structured. If you declare an `outputSchema`, the result **must** conform — the spec makes that a MUST. So derive both from one schema; never maintain two schemas.
-- **The handler is entry glue.** Compose the real service. Call **exactly one** service method. Shape the result. The same **Never** list as the router applies: no business logic, no transactions, no queries.
-- **Return `structuredContent` plus a text fallback.** The spec requires that a structured-content tool also serializes the result into a `content` text block for older clients.
-- **Set the annotations explicitly on every tool.** The default for `destructiveHint` is `true`, and the default for `readOnlyHint` is `false`. Thus a read tool without annotations declares itself destructive. For reads, set `{ readOnlyHint: true }`. For destructive operations (publish, delete), set `destructiveHint: true` — then the hosts ask the user first.
-- **There are two error channels — do not mix them.** Expected domain failures (validation, not-found, quota) go **in the result** as `isError: true`, with a message the model can act on. Never throw them. Thrown errors become JSON-RPC protocol errors. Reserve thrown errors for calls that are truly broken (unknown tool, malformed input).
-- **Auth is server-side.** Annotations and client confirmations are not security controls. Every handler enforces RBAC through the service layer, the same as any other entry point.
-- **Mutating tools are idempotent through a server-derived key** — never through a key that the model supplies. An LLM makes a new key for each retry, which defeats deduplication, or reuses one key across different intents. The server derives the key from `Mcp-Session-Id` + tool name + SHA-256 of the canonicalized arguments. The caller — the model or the host's HTTP retry — never knows that the key exists. The semantics: reserve the key atomically when execution begins. Store the first result (success or failure) and replay it on repeats. A repeat while the original call still runs waits for the original's result and returns it. If execution never began, store nothing — then genuine retries run again. Entries expire after ~1h. A derived key cannot separate a retry from a deliberate identical repeat; the short TTL limits that risk. Read-only tools are exempt. Set `idempotentHint: true` on deduplicated tools. This layer deduplicates repeats **across** calls. The step check-before-write (see the Workflow entry) covers re-execution **within** a call. Both are required.
-- **Wire this once, not per feature.** Set up these items one time with the official SDK's primitives: the single MCP endpoint (Streamable HTTP: POST per message, `Mcp-Session-Id`, `MCP-Protocol-Version`, Origin validation), the framework adapter, the OAuth/bearer middleware, and the idempotency store (a wrapper that every mutating tool registers through). Tool handlers never touch the transport, the tokens, or the dedup logic.
+**Load `references/mcp-entry.md` before you write or review an MCP tool.** It holds the `registerTool` contract, the `structuredContent` + text fallback, the annotation defaults, the two error channels, the server-derived idempotency key, and the wire-once transport setup. It backs Review checklist items 8–9.
 
 ### Service — `api/*.service.ts`
 
@@ -172,7 +191,7 @@ type GetUser = inferRouterOutputs<AppRouter>["user"]["get"];
 
 ## Review checklist
 
-Reject the change if any item is true:
+Reject the change if any item is true. Items 5–7 need `references/workflow-entry.md`; items 8–9 need `references/mcp-entry.md` — load each file before you judge its items, and skip those items when the diff has no workflow or no MCP tool.
 
 1. A file is outside the feature tree, or the schema is outside its correct home (`db/schema/`; in a monorepo: the workspace db package for shared tables, the prefixed app-local `db/schema/` for private ones).
 2. A service or a repo is a class or a module singleton, or a layer below the entry point imports the db client.
