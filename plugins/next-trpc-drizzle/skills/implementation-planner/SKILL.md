@@ -38,7 +38,19 @@ Write each implementation checklist as `docs/<project>/checklists/NN-<slug>.md`.
 
 Also give each implementation checklist its Conventional Commits type (`feat`, `fix`, `chore`, `refactor`, ...). The type names its branch and PR title. It does not decide which checklist to write.
 
-Then write the tracker as `docs/<project>/tracker.md` — fill `assets/tracker-template.md`.
+Then write the tracker as `docs/<project>/tracker.md` — fill `references/tracker-template.md`. The tracker carries each implementation checklist's /goal run command:
+
+For a TDD implementation checklist:
+
+```
+/goal the build-backend-feature skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript
+```
+
+For a step implementation checklist:
+
+```
+/goal every step and every Done item in docs/<project>/checklists/NN-<slug>.md is shown satisfied in the transcript; for each Done item the pasted proof is the command, its final summary output, and its exit status — full output is not required
+```
 
 ### Step 5: Check your output
 
@@ -48,7 +60,7 @@ Check every file you wrote. Fix every miss, then check again.
 2. List the files in `checklists/`. Every file must appear in the tracker table. An implementation checklist missing from the tracker is never built.
 3. Read each /goal run command. The path in it must equal the real path of the implementation checklist it runs. With a wrong path, the checklist can never pass its /goal check.
 4. Checklist numbers must agree across the tracker table, the filenames, and the run-command labels. No two implementation checklists share a number.
-5. Each /goal command must match the Run command in the checklist's reference file from Step 4.
+5. Each /goal command must match its template in Step 4: the TDD command for a TDD implementation checklist, the step command for a step implementation checklist.
 6. Every task checkbox in every implementation checklist must be `[ ]`. The builder ticks boxes, not you.
 7. Every Status in the tracker must be `Not started`.
 

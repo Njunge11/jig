@@ -11,5 +11,5 @@ Builders may edit only the Status and PR columns. Status is one of: Not started,
 **01 — <name>**:
 
 ```
-<the checklist's /goal run command, from the Run command section of references/tdd-implementation-checklist.md or references/step-implementation-checklist.md>
+<the checklist's /goal run command, from Step 4 of the skill>
 ```

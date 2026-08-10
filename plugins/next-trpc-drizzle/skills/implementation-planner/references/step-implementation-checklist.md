@@ -2,41 +2,39 @@
 
 How to write a step implementation checklist for work that only changes the code's structure, not what the software does. The builder follows its steps directly, one task at a time.
 
-## Writing rules
+## How to fill it
 
-- Copy the spec's wording verbatim. Do not invent labels, taglines, or microcopy.
-- The checklist speaks only to the builder. Do not write rationale, provenance notes, spec corrections, or verification evidence into it.
-- The standards skills (`backend-standards`, `backend-tests`, `frontend-standards`, `testing`) prescribe structure, naming, and harness. Do not repeat their content. Do not override it. Existing app code is not a reference.
-- A checklist is immutable after a builder starts it.
+- Copy the spec's wording verbatim. Do not invent labels or microcopy.
+- Write each step as a mechanical rule, never a vague intention.
+  - Write: "rewrite `@/lib/db/*` → `@ajiri/db/*` per this mapping"
+  - Not: "fix imports"
+- `## Done` lists verification from two sources only. Do not write your own verification.
+  1. The standing checks: the `test`/`test:run` and `typecheck` scripts of the affected packages, run unchanged, green at the baseline counts. No other command is a standing check.
+  2. Verification the spec states, copied word for word. If a needed proof is not in the spec, ask the developer; the developer writes the decision into the spec.
 
 ## Template
 
-Copy `assets/step-implementation-checklist-template.md`. Replace each `<placeholder>` with this checklist's content, following the Section rules below. Save the result as `docs/<project>/checklists/NN-<slug>.md`.
+Copy the template below. Replace each `<placeholder>` with this implementation checklist's content. Save it as `docs/<project>/checklists/NN-<slug>.md`.
 
-## Section rules
+```markdown
+# NN — <checklist name>
 
-### Steps
+## Scope
 
-- Each step is one concrete, completable unit: branch + baseline, create X, move Y, rewrite Z, update CI.
-- Write mechanical rules, never vague intentions.
-  - Write: "rewrite `@/lib/db/*` → `@ajiri/db/*` per this mapping"
-  - Not: "fix imports"
-- The first step is the baseline: the builder runs the standing checks of the affected packages and shows them green.
+<What this implementation checklist does.> Spec: `docs/<spec>.md`, section <section>.
+Builds on: <earlier checklists, or none>.
 
-### Done
+## Steps
 
-- Verification comes from two sources only. Write none of your own.
-  1. The standing checks: the `test`/`test:run` and `typecheck` scripts of the affected packages, run unchanged, green at the baseline counts. No other command is a standing check.
-  2. Verification the spec states, copied word for word. If a needed proof is not in the spec, ask the developer; the developer writes the decision into the spec.
-- Last two items: the tracker flip, then the PR.
-- The builder ticks each box (`[ ]` → `[x]`) when it pastes the box's output.
+1. Branch + baseline: create `<type>/<slug>`. Run the standing checks of the affected packages. Record the results.
+2. <one concrete, completable step>
 
-## Run command
+## Done
 
-The checklist's /goal run command for the tracker:
+Tick each box when you paste its output.
 
+- [ ] <standing check command> green at baseline counts, output pasted.
+- [ ] <verification the spec states, copied word for word>
+- [ ] Tracker Status flipped to Done.
+- [ ] PR open with its URL and a What/Why/How/Verification body.
 ```
-/goal every step and every Done item in docs/<project>/checklists/NN-<slug>.md is shown satisfied in the transcript; for each Done item the pasted proof is the command, its final summary output, and its exit status — full output is not required
-```
-
-Rules for every /goal condition: keep it under 4,000 characters. Demand only evidence that can appear in the conversation: pasted output, a PR URL, a ticked checklist. The evaluator reads only the conversation; it cannot run commands or open files.

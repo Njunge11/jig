@@ -1,65 +1,49 @@
 # TDD implementation checklist
 
-How to write a TDD implementation checklist for work that changes what the software does. The builder (build-backend-feature or build-frontend-feature) implements it with TDD, one task at a time.
+How to write a TDD implementation checklist for work that changes what the software does. The builder (build-backend-feature) implements it with TDD, one task at a time.
 
-## Writing rules
+## How to fill it
 
-- Copy the spec's wording verbatim. Do not invent labels, taglines, or microcopy.
-- The checklist speaks only to the builder. Do not write rationale, provenance notes, spec corrections, or verification evidence into it.
-- The standards skills (`backend-standards`, `backend-tests`, `frontend-standards`, `testing`) prescribe structure, naming, and harness. Do not repeat their content. Do not override it. Existing app code is not a reference.
-- A checklist is immutable after a builder starts it.
+- Copy the spec's wording verbatim. Do not invent labels or microcopy.
+- For TDD, the `backend-tests` and `testing` skills are the guide. Write tasks their harness can test.
+- If the implementation checklist creates a new app or package, list its setup in Scope: package.json with the standard scripts, tsconfig, vitest setup, drizzle config, `db/schema/`.
 
 ## Template
 
-Copy `assets/tdd-implementation-checklist-template.md`. Replace each `<placeholder>` with this checklist's content, following the Section rules below. Save the result as `docs/<project>/checklists/NN-<slug>.md`.
+Copy the template below. Replace each `<placeholder>` with this implementation checklist's content. Save it as `docs/<project>/checklists/NN-<slug>.md`.
 
-## Section rules
+```markdown
+# NN — <checklist name>
 
-### Scope
+## Scope
 
-- Build in a new app or package laid out per the standards skills. Never in a legacy app.
-- Do not edit the skills to fit a placement conflict. Fix the placement.
-- First checklist of a new app only — list the one-time scaffold: package.json with `test`/`test:run`/`typecheck`/`db:generate` scripts, tsconfig, vitest backend project + setup, drizzle config, `db/schema/`. The builder commits it as one chore commit before the first task.
+<What this builds.> Spec: `docs/<spec>.md`, section <section>.
+Target: <app or package>, feature <slug>. Builds on: <earlier checklists, or none>.
 
-### Backend
+Setup (only when this checklist creates a new app or package):
+- <the setup items from the How to fill it rules>
 
-- Each task is one observable behavior with expected values from the spec, never an implementation step.
-  - Write: "`reserve` on an expired key treats it as absent"
-  - Not: "add a WHERE clause"
-- Group tasks under the source file they test: pure helpers → repository → service → entry (when there is one). One test file per source file.
-- One task = one test = one red-green-refactor cycle = one commit.
-- The schema and its migration ride the first repository task's cycle.
-- Stay inside the harness limits. PGlite has one connection:
-  - Concurrency: `Promise.all`, assert the atomic outcome.
-  - Expiry: seed rows with past timestamps. No clock injection.
+## Skills
 
-### Frontend + Integration
+<the skills the build runs under — documentation only; the builder's preload delivers them>
 
-- Behavior tasks (test-backed): what the user observes and does, the loading/error/empty states, the integrated data path.
-- Visual & responsive tasks (browser-checked): layout, spacing, tokens, the `md:` state. No tests for visual tasks.
-- Trace each task to the spec's screens and states. If a screen or state is undecided, ask the developer.
+## Backend
 
-### Manual verification
+### <source file>
 
-- Commands the developer runs by hand. Verify each one against the scaffold this checklist defines.
+- [ ] <one task: an observable behavior with expected values from the spec>
 
-### Done
+## Manual verification
 
-- Only artifacts a transcript can show.
-- Invariants: only those the spec states, copied word for word. Write none of your own.
-- Last two items: the tracker flip, then the PR.
+- <command the developer runs>
 
-## Run command
+## Done
 
-The checklist's /goal run command for the tracker:
-
+- [ ] Every task box above is checked and shown.
+- [ ] Green suite output pasted.
+- [ ] `git log` shows one commit per task.
+- [ ] `handoffs/NN-<slug>.md` exists.
+- [ ] <invariants the spec states, copied word for word>
+- [ ] Tracker Status flipped to Done.
+- [ ] PR open with its URL and a What/Why/How/Verification body.
 ```
-/goal the build-backend-feature skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript
-```
-
-Two rules for this command:
-
-- Write the build skill's name in the command. A skill loads only when the developer types its name.
-- Write "the skill was run" in the condition, so the /goal evaluator requires the conversation to show that the skill was used.
-
-Rules for every /goal condition: keep it under 4,000 characters. Demand only evidence that can appear in the conversation: pasted output, a PR URL, a ticked checklist. The evaluator reads only the conversation; it cannot run commands or open files.
