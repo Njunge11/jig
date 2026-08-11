@@ -7,7 +7,7 @@ description: The quality checklist for backend tests — what an ideal TDD test 
 
 ## Review checklist
 
-Reject the test if any item is true:
+Reject the test if any item is true. This list judges each test's quality, not the suite's breadth — coverage is the implementation checklist's job: its task list states which behaviors need tests.
 
 1. The test asserts that an **internal function was called** instead of observable behavior. Observable behavior is the response (success or thrown error), the DB state after the call, or a side effect. A side effect on an external system (item 6's fakes) is observed through the fake's record — assert its exact contents (`fakePayments.charges`), never through `toHaveBeenCalled` spy assertions.
 2. The test is at the **wrong layer**. Each layer has one test setup: a repo runs on PGlite with the real schema; a service runs on an in-memory fake repo; an entry point is driven through its real interface — a tRPC procedure via `createCaller`, an MCP tool via its registered handler, a route handler via a real request, a workflow step as a plain function with injected dependencies, a workflow function through the `@workflow/vitest` plugin, which runs it in-process with its real steps.
@@ -19,6 +19,7 @@ Reject the test if any item is true:
 8. The test fails the **rewrite litmus**: the test breaks if a developer rewrites the implementation (ORM → raw SQL, service restructured, auth strategy swapped).
 9. The test **reads poorly**: the name does not state the action and the expected outcome, or the body contains logic (loops, conditionals). Duplication between tests is acceptable when it helps clarity.
 10. The test is in the **wrong file**: the file mixes layers, or the file is not named after the source file it tests (`<source-file>.test.ts` — so `users.repo.test.ts`, `users.service.test.ts`, `users.router.test.ts`, `create-job-draft.tool.test.ts`).
+11. The test verifies **more than one specified behavior**. One behavior per test; a task with several behaviors gets several tests.
 
 ## What not to do — and what to do instead
 
