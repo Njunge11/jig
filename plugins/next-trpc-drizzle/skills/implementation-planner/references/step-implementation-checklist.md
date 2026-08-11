@@ -5,9 +5,9 @@ How to write a step implementation checklist for work that only changes the code
 ## How to fill it
 
 - Copy the spec's wording verbatim. Do not invent labels or microcopy.
-- Write each step as a mechanical rule, never a vague intention.
-  - Write: "rewrite `@/lib/db/*` → `@ajiri/db/*` per this mapping"
-  - Not: "fix imports"
+- Write each step as a mechanical rule, never a vague intention. A mechanical rule names the files and the exact change, so that two builders produce the same diff from it.
+  - Write: "move `apps/web/lib/email/` to `packages/email/src/`, and change every `@/lib/email` import to `@repo/email`"
+  - Not: "extract the email code into its own package"
 - `## Done` lists verification from two sources only. Do not write your own verification.
   1. The standing checks: the `test`/`test:run` and `typecheck` scripts of the affected packages, run unchanged, green at the baseline counts. No other command is a standing check.
   2. Verification the spec states, copied word for word. If a needed proof is not in the spec, ask the developer; the developer writes the decision into the spec.
