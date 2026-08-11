@@ -87,9 +87,4 @@ While you work:
 - **A pre-commit hook rejects the commit.** Fix what the hook reports, then commit again. Never pass `--no-verify`.
 - **A `## Backend` item is wrong or missing a case.** The task list is immutable. Write the extra test under the current task. Record the difference in the handoff's **Deviations** section.
 - **`git push` or `gh` fails at step 5.** Use the **When a step fails** section of the preloaded `open-feature-pr` skill. Do not open the PR by another route.
-- **The `review-backend-feature` invocation at step 6 fails.** Retry it once. If it fails again, state the failure in the proof's `review` line and stop. Never substitute your own walk of the review checklists — that breaks the independence rule.
-
-## Rules
-
-- **Stop at the backend.** Do not touch frontend/UI files. The `build-frontend-feature` skill owns that work.
-- **Do not review your own work twice.** Step 3 is your self-check. The independent review is step 6's invocation of `review-backend-feature` — it runs in its own fork, and you never perform it yourself.
+- **The `review-backend-feature` invocation at step 6 fails.** Retry it once. If it fails again, state the failure in the proof's `review` line and stop. Never substitute your own walk of the review checklists — that breaks the review's independence.
