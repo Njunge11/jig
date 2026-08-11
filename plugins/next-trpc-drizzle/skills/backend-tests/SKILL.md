@@ -9,7 +9,7 @@ description: The quality checklist for backend tests — what an ideal TDD test 
 
 Reject the test if any item is true:
 
-1. The test asserts that an **internal function was called** instead of observable behavior. Observable behavior is the response (success or thrown error), the DB state after the call, or a side effect.
+1. The test asserts that an **internal function was called** instead of observable behavior. Observable behavior is the response (success or thrown error), the DB state after the call, or a side effect. A side effect on an external system (item 6's fakes) is observed through the fake's record — assert its exact contents (`fakePayments.charges`), never through `toHaveBeenCalled` spy assertions.
 2. The test is at the **wrong layer**. Each layer has one test setup: a repo runs on PGlite with the real schema; a service runs on an in-memory fake repo; an entry point is driven through its real interface — a tRPC procedure via `createCaller`, an MCP tool via its registered handler, a route handler via a real request, a workflow step as a plain function with injected dependencies, a workflow function through the `@workflow/vitest` plugin, which runs it in-process with its real steps.
 3. The test does not have explicit **setup, invocation, or specific assertions**. Examples: no assertions, or a `toBeDefined()`-grade assertion where an exact value is knowable.
 4. The test's expected values are **not computed by hand from the spec**: they are pasted from the implementation's output, or they restate the implementation's formula in the assertion.
@@ -90,6 +90,18 @@ const caller = createCaller(ctxFor(session));
 expect(await caller.users.funnel({ period: "30d" })).toMatchObject({
   signups: 1204,
 });
+```
+
+**Checklist items 1 and 6 — A side effect on an external system is observable only in the fake's record. Do assert the record's exact contents.**
+
+```ts
+// ❌ asserts nothing about the charge — passes even if the service charged twice
+const result = await svc.checkout({ cartId: "c1" });
+expect(result.status).toBe("paid");
+
+// ✅ the exact record catches a duplicate charge
+await svc.checkout({ cartId: "c1" });
+expect(fakePayments.charges).toEqual([{ amount: 116, cartId: "c1" }]);
 ```
 
 ## Test setup
