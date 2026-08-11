@@ -22,7 +22,9 @@ Reject the test if any item is true:
 
 ## What not to do — and what to do instead
 
-**#1 — Do not assert an internal call. Do assert the outcome.**
+Each example shows one Review-checklist item above. Items without an example need none.
+
+**Checklist item 1 — Do not assert an internal call. Do assert the outcome.**
 
 ```ts
 // ❌ breaks on every refactor, proves nothing a user observes
@@ -35,7 +37,7 @@ expect(fakeRepo.users).toContainEqual(
 );
 ```
 
-**#1 — A thrown error is observable behavior too. Do assert the rejection, not only the happy path.**
+**Checklist item 1 — A thrown error is observable behavior too. Do assert the rejection, not only the happy path.**
 
 ```ts
 // ✅ the denial is the outcome under test
@@ -45,7 +47,7 @@ await expect(anon.users.funnel({ period: "30d" })).rejects.toThrow(
 );
 ```
 
-**#4 — Do not paste the implementation's output as the expected value. Do derive it from the spec.**
+**Checklist item 4 — Do not paste the implementation's output as the expected value. Do derive it from the spec.**
 
 ```ts
 // ❌ ran the code, copied what came out — the test now certifies whatever the code does
@@ -55,7 +57,7 @@ expect(invoice.total).toBe(1042.37);
 expect(invoice.total).toBe(FIXTURE.subtotal * 1.16);
 ```
 
-**#5 — Do not read the clock. Do inject it.**
+**Checklist item 5 — Do not read the clock. Do inject it.**
 
 ```ts
 // ❌ flaky at midnight, unfixable expected values
@@ -73,7 +75,7 @@ expect(fakeRepo.users).toContainEqual(
 );
 ```
 
-**#6 — Do not mock your own service in an entry-point test. Do drive the real entry.**
+**Checklist item 6 — Do not mock your own service in an entry-point test. Do drive the real entry.**
 
 ```ts
 // ❌ tests the mock
