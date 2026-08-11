@@ -12,7 +12,7 @@ Reject the test if any item is true:
 1. The test asserts that an **internal function was called** instead of observable behavior. Observable behavior is the response (success or thrown error), the DB state after the call, or a side effect.
 2. The test is at the **wrong layer**. Each layer has one test setup: a repo runs on PGlite with the real schema; a service runs on an in-memory fake repo; an entry point is driven through its real interface — a tRPC procedure via `createCaller`, an MCP tool via its registered handler, a route handler via a real request, a workflow step as a plain function with injected dependencies, a workflow function through the `@workflow/vitest` plugin, which runs it in-process with its real steps.
 3. The test does not have explicit **setup, invocation, or specific assertions**. Examples: no assertions, or a `toBeDefined()`-grade assertion where an exact value is knowable.
-4. The test uses expected values **pasted from the implementation's output**, not values derived from the spec or a fixture.
+4. The test's expected values are **not computed by hand from the spec**: they are pasted from the implementation's output, or they restate the implementation's formula in the assertion.
 5. The test is **non-deterministic**: it reads the clock or randomness directly instead of the injected `now()` / `uuid()`.
 6. The test mocks **our own** repos or services. You may mock only systems outside ours (payments, email, OAuth).
 7. The test **shares state** with other tests: no rollback transaction (repo) or no fresh fake (service).
@@ -47,14 +47,18 @@ await expect(anon.users.funnel({ period: "30d" })).rejects.toThrow(
 );
 ```
 
-**Checklist item 4 — Do not paste the implementation's output as the expected value. Do derive it from the spec.**
+**Checklist item 4 — Do not paste the implementation's output as the expected value. Do compute it by hand from the spec.**
 
 ```ts
 // ❌ ran the code, copied what came out — the test now certifies whatever the code does
 expect(invoice.total).toBe(1042.37);
 
-// ✅ the spec says: subtotal + 16% VAT
+// ❌ restates the implementation's formula — a shared misreading of the spec still passes
 expect(invoice.total).toBe(FIXTURE.subtotal * 1.16);
+
+// ✅ round input, expected value computed by hand from the spec (16% VAT)
+const invoice = await svc.createInvoice({ subtotal: 100 });
+expect(invoice.total).toBe(116);
 ```
 
 **Checklist item 5 — Do not read the clock. Do inject it.**
