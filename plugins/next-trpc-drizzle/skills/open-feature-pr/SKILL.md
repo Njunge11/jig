@@ -65,7 +65,7 @@ Write the Verification section for a reviewer who did not see this session. Do n
 
 ## Language rules (title and body)
 
-- Write complete sentences, each with a subject and a verb. Do not write fragments: not "No breaking changes.", but "The change breaks no existing API."
+- Write complete sentences, each with a subject and a verb. Do not write fragments: not "No new dependencies.", but "This PR adds no new dependencies."
 - Use the active voice. Use the imperative for the title and the What section.
 - Write one idea per sentence. Use a maximum of 20 words per sentence.
 - Use simple tenses only. Do not write noun stacks of more than 3 words.
