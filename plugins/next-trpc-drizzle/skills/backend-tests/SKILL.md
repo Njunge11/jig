@@ -20,6 +20,7 @@ Reject the test if any item is true. This list judges each test's quality, not t
 9. The test **reads poorly**: the name does not state the action and the expected outcome, or the body contains logic (loops, conditionals). Duplication between tests is acceptable when it helps clarity.
 10. The test is in the **wrong file**: the file mixes layers, or the file is not named after the source file it tests (`<source-file>.test.ts` — so `users.repo.test.ts`, `users.service.test.ts`, `users.router.test.ts`, `create-job-draft.tool.test.ts`).
 11. The test verifies **more than one specified behavior**. One behavior per test; a task with several behaviors gets several tests.
+12. The test targets **code that is not ours or has no behavior of its own**: a third-party library's correctness (Zod parsing, Drizzle SQL generation), a trivial pass-through, or a private helper already covered through its public API.
 
 ## What not to do — and what to do instead
 
@@ -103,6 +104,18 @@ expect(result.status).toBe("paid");
 // ✅ the exact record catches a duplicate charge
 await svc.checkout({ cartId: "c1" });
 expect(fakePayments.charges).toEqual([{ amount: 116, cartId: "c1" }]);
+```
+
+**Checklist item 12 — Do not test the library. Do test our rule, through our entry point.**
+
+```ts
+// ❌ tests Zod, not our code
+expect(() => schema.parse({ email: 123 })).toThrow();
+
+// ✅ our validation contract, driven through the real interface
+await expect(caller.users.register({ email: "no-at-sign" })).rejects.toThrow(
+  /invalid email/,
+);
 ```
 
 ## Test setup
