@@ -1,13 +1,13 @@
 ---
 name: implement-backend
-description: Use this skill to build the BACKEND of a feature test-first. This is Phase 1, before any frontend. The skill drives the feature's checklist + TDD loop to a green backend suite. tRPC + Drizzle + Vitest/PGlite.
+description: Use this skill to build the BACKEND of a feature test-first, before any frontend work. The skill drives the feature's checklist + TDD loop to a green backend suite. tRPC + Drizzle + Vitest/PGlite.
 context: fork
 agent: backend-feature-builder
 ---
 
-# Feature Build — Backend (Phase 1)
+# Implement Backend
 
-Build the backend of a feature test-first. The checklist drives the work. This skill runs in a forked subagent. The subagent has no chat history. Thus the checklist file and the repo are your source of truth. The subagent has the `backend-tests`, `backend-standards`, and `open-feature-pr` skills preloaded. The implementation planner writes the checklist before this skill runs.
+Build the backend of a feature test-first. The checklist drives the work — the implementation planner writes it before this skill runs. You have no chat history: the checklist file and the repo are your only source of truth.
 
 **Checklist:** `$ARGUMENTS` — the path to the implementation checklist (`docs/<project>/checklists/NN-<slug>.md`). If you did not get a path, find it in the tracker (`docs/<project>/tracker.md`).
 
@@ -91,5 +91,5 @@ While you work:
 
 ## Rules
 
-- **Stop at the backend.** Do not touch frontend/UI files. The `build-frontend-feature` skill owns that phase.
+- **Stop at the backend.** Do not touch frontend/UI files. The `build-frontend-feature` skill owns that work.
 - **Do not review your own work twice.** Step 3 is your self-check. The independent review is step 6's invocation of `review-backend-feature` — it runs in its own fork, and you never perform it yourself.

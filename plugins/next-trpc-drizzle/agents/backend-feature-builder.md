@@ -1,6 +1,6 @@
 ---
 name: backend-feature-builder
-description: Build a feature's backend test-first (Phase 1), driven by a checklist file, with the stack's backend-tests and backend-standards skills preloaded.
+description: Build a feature's backend test-first, driven by a checklist file, with the stack's backend-tests and backend-standards skills preloaded.
 skills:
   - backend-tests
   - backend-standards
