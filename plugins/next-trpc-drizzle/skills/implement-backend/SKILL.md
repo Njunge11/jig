@@ -7,7 +7,7 @@ agent: backend-feature-builder
 
 # Implement Backend
 
-Build the backend of a feature test-first. The checklist drives the work — the implementation planner writes it before this skill runs. You have no chat history: the checklist file and the repo are your only source of truth.
+Build the backend of a feature test-first. The checklist drives the work — the implementation planner writes it before this skill runs.
 
 **Checklist:** `$ARGUMENTS` — the path to the implementation checklist (`docs/<project>/checklists/NN-<slug>.md`). If you did not get a path, find it in the tracker (`docs/<project>/tracker.md`).
 
