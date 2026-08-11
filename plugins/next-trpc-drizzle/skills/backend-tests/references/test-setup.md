@@ -37,13 +37,13 @@ await db.transaction(async (tx) => {
 
 ## Service tests — fake repo
 
-Use no DB. Assert the returned values and the data persisted to the fake. The #5 example in `SKILL.md` shows the setup.
+Use no DB. Assert the returned values and the data persisted to the fake. The Checklist item 5 example in `SKILL.md` shows the setup.
 
 A fake is code too. Give each fake repo a contract test. The contract test runs the same assertions against the fake and against the PGlite-backed real repo. Then the fake cannot drift from the behavior it substitutes for.
 
 ## Router tests — createCallerFactory
 
-Create the caller once in a test helper: `const createCaller = createCallerFactory(appRouter)` (the docs-preferred primitive; `router.createCaller` remains valid). Then do these steps per test. Build a context with a test session. Call procedures. Assert the response or the thrown error. The #6 example in `SKILL.md` shows the pattern.
+Create the caller once in a test helper: `const createCaller = createCallerFactory(appRouter)` (the docs-preferred primitive; `router.createCaller` remains valid). Then do these steps per test. Build a context with a test session. Call procedures. Assert the response or the thrown error. The Checklist item 6 example in `SKILL.md` shows the pattern.
 
 ## Workflow tests — steps plain, workflows via @workflow/vitest
 
