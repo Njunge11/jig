@@ -24,6 +24,8 @@ Assign one category. The category decides which technique checks apply in Step 3
 - **Workflow automation** — the skill drives a multi-step process.
 - **MCP enhancement** — the skill guides the use of an MCP server's tools.
 
+Write the category and one sentence of evidence before you start Step 3.
+
 ### Step 3: Walk the checklist
 
 Walk the audit checklist below row by row. Give every item a verdict: **pass** or **fail**, with `file:line` evidence. Never skip a row. Never substitute a grep for reading the file.
@@ -36,9 +38,20 @@ Fix each failing item in the skill's files. Three limits:
 - Change only what the failing item requires. Do not rewrite passing content.
 - A fix that changes the skill's meaning or scope — what it does, when it triggers, who consumes it — is the developer's decision. Ask first, with the failing item and your proposed fix.
 
+Do not start Step 5 until every failing item has a fix in the file or a decision from the developer.
+
 ### Step 5: Re-audit and report
 
 Walk the checklist again on the fixed files. Repeat Steps 4–5 until every item passes. Then report: the category you assigned and why; each item that failed, its evidence, and the fix applied; and the final all-pass verdict.
+
+Report one line per item, in this form:
+
+```
+Item 4 — fail — SKILL.md:3 — the description names no trigger phrase. Fix: added "Use when the developer asks to ...".
+Item 7 — pass — SKILL.md:9-41 — the five steps sit above the checklist.
+```
+
+When a fix for one item breaks another item, and the two cannot both pass, stop the loop. Report both items with their evidence and ask the developer which one wins.
 
 ## Audit checklist
 
@@ -60,7 +73,7 @@ Walk the checklist again on the fixed files. Repeat Steps 4–5 until every item
 8. Every instruction is specific and actionable — a command to run, a condition to check, an output to expect. No "validate things properly" language an agent can read two ways.
 9. The body is concise: numbered steps and bullets, one home per rule, no restated content.
 10. The body shows examples of correct output or correct calls, and names the common failure cases with their fixes, where the skill acts on anything that can fail.
-11. The skill composes: it does not assume it is the only skill loaded, and it does not duplicate content that another skill owns — it names that skill instead.
+11. The skill composes: its rules stay inside its own domain, it does not tell the agent to ignore other loaded instructions, and it does not duplicate content that another skill owns — it names that skill instead.
 
 ### Category techniques (apply the matching row only)
 
