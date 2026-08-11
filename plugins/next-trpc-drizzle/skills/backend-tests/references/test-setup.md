@@ -43,7 +43,7 @@ A fake is code too. Give each fake repo a contract test. The contract test runs 
 
 ## Router tests — createCallerFactory
 
-Create the caller once in a test helper: `const createCaller = createCallerFactory(appRouter)` (the docs-preferred primitive; `router.createCaller` remains valid). Then do these steps per test. Build a context with a test session. Call procedures. Assert the response or the thrown error.
+Create the caller once in a test helper: `const createCaller = createCallerFactory(appRouter)`. Then do these steps per test. Build a context with a test session. Call procedures. Assert the response or the thrown error.
 
 ## Workflow tests — steps plain, workflows via @workflow/vitest
 

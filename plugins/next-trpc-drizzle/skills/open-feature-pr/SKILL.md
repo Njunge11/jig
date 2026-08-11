@@ -17,7 +17,7 @@ Open the pull request for a completed implementation checklist. The checklist's 
 
 ## Body template
 
-The body follows Google's CL-description guidance (google.github.io/eng-practices). State what changed and why. Give enough context for a reader who did not see this session. The language rules below apply to every section. Use exactly these sections:
+State what changed and why. Give enough context for a reader who did not see this session. The language rules below apply to every section. Use exactly these sections:
 
 ```
 ## What
