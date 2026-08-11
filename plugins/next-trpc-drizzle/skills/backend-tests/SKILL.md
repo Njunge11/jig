@@ -1,6 +1,6 @@
 ---
 name: backend-tests
-description: The quality checklist for backend tests — what an ideal TDD test looks like and what to reject. Repos on PGlite, services with fake repos, entry points (tRPC procedure, MCP tool, route handler, workflow step and function) driven through their real interfaces. Use when writing, reviewing, or planning backend tests, or wiring the backend test harness. Keeps tests asserting observable behavior so the tests survive refactors.
+description: The quality checklist for backend tests — what an ideal TDD test looks like and what to reject. Repos on PGlite, services with fake repos, entry points (tRPC procedure, MCP tool, route handler, workflow step and function) driven through their real interfaces. Use when writing, reviewing, or planning backend tests, or creating the backend test setup (Vitest + PGlite). Keeps tests asserting observable behavior so the tests survive refactors.
 ---
 
 # Backend Tests
@@ -10,7 +10,7 @@ description: The quality checklist for backend tests — what an ideal TDD test 
 Reject the test if any item is true:
 
 1. The test asserts that an **internal function was called** instead of observable behavior. Observable behavior is the response (success or thrown error), the DB state after the call, or a side effect.
-2. The test is at the **wrong layer**. Each layer has one harness: a repo runs on PGlite with the real schema; a service runs on an in-memory fake repo; an entry point is driven through its real interface — a tRPC procedure via `createCaller`, an MCP tool via its registered handler, a route handler via a real request, a workflow step as a plain function with injected dependencies, a workflow function through the `@workflow/vitest` plugin, which runs it in-process with its real steps.
+2. The test is at the **wrong layer**. Each layer has one test setup: a repo runs on PGlite with the real schema; a service runs on an in-memory fake repo; an entry point is driven through its real interface — a tRPC procedure via `createCaller`, an MCP tool via its registered handler, a route handler via a real request, a workflow step as a plain function with injected dependencies, a workflow function through the `@workflow/vitest` plugin, which runs it in-process with its real steps.
 3. The test does not have explicit **setup, invocation, or specific assertions**. Examples: no assertions, or a `toBeDefined()`-grade assertion where an exact value is knowable.
 4. The test uses expected values **pasted from the implementation's output**, not values derived from the spec or a fixture.
 5. The test is **non-deterministic**: it reads the clock or randomness directly instead of the injected `now()` / `uuid()`.
@@ -86,6 +86,6 @@ expect(await caller.users.funnel({ period: "30d" })).toMatchObject({
 });
 ```
 
-## Harness
+## Test setup
 
-When wiring or extending the test harness, consult `references/harness.md` for the Vitest config, the PGlite setup, the fake-repo contract tests, the `createCaller` helper, and the `@workflow/vitest` plugin.
+When you create or extend the test setup, consult `references/test-setup.md` for the Vitest config, the PGlite setup, the fake-repo contract tests, the `createCaller` helper, and the `@workflow/vitest` plugin.

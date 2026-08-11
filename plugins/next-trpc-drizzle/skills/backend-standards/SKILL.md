@@ -167,7 +167,7 @@ Errors flow up: Repository → Service → Entry → the global handler (tRPC) o
 - The schema is the single source of truth.
 - Generate the migrations with the Drizzle tooling (`db:generate`). Custom SQL (DDL that drizzle-kit cannot express, data seeding) goes through `drizzle-kit generate --custom` — never through a file created by hand.
 - Never edit an applied migration. Add a new migration for every schema change.
-- **Never apply migrations.** To generate the migration file is part of a schema change. To run it (`db:migrate`, `db:push`, or any command that alters a real database) is the developer's job — the developer does this manually. Tests are not affected: the PGlite harness pushes the schema into an in-memory instance, not into a database.
+- **Never apply migrations.** To generate the migration file is part of a schema change. To run it (`db:migrate`, `db:push`, or any command that alters a real database) is the developer's job — the developer does this manually. Tests are not affected: the PGlite test setup pushes the schema into an in-memory instance, not into a database.
 
 ## Types & reuse
 

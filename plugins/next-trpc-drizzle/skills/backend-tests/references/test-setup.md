@@ -1,8 +1,8 @@
-# Backend test harness
+# Backend test setup
 
 Use one Vitest config, a `backend` project, and the node environment. Put the tests in each feature's `api/__tests__/` and `db/__tests__/`. Run the tests with `vitest --project backend`.
 
-**One test file per source file, named after it** — `<source-file>.test.ts`. Never mix layers in one file. Each layer has its own harness (PGlite / fake repo / real entry interface). A mixed file mixes the setups together.
+**One test file per source file, named after it** — `<source-file>.test.ts`. Never mix layers in one file. Each layer has its own setup (PGlite / fake repo / real entry interface). A mixed file mixes the setups together.
 
 ```ts
 // vitest.config.ts — the backend project
