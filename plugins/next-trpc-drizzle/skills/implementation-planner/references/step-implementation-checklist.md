@@ -1,10 +1,10 @@
 # Step implementation checklist
 
-How to write a step implementation checklist for work that only changes the code's structure, not what the software does. The builder follows its steps directly, one task at a time.
+How to write a step implementation checklist for work that only changes the code's structure, not what the software does. The `implement-steps` skill executes it in a forked builder, one step at a time.
 
 ## How to fill it
 
-- Step 1 always loads the `backend-standards` skill. Its rules govern every edit the builder makes, and no other step-lane instruction loads it.
+- The `implement-steps` skill executes the checklist in a forked builder that has the `backend-standards` skill preloaded. The `implement-steps` skill also owns the branch, the baseline run, the review walk, and the PR. Write only the work into `## Steps` — no load-a-skill step, no branch step, no baseline step.
 - Copy the spec's wording verbatim. Do not invent labels or microcopy.
 - Write each step as a mechanical rule, never a vague intention. A mechanical rule names the files and the exact change, so that two builders produce the same diff from it.
   - Write: "move `apps/web/lib/email/` to `packages/email/src/`, and change every `@/lib/email` import to `@repo/email`"
@@ -29,9 +29,7 @@ Type: <Conventional Commits type>. Branch: `<type>/<slug>`.
 
 ## Steps
 
-1. Load the `next-trpc-drizzle:backend-standards` skill. Its rules govern every edit below.
-2. Branch + baseline: create `<type>/<slug>`. Run the standing checks of the affected packages. Record the results.
-3. <one concrete, completable step>
+1. <one concrete, completable step>
 
 ## Manual verification
 

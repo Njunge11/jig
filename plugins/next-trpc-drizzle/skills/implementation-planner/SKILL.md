@@ -1,6 +1,6 @@
 ---
 name: implementation-planner
-description: Converts a spec doc into a tracker and implementation checklists. Each implementation checklist is one PR and holds the tasks that implement it. The tracker lists every implementation checklist with its status and its /goal run command. Work that changes what the software does gets a TDD implementation checklist, which a builder implements with TDD. Work that only changes the code's structure gets a step implementation checklist, which a builder follows step by step. The skill audits the repo first, and asks the developer when the spec leaves a decision open. Use when the developer runs /next-trpc-drizzle:implementation-planner with a doc path, or asks to plan a spec's implementation, to split a spec doc into checklists or PRs, or to write a spec's project tracker.
+description: Converts a spec doc into a tracker and implementation checklists. Each implementation checklist is one PR and holds the tasks that implement it. The tracker lists every implementation checklist with its status and its /goal run command. Work that changes what the software does gets a TDD implementation checklist, which a builder implements with TDD. Work that only changes the code's structure gets a step implementation checklist, which the implement-steps skill executes step by step. The skill audits the repo first, and asks the developer when the spec leaves a decision open. Use when the developer runs /next-trpc-drizzle:implementation-planner with a doc path, or asks to plan a spec's implementation, to split a spec doc into checklists or PRs, or to write a spec's project tracker.
 ---
 
 # Implementation planner
@@ -53,7 +53,7 @@ For a TDD implementation checklist:
 For a step implementation checklist:
 
 ```
-/goal the backend-standards skill was loaded, and every step and every Done item in docs/<project>/checklists/NN-<slug>.md is shown satisfied in the transcript; for each Done item the pasted proof is the command, its final summary output, and its exit status — full output is not required
+/goal the implement-steps skill was run on docs/<project>/checklists/NN-<slug>.md and every step and every Done item in it is shown satisfied in the transcript; for each Done item the pasted proof is the command, its final summary output, and its exit status — full output is not required
 ```
 
 ### Step 5: Check your output
