@@ -12,6 +12,8 @@ This audit records one finding only. The developer raised it by reading the diff
 
 | 2 | The builder wrapped one validation function in a `makeJobValidator(reader)` factory, so a function returned a function to bind a single argument. The developer rejected it as the same class of indirection. | Rule missing from the skill | **Landed:** the factory rule in `## Structure` now states its own limit — only a service or a repository is a factory; everything else takes its dependencies as parameters. Review checklist item 23 enforces it. |
 
+| 3 | The dashboard jobs service writes twelve method bodies inside the object it returns, so the file has no readable public surface. The builder left that shape in place while editing the file. The developer rejected the shape itself. | Rule missing from the skill — its own service example taught the shape | **Landed:** a factory now returns a list of named functions. Review checklist item 24 enforces it, and the `makeInvitesService` example in `## Structure` was rewritten to obey it. |
+
 ## Related builder deviations, self-corrected in the same session
 
 These never reached a rule change; the existing rules already covered them, and the developer caught each one in review.

@@ -58,6 +58,24 @@ export async function validate(form: Form, orgId: string, reader: Reader) { … 
 await validate(form, orgId, reader);
 ```
 
+- **A factory returns a list of names.** Define each method as a named function in the body of the factory, then return `{ a, b, c }`. Never write a method body inside the returned object. The return statement is then the whole public surface, on one screen. A method whose body is a single expression — a repository query that passes straight through to Drizzle — may stay inline.
+
+```ts
+// WRONG — twelve method bodies inside one object literal
+export const makeJobsService = (deps) => ({
+  async publish(id) { …30 lines… },
+  async close(id) { …20 lines… },
+});
+
+// RIGHT — named functions, then the surface
+export function makeJobsService(deps) {
+  async function publish(id) { …30 lines… }
+  async function close(id) { …20 lines… }
+
+  return { publish, close };
+}
+```
+
 - **The entry point is the composition root**. The router procedure or the workflow step constructs the real repo and the real service and connects them. Each layer below the entry point only receives its dependencies.
 
 The three files in that shape:
@@ -70,14 +88,17 @@ export const makeInvitesRepo = (db: Db | Tx) => ({
 });
 
 // api/invites.service.ts — every dependency is an argument
-export const makeInvitesService = (deps: {
+export function makeInvitesService(deps: {
   repo: ReturnType<typeof makeInvitesRepo>;
   now: () => Date;
   uuid: () => string;
-}) => ({
-  invite: async (email: string) =>
-    deps.repo.create({ id: deps.uuid(), email, createdAt: deps.now() }),
-});
+}) {
+  async function invite(email: string) {
+    return deps.repo.create({ id: deps.uuid(), email, createdAt: deps.now() });
+  }
+
+  return { invite };
+}
 
 // api/invites.router.ts — the composition root
 export const invitesRouter = createTRPCRouter({
@@ -278,3 +299,4 @@ Reject the change if any item is true. Items 5–7 need `references/workflow-ent
 21. A type is declared by hand where Drizzle/tRPC inference exists, or a parallel `interface` duplicates an API payload.
 22. A helper takes the rest of a method as a callback in order to share a prologue, instead of returning a value that the caller checks.
 23. A function returns a function to bind a dependency that could be a parameter, or a factory wraps something that is not a service or a repository.
+24. A factory writes a method body inside the object it returns, instead of returning a list of named functions.
