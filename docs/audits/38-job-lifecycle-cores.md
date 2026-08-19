@@ -14,12 +14,12 @@ This audit records one finding only. The developer raised it by reading the diff
 
 | 3 | The dashboard jobs service writes twelve method bodies inside the object it returns, so the file has no readable public surface. The builder left that shape in place while editing the file. The developer rejected the shape itself. | Rule missing from the skill — its own service example taught the shape | **Landed:** a factory now returns a list of named functions. Review checklist item 24 enforces it, and the `makeInvitesService` example in `## Structure` was rewritten to obey it. |
 
-## Related builder deviations, self-corrected in the same session
+| 4 | The builder never loaded `backend-standards`. A step-lane checklist names no skill — not in its steps, not in its `/goal` command — while the TDD lane names `implement-backend`, which preloads the standards. The builder read `backend-standards` for the first time when the developer asked about layering, long after the diff was written. Item 21 would have stopped the hand-written types on sight. | Rule clear but never in context | **Landed:** the step-lane checklist template's step 1 loads `backend-standards`, and the step-lane `/goal` command requires the transcript to show it. |
 
-These never reached a rule change; the existing rules already covered them, and the developer caught each one in review.
+## Related builder deviations
 
-- Two type parameters on the factory, so the host kept its own row and patch types. Checklist item 21 already forbids a hand-written type where Drizzle inference exists. The fix derived both types from the schema.
-- A per-field `pick` helper in the merge, in place of the RFC 7396 filter-then-spread. No rule covers merge-patch shape; the developer asked for the simplification directly.
+- Two type parameters on the factory, so the host kept its own row and patch types. **Checklist item 21 already forbade this** — a hand-written type where Drizzle inference exists. Not a rule gap; a loading gap, recorded as deviation 4.
+- A per-field `pick` helper in the merge, in place of the RFC 7396 filter-then-spread. No rule covers merge-patch shape, and none was added. The developer asked for the simplification directly.
 
 ## Outstanding
 

@@ -53,7 +53,7 @@ For a TDD implementation checklist:
 For a step implementation checklist:
 
 ```
-/goal every step and every Done item in docs/<project>/checklists/NN-<slug>.md is shown satisfied in the transcript; for each Done item the pasted proof is the command, its final summary output, and its exit status — full output is not required
+/goal the backend-standards skill was loaded, and every step and every Done item in docs/<project>/checklists/NN-<slug>.md is shown satisfied in the transcript; for each Done item the pasted proof is the command, its final summary output, and its exit status — full output is not required
 ```
 
 ### Step 5: Check your output
