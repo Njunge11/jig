@@ -245,6 +245,51 @@ async function closeJob(id: string, companyId: string) {
 
 Both versions share the same ownership check. Only the second one lets you read `closeJob` from the top to the bottom.
 
+**Pass a name, never a body.** An argument of a call is a variable, a named constant, or a named function. When an argument is a function of more than one line, or an object literal of more than a few lines, declare it above the call with a name — then the call reads as one line, and each part reads on its own. A one-line arrow that forwards to a method (`(id) => repo.getJob(id)`) stays inline.
+
+```ts
+// WRONG — one call swallows the config and the handler; the reader scrolls
+// through sixty lines to find out that this is one registration
+register(
+  "delete_job",
+  {
+    title: "Take one job off the board",
+    description: "Delete one job this workspace has posted. …",
+    inputSchema: deleteJobInput,
+    outputSchema: deleteJobResult,
+    annotations: { readOnlyHint: false, destructiveHint: true },
+  },
+  async (args, scope) => {
+    const outcome = await deps.jobs.deleteJob(args.job_id, scope.companyId);
+    if (outcome.status !== "deleted") {
+      return { isError: true, content: [{ type: "text", text: outcome.message }] };
+    }
+    return toolResult({ deleted: true }, DELETED_MESSAGE);
+  },
+);
+
+// RIGHT — the call passes names
+const DELETE_JOB_CONFIG = {
+  title: "Take one job off the board",
+  description: "Delete one job this workspace has posted. …",
+  inputSchema: deleteJobInput,
+  outputSchema: deleteJobResult,
+  annotations: { readOnlyHint: false, destructiveHint: true },
+};
+
+export function registerDeleteJob(register: RegisterTool, deps: DeleteJobDeps) {
+  async function deleteJob(args: DeleteJobArgs, scope: CompanyScope) {
+    const outcome = await deps.jobs.deleteJob(args.job_id, scope.companyId);
+    if (outcome.status !== "deleted") {
+      return { isError: true, content: [{ type: "text", text: outcome.message }] };
+    }
+    return toolResult({ deleted: true }, DELETED_MESSAGE);
+  }
+
+  register("delete_job", DELETE_JOB_CONFIG, deleteJob);
+}
+```
+
 ## Migrations
 
 - The schema is the single source of truth.
@@ -300,3 +345,4 @@ Reject the change if any item is true. Items 5–7 need `references/workflow-ent
 22. A helper takes the rest of a method as a callback in order to share a prologue, instead of returning a value that the caller checks.
 23. A function returns a function to bind a dependency that could be a parameter, or a factory wraps something that is not a service or a repository.
 24. A factory writes a method body inside the object it returns, instead of returning a list of named functions.
+25. A call takes a function of more than one line, or an object literal of more than a few lines, as an inline argument — instead of a named function or a named constant declared above the call.
