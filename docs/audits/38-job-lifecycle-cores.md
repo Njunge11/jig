@@ -10,6 +10,8 @@ This audit records one finding only. The developer raised it by reading the diff
 | - | --------- | --------------------------- | --- |
 | 1 | The builder shared the ownership check and the `try/catch` through a higher-order `onOwnedJob(id, companyId, write)` helper. Both service writes became a callback passed into it, so neither method read top to bottom. The developer rejected the shape on sight. | Rule missing from the skill | **Landed:** backend-standards gains a `## Control flow` section and review checklist item 22. A shared prologue must be a function that returns a value the caller checks, never one that takes the rest of the method as a callback. |
 
+| 2 | The builder wrapped one validation function in a `makeJobValidator(reader)` factory, so a function returned a function to bind a single argument. The developer rejected it as the same class of indirection. | Rule missing from the skill | **Landed:** the factory rule in `## Structure` now states its own limit — only a service or a repository is a factory; everything else takes its dependencies as parameters. Review checklist item 23 enforces it. |
+
 ## Related builder deviations, self-corrected in the same session
 
 These never reached a rule change; the existing rules already covered them, and the developer caught each one in review.

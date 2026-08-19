@@ -43,6 +43,21 @@ db/schema/
 - **The schema lives centrally in `db/schema/`**, with one file per domain. Set `schema: "./db/schema"` in `drizzle.config.ts`. The drizzle-kit tool reads the folder recursively. You must export every table. The schema is central because FKs cross domains constantly. Feature-local schema files would import across features.
 - **Monorepo schema placement**: tables that more than one app uses live in the workspace db package. That package is `packages/db`, which exports the schema and the client. That package owns their drizzle config and their migration history. An app's **private** tables stay in that app's `db/schema/`, with Drizzle's multi-project safeguards. Define every private table through a `pgTableCreator` name prefix (`<app>_`). Set `tablesFilter: ["<app>_*"]`. Give the app its own migrations journal (`migrations: { schema: "drizzle_<app>" }`). Private tables never FK into another app's tables. When a second app needs a table, move that table to the db package.
 - **Services and repositories are factory functions** — `make<X>Service(deps)`, `make<X>Repo(db)`. Each factory receives every dependency as an argument: the repo, `now()`, `uuid()`, and the external clients. Never write them as classes. Never write them as module-level singletons. Only the entry point imports the db client. The fake-repo and injected-clock tests in `backend-tests` require this pattern.
+- **Only a service or a repository is a factory.** A factory is right for a unit that holds several methods and several dependencies, and that the entry point constructs once. Everything else is a plain function that takes its dependencies as parameters. Never return a function from a function to bind an argument.
+
+```ts
+// WRONG — a factory around one function, to bind one argument
+export function makeValidator(reader: Reader) {
+  return async function validate(form: Form, orgId: string) { … };
+}
+const validate = makeValidator(reader);
+await validate(form, orgId);
+
+// RIGHT — the dependency is a parameter
+export async function validate(form: Form, orgId: string, reader: Reader) { … }
+await validate(form, orgId, reader);
+```
+
 - **The entry point is the composition root**. The router procedure or the workflow step constructs the real repo and the real service and connects them. Each layer below the entry point only receives its dependencies.
 
 The three files in that shape:
@@ -262,3 +277,4 @@ Reject the change if any item is true. Items 5–7 need `references/workflow-ent
 20. Duplicated business logic, query, or validation.
 21. A type is declared by hand where Drizzle/tRPC inference exists, or a parallel `interface` duplicates an API payload.
 22. A helper takes the rest of a method as a callback in order to share a prologue, instead of returning a value that the caller checks.
+23. A function returns a function to bind a dependency that could be a parameter, or a factory wraps something that is not a service or a repository.
