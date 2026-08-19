@@ -162,6 +162,53 @@ Errors flow up: Repository → Service → Entry → the global handler (tRPC) o
 - Catch **only** for these purposes: to add context, to convert an infrastructure error into a domain error, or to recover from an expected failure.
 - Never discard an error — let it propagate.
 
+## Control flow
+
+Write each method as a flat sequence: do one step, check its result, return early on failure. The reader follows the method from the top to the bottom.
+
+- Share a prologue by extracting a function that **returns a value the caller checks**. Never write one that takes the rest of the method as a callback. A callback moves the body of the method into an argument, and hides the order of the work.
+- Two repeated lines in two methods cost less than a wrapper that hides both.
+
+The difference is the shape of the shared helper, not the shape of the caller.
+
+```ts
+// WRONG — the helper takes the rest of the method
+async function withOwnedJob(id, companyId, run) {
+  const job = await repo.getById(id);
+  if (job?.companyId !== companyId) return notFound("Job");
+  return run(job);                       // ← the caller's body arrives here
+}
+
+async function closeJob(id: string, companyId: string) {
+  return withOwnedJob(id, companyId, async (job) =>
+    isValidTransition(job.status, "closed")
+      ? written(await repo.setStatus(id, "closed"))
+      : failed(cannotTransition(job.status, "closed")),
+  );                                     // ← closeJob has no body of its own
+}
+
+// RIGHT — the helper returns the job, and the caller checks it
+async function loadOwnedJob(id, companyId) {
+  const job = await repo.getById(id);
+  return job?.companyId === companyId
+    ? { success: true as const, data: job }
+    : { success: false as const, error: notFound("Job") };
+}
+
+async function closeJob(id: string, companyId: string) {
+  const owned = await loadOwnedJob(id, companyId);
+  if (!owned.success) return owned;      // ← one step, one check
+
+  const current = owned.data.status;
+  if (!isValidTransition(current, "closed")) {
+    return failed(cannotTransition(current, "closed"));
+  }
+  return written(await repo.setStatus(id, "closed"));
+}
+```
+
+Both versions share the same ownership check. Only the second one lets you read `closeJob` from the top to the bottom.
+
 ## Migrations
 
 - The schema is the single source of truth.
@@ -214,3 +261,4 @@ Reject the change if any item is true. Items 5–7 need `references/workflow-ent
 19. Repeated `try/catch`, or an error is discarded instead of propagated.
 20. Duplicated business logic, query, or validation.
 21. A type is declared by hand where Drizzle/tRPC inference exists, or a parallel `interface` duplicates an API payload.
+22. A helper takes the rest of a method as a callback in order to share a prologue, instead of returning a value that the caller checks.

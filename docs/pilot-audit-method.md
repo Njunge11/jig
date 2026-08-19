@@ -38,7 +38,7 @@ One row per rule, for every skill that governed the run:
 
 - **implementation-planner** — grounding (no unverified path/command/version), no invented semantics, lane classification, checklist format, run commands.
 - **backend-tests** — the loop (red → self-check → green → refactor → commit → tick) plus its 10-item test review checklist, applied per test.
-- **backend-standards** — the 21-item review checklist against the final diff.
+- **backend-standards** — the 22-item review checklist against the final diff.
 - **open-feature-pr** — branch naming, title, What/Why/How/Verification body.
 
 Verdict per row: **conformed / deviated / can't determine from evidence** — with the transcript line or artifact cited. "Can't determine" is a finding too: it means the skill or Done section failed to force observable proof.
