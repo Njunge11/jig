@@ -96,3 +96,10 @@ these pages on 2026-09-01.
   your updates that change the QueryKey into startTransition").
   Verified 2026-09-01. `nuqs` and `use-debounce` confirmed in
   apps/dashboard/package.json.
+- recipes/tabs.md —
+  [Radix Primitives: Tabs](https://www.radix-ui.com/primitives/docs/components/tabs)
+  (controlled `value`/`onValueChange`, `forceMount` on Content,
+  arrow-key/Home/End keyboard map), the nuqs and TanStack
+  suspense sources above, and a project lesson: dashboard tab
+  badge counts drifted from tab contents until both read one
+  procedure's definitions. Verified 2026-09-01.
