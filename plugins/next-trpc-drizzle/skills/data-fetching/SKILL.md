@@ -1,35 +1,24 @@
 ---
 name: data-fetching
-description: Use when writing or reviewing data-fetching or perf code — tRPC + TanStack Query v5 + Next.js App Router. Server prefetch/HydrateClient, useSuspenseQuery, caching, optimistic updates, loading/error UI, no waterfalls.
+description: Rules for data-fetching and fetch performance in tRPC + TanStack Query v5 + Next.js App Router code. Use when writing or reviewing pages, client components, queries, mutations, loading/error UI, optimistic updates, or when diagnosing slow pages, waterfalls, duplicate fetches, or spinner problems.
 ---
 
 # Data Fetching & Performance
 
-The playbook for making every page feel instant. Stack: **tRPC + TanStack Query v5 + Next.js App Router (Next 16)**. Patterns below are the current canonical ones from the tRPC, TanStack Query, and Next.js docs — see [Sources](#sources).
+Stack: **tRPC + TanStack Query v5 + Next.js App Router**. When code in
+the repo disagrees with a rule here, the rule wins. Per-rule doc links:
+[`sources.md`](sources.md).
 
 ## Golden path
 
-> Kick off the query on the **server** (no `await`), stream it to the client, and let the client component read it via `useSuspenseQuery`. The Suspense fallback (`loading.tsx` or an inner `<Suspense>`) shows meanwhile. The client never re-fetches what the server already started.
-
-```
-Server Component: prefetch(queryOptions)  ──(stream)──▶  HydrateClient
-   Client Component: useSuspenseQuery(sameQueryOptions) → reads cache, no waterfall
-```
-
-This is "render as you fetch": the server starts the fetch and returns HTML immediately (good TTFB), data streams in as it resolves. A spinner that never resolves, or a *second* skeleton on top of the route skeleton, means the pattern was broken — see [Loading UI](#loading-ui).
-
-## Wiring
-
-The `prefetch` / `HydrateClient` / `useTRPC` setup (`@trpc/tanstack-react-query`, **not** the legacy `createHydrationHelpers`) is a **one-time per-app** install — `lib/trpc/{query-client,server,react}.tsx`. Full boilerplate in [`wiring.md`](wiring.md). Everything below assumes it's in place.
-
-## Prefetching
-
-In the **page (Server Component)**: `prefetch` each query (no `await`), wrap the tree in `HydrateClient`.
+Kick off the query on the **server** (no `await`), stream it, and read
+it in the client with `useSuspenseQuery`. The Suspense fallback shows
+meanwhile. The client never re-fetches what the server started.
 
 ```tsx
 export default async function Page() {
-  prefetch(trpc.users.funnel.queryOptions({ period: "30d" }));   // fire — don't await
-  prefetch(trpc.users.table.queryOptions({ page: 1 }));          // fires in parallel
+  prefetch(trpc.users.funnel.queryOptions({ period: "30d" })); // fire, don't await
+  prefetch(trpc.users.table.queryOptions({ page: 1 }));        // fires in parallel
   return (
     <HydrateClient>
       <Suspense fallback={<FunnelCardsSkeleton />}><FunnelCards /></Suspense>
@@ -39,129 +28,160 @@ export default async function Page() {
 }
 ```
 
-- **No waterfalls.** `prefetch` calls don't `await`, so they all start together. Never `await` one query before starting the next unless the second genuinely depends on the first.
-- **Share `queryOptions` verbatim.** Server `prefetch` and client `useSuspenseQuery` must call the identical `trpc.x.queryOptions(input)` — that's what makes the query keys match and the cache hit. Mismatched input = cache miss = refetch.
-- **Don't `await` prefetch** in the page. Awaiting blocks the whole page on the slowest query and kills streaming. Let each section stream into its own Suspense boundary.
+1. The page `prefetch`es every query its tree renders, wrapped in
+   `HydrateClient`.
+2. Do not `await` a prefetch by default — it blocks the HTML on that
+   query. Rule 19 names the only cases that earn an awaited prefetch,
+   and then it is `await Promise.all([...])` over the prefetches, never
+   one await after another.
+3. Server `prefetch` and client `useSuspenseQuery` call the
+   **identical** `trpc.x.queryOptions(input)`. A mismatched input is a
+   cache miss and a refetch.
+4. The wiring (`@trpc/tanstack-react-query`, not the legacy
+   `createHydrationHelpers`) is a one-time install — see
+   [`wiring.md`](wiring.md). Everything here assumes it.
 
-## Client components
+## Choosing the read primitive
 
-Read with `useSuspenseQuery` — the component suspends until its (already-streaming) data resolves, and the nearest Suspense fallback covers it. No manual `isLoading` branches.
+5. `useSuspenseQuery` for prefetched data. `useQuery` only for data
+   fetched **after** mount (user-triggered, dependent on client state),
+   with its own loading state — Next.js does not suspend for
+   `useQuery`, so it renders `pending` and opts out of
+   server-rendering.
+6. Several values that belong to one screen section (metrics, counts):
+   one aggregating procedure, one `useSuspenseQuery`, one cache entry.
+   Inside the procedure, prefer one SQL statement
+   (`COUNT(*) FILTER (WHERE …)`); when one statement cannot produce
+   them, run the queries in parallel server-side (`Promise.all` on the
+   repo calls) and return one object. The fan-out lives next to the
+   database, never across the network.
+7. Several genuinely independent sources in one component: one
+   `useSuspenseQueries` (or `useQueries` for a variable count). Never
+   stack `useSuspenseQuery` calls — the first suspends before the
+   second starts.
+8. Server Components are for prefetch only. Do not render query data in
+   a Server Component — that copy is detached from the query client and
+   desyncs after the client revalidates. Never use a Server Action as a
+   `queryFn` — Server Actions run serially.
 
-```tsx
-"use client";
-export function FunnelCards() {
-  const trpc = useTRPC();
-  const { data } = useSuspenseQuery(trpc.users.funnel.queryOptions({ period: "30d" }));
-  return <Cards data={data} />;
-}
-```
+## Parallelism and duplicate fetches
 
-`useQuery` picks up the streamed promise too, but **Next.js won't suspend** for it — the component renders in `pending` status and opts out of server-rendering that content. So: `useSuspenseQuery` for prefetched data; plain `useQuery` only for data fetched **after** mount (user-triggered, dependent on client state), with its own loading state.
-
-### Several data points at once
-
-Two strategies — pick deliberately:
-
-1. **One aggregating endpoint (preferred for metrics).** When the points are computed together — e.g. the funnel counts (signups, onboarded, posted, applied, paid) — return them as one object from a single procedure backed by **one SQL query** (`COUNT(*) FILTER (WHERE …)` per stage). One round trip, one cache entry, no fan-out. The component does a single `useSuspenseQuery`.
-
-2. **`useSuspenseQueries` (genuinely independent sources).** When the points come from separate queries you want in parallel. **You cannot stack `useSuspenseQuery` calls** — the first suspends before the others run. Use one `useSuspenseQueries` (fixed set) or `useQueries` (variable count); both run in parallel, return results in input order, and accept a `combine` to fold into one value:
-
-```tsx
-const trpc = useTRPC();
-const [{ data: revenue }, { data: applications }] = useSuspenseQueries({
-  queries: [
-    trpc.revenue.summary.queryOptions({ period }),
-    trpc.applications.summary.queryOptions({ period }),
-  ],
-});
-```
-
-Server prefetch still fires each with its own `prefetch(...)` call (parallel). Avoid duplicate query keys in the array — same key twice can share data.
-
-**Server Components are for prefetch only.** Don't render a query's data in a Server Component *and* the same query in a Client Component — when the client revalidates after `staleTime`, the server-rendered copy goes stale and desyncs. Treat the Server Component as a place to start the fetch, nothing more (avoid `fetchQuery` + rendering its result on the server). Also: never use a Server Action as a `queryFn` — Server Actions run serially and stall React Query; fetch via tRPC (which we do).
+9. Independent fetches start together. Fire all prefetches/promises
+   first; if you must await, `Promise.all` — never sequential awaits
+   for independent data.
+10. Awaits that are not queries — `auth()`, `cookies()`, feature
+    flags — get their parallelism from composition: sibling async
+    components await their own data. A layout that awaits `auth()` and
+    then renders a page awaiting a flag check has serialized the two;
+    give each its own component, or start both promises before
+    awaiting. tRPC queries are not this rule's business — rules 1–2
+    and 9 already run them in parallel.
+11. No per-row queries. A list that runs one query per row is an N+1;
+    return the rows with their joined data from one list procedure.
+12. Two components reading the same `queryOptions` is not a duplicate
+    fetch — the cache deduplicates by key. Do not lift query results
+    into props or context to "save" a fetch.
+13. On the server, `getQueryClient` is wrapped in React `cache()`, so
+    all prefetches in one request share one client. Never construct a
+    second QueryClient per request.
 
 ## Caching
 
-- **`staleTime`** (set non-zero, e.g. 30–60s) governs refetch-on-mount/focus. With prefetched data, a non-zero staleTime is what *prevents the instant re-fetch* after hydration (default `0` would refetch immediately). Raise it for reference data that rarely changes.
-- **`gcTime`** (default 5m) is how long unused cache is retained before garbage-collection. Leave unless a screen needs longer.
-- **Query keys are derived** from `queryOptions` — never hand-write keys. Invalidate with the matching filter: `queryClient.invalidateQueries(trpc.users.table.queryFilter())`.
-- **One freshness layer.** Do not also set route/`fetch` caching in `next.config.ts` for these — TanStack owns freshness here; two layers conflict.
+14. Set a non-zero `staleTime` (30–60s; higher for reference data). The
+    default `0` refetches immediately after hydration, wasting the
+    prefetch.
+15. Leave `gcTime` at its default (5m) unless a screen provably needs
+    longer retention.
+16. Query keys are derived from `queryOptions` — never hand-write a
+    key. Invalidate through the derived filter:
+    `queryClient.invalidateQueries(trpc.users.table.queryFilter())`.
+17. One freshness layer. TanStack owns freshness for these queries; do
+    not also configure Next route/`fetch` caching for them.
+
+## Streaming — and when not to
+
+18. Wrap independent sections in their own `<Suspense>` so fast
+    sections paint while slow ones stream.
+19. Streaming is the default, not a law. Two cases earn
+    `await prefetch(...)` instead (same wiring, same
+    `useSuspenseQuery` — the only change is when the HTML ships): the
+    content must be in the initial HTML (a public posting page that
+    crawlers and link unfurls read), or the query is so small and fast
+    that its skeleton is just flicker (the company name in the shell).
+    A dashboard of sections streams; a public document page awaits.
+    Choose per section, and say why in the code.
 
 ## Loading UI
 
-- **`loading.tsx` per route segment** is a Next.js primitive: it auto-wraps `page.tsx` and nested layouts/children in a `<Suspense>` boundary and shows **instantly on navigation** (it's prefetched). It does **not** wrap the same-segment `layout.tsx` or `error.tsx`.
-- **Make it a meaningful skeleton that matches the loaded layout** — same container, grid, column count, card sizes — so there's no layout shift when real content swaps in. A spinner is acceptable; a *mismatched* skeleton is worse than none.
-- **One skeleton, not two.** The route fallback (`loading.tsx`) and the inner `<Suspense>` fallbacks are different boundaries — don't let a client component *also* render its own spinner inside an already-suspended boundary. With `useSuspenseQuery`, the component suspends; it must not branch on `isLoading` too.
-- **Keep runtime data out of `layout.tsx`.** If a layout reads uncached data (`cookies()`, `headers()`, an uncached fetch), `loading.tsx` won't show a fallback for it and navigation blocks. Fetch in `page.tsx`, or wrap the layout's runtime access in its own `<Suspense>`.
-- **Granular streaming:** beyond `loading.tsx`, wrap independent sections in their own `<Suspense>` so fast sections paint while slow ones stream.
+20. Every fetching route segment has a `loading.tsx`. It auto-wraps the
+    page in a Suspense boundary and shows instantly on navigation.
+21. Derive the skeleton from the real component: copy its container,
+    grid, and sizing classes; replace content with the `Skeleton`
+    primitive. Same column count, same card sizes — zero layout shift
+    on swap. A mismatched skeleton is worse than a spinner.
+22. One skeleton per boundary. A component using `useSuspenseQuery`
+    suspends — it must not also branch on `isLoading` or render its own
+    spinner inside the already-suspended boundary.
+23. Keep runtime data out of `layout.tsx` (`cookies()`, `headers()`,
+    uncached fetches) — a layout that blocks defeats `loading.tsx`.
+    Fetch in the page, or give the layout's dynamic part its own
+    boundary.
 
 ## Error UI
 
-- **`error.tsx` per segment** is the error boundary — it **must** be a Client Component (`"use client"`). It catches render + data errors in its segment.
-- It receives `{ error, reset }`; wire `reset()` to a "Try again" action that re-renders the segment. Every route that fetches gets one.
-- For finer control, an inner `react-error-boundary` `<ErrorBoundary>` around a specific `<Suspense>` isolates one failing section instead of failing the page.
+24. Every fetching route segment has an `error.tsx`: a Client Component
+    receiving `{ error, reset }`, with `reset()` wired to a "Try again"
+    action.
+25. Isolate a failing section with an inner `react-error-boundary`
+    around its `<Suspense>`, so one broken card does not take the page.
+26. Route errors by channel: read failures render in the boundary;
+    mutation failures surface as a toast naming the action; form-field
+    validation renders inline at the field. Do not mix the channels.
 
 ## Optimistic updates
 
-Two approaches — pick by scope.
-
-**A. UI-only via mutation variables** (simplest; single component reflects the pending action). Use the mutation's `variables` + `isPending` to render the optimistic row; no cache writes, auto-reconciles on settle.
-
-**B. Cache update via `onMutate`** (when other components/queries must reflect the change immediately):
-
-The callbacks receive a `context` (use `context.client` instead of a closed-over QueryClient); `onMutate`'s return value arrives as `onMutateResult`:
+27. Use optimism for instant-feel mutations the user expects to succeed
+    (toggle, rename, reorder). Do not use it for destructive or
+    irreversible actions — those wait for the server.
+28. Default: variables-only. Render the pending row from the mutation's
+    `variables` + `isPending`; no cache writes; it reconciles itself on
+    settle.
+29. Cache-write optimism only when other components must reflect the
+    change immediately. Callbacks receive `context` with
+    `context.client`; `onMutate`'s return arrives as the
+    `onMutateResult` parameter:
 
 ```ts
 const filter = trpc.promo.list.queryFilter();
 useMutation(trpc.promo.markPaid.mutationOptions({
-  onMutate: async (vars, ctx) => {
-    await ctx.client.cancelQueries(filter);            // 1. stop in-flight refetch
-    const prev = ctx.client.getQueryData(filter.queryKey); // 2. snapshot
-    ctx.client.setQueryData(filter.queryKey, optimistic(prev, vars)); // 3. apply
-    return { prev };                                   // → onMutateResult
+  onMutate: async (vars, context) => {
+    await context.client.cancelQueries(filter);                // 1 cancel
+    const prev = context.client.getQueryData(filter.queryKey); // 2 snapshot
+    context.client.setQueryData(filter.queryKey, apply(prev, vars)); // 3 set
+    return { prev };
   },
-  onError: (_e, _vars, onMutateResult, ctx) =>
-    ctx.client.setQueryData(filter.queryKey, onMutateResult.prev), // rollback
-  onSettled: (_d, _e, _vars, _res, ctx) =>
-    ctx.client.invalidateQueries(filter),              // reconcile (runs even after rollback)
+  onError: (_e, _v, onMutateResult, context) =>
+    context.client.setQueryData(filter.queryKey, onMutateResult.prev), // rollback
+  onSettled: (_d, _e, _v, _r, context) =>
+    context.client.invalidateQueries(filter),                  // reconcile
 }));
 ```
 
-Order matters: **`cancelQueries` first** (else a slow refetch clobbers the optimistic value); **invalidate in `onSettled`** (runs even after a rollback).
+    The order matters: `cancelQueries` first (a slow refetch would
+    clobber the optimistic value); invalidate in `onSettled` (it runs
+    even after a rollback).
 
-## Inner CTAs & secondary surfaces
+## Secondary surfaces
 
-The pattern most often dropped — modals, drawers, detail panels, tab content opened from a button deserve the **same** treatment as a page:
+30. Modals, drawers, tabs, and detail panels get page treatment:
+    prefetch their data on the trigger's hover/focus
+    (`queryClient.prefetchQuery(trpc.x.queryOptions(input))`) and open
+    them against the same cache — never an ad-hoc fetch with a fresh
+    spinner.
+31. Load heavy panel components with `next/dynamic` and prefetch their
+    data on hover, so opening is instant despite the lazy code.
 
-- **Preload on hover/focus** of the trigger: `queryClient.prefetchQuery(trpc.x.queryOptions(input))`, so the panel's data is warm before the click.
-- Open the panel against the **same cache / `queryOptions`**, not an ad-hoc `fetch` with a fresh spinner.
-- Heavy panels: `next/dynamic` the component (keep it out of the initial bundle) **and** prefetch its data on hover — so opening feels instant despite the lazy code.
+## Review
 
-## No waterfalls (CRITICAL)
-
-- Independent fetches run in **parallel** — fire all `prefetch`/promises, then await together (`Promise.all`) if you must await at all.
-- Parallelize RSC fetches by **component composition**: sibling async components each fetch their own data instead of a parent fetching then rendering a child (which serializes them).
-- Move `await` into the branch that actually uses the value; start promises early, await late.
-
-## Per-feature checklist
-
-- [ ] Page `prefetch`es every query it renders (no `await`, parallel), wrapped in `HydrateClient`.
-- [ ] Client components use `useSuspenseQuery` with the **same `queryOptions`** as the prefetch.
-- [ ] `loading.tsx` exists and its skeleton matches the loaded layout (no shift).
-- [ ] No second spinner stacked inside an already-suspended boundary.
-- [ ] No runtime/uncached data in `layout.tsx` blocking the fallback.
-- [ ] `error.tsx` present (`"use client"`) with a working `reset()`.
-- [ ] Instant-feeling mutations use an optimistic update (variables, or `onMutate` cancel→snapshot→set→rollback→invalidate).
-- [ ] Inner CTAs (modals/drawers/tabs) preload data on hover and reuse the cache.
-- [ ] No sequential awaits for independent data anywhere in the path.
-
-## Sources
-
-- [tRPC — Set up with React Server Components (TanStack React Query)](https://trpc.io/docs/client/tanstack-react-query/server-components)
-- [TanStack Query — Advanced Server Rendering](https://tanstack.com/query/latest/docs/framework/react/guides/advanced-ssr)
-- [TanStack Query — Server Rendering & Hydration](https://tanstack.com/query/v5/docs/framework/react/guides/ssr)
-- [TanStack Query — Parallel Queries (`useQueries` / `useSuspenseQueries`, `combine`)](https://tanstack.com/query/v5/docs/framework/react/guides/parallel-queries)
-- [TanStack Query — Optimistic Updates](https://tanstack.com/query/v5/docs/framework/react/guides/optimistic-updates)
-- [Next.js — loading.js & instant loading states](https://nextjs.org/docs/app/api-reference/file-conventions/loading)
-- [Next.js — error.js / error boundaries](https://nextjs.org/docs/app/api-reference/file-conventions/error)
-- Vercel React Best Practices — `async-parallel`, `server-parallel-fetching`, `bundle-preload`
+Rules 1–31 are this skill's review checklist, run by the
+`review-frontend-feature` skill.
