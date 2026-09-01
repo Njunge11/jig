@@ -8,7 +8,7 @@
     {
       "name": "next-trpc-drizzle",
       "source": "./plugins/next-trpc-drizzle",
-      "description": "TDD feature pipeline + backend/frontend/data-fetching/testing standards for the Next.js + tRPC + Drizzle stack."
+      "description": "Spec-to-PR TDD pipeline + backend/frontend standards for the Next.js + tRPC + Drizzle stack."
     }
   ]
 }
