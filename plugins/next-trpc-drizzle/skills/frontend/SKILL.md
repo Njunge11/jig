@@ -68,7 +68,7 @@ recipe is missing.
 |---|---|
 | A page that reads and renders queries — dashboard, details, list | [`references/recipes/page-with-data.md`](references/recipes/page-with-data.md) |
 | Search, filters, or sort over a list (debounce, URL state) | [`references/recipes/search-and-filters.md`](references/recipes/search-and-filters.md) |
-| A data table — columns, sorting, pagination, row actions | *planned* |
+| A data table — columns, sorting, pagination, row actions | [`references/recipes/data-table.md`](references/recipes/data-table.md) |
 | Tabs or segmented views (URL-backed, prefetched) | [`references/recipes/tabs.md`](references/recipes/tabs.md) |
 | A form that submits a mutation (validation, field errors) | [`references/recipes/form-with-mutation.md`](references/recipes/form-with-mutation.md) |
 | A multi-step flow / wizard | *planned* |

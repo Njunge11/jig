@@ -96,6 +96,20 @@ these pages on 2026-09-01.
   your updates that change the QueryKey into startTransition").
   Verified 2026-09-01. `nuqs` and `use-debounce` confirmed in
   apps/dashboard/package.json.
+- recipes/data-table.md — committed to TanStack Table **v9**:
+  npm `latest` is 9.2.4 (checked 2026-09-02), and the repo's
+  `@tanstack/react-table@^8.21.3` has zero call sites, so the
+  upgrade migrates nothing.
+  [TanStack Table v9: React pagination guide](https://tanstack.com/table/v9/docs/framework/react/guide/pagination)
+  (server-side: include `rowPaginationFeature`, omit the
+  paginated row model; `manualPagination: true`; provide
+  `rowCount` or `pageCount`; set `manualSorting`/`manualFiltering`
+  for full server control) and
+  [shadcn/ui: Data Table](https://ui.shadcn.com/docs/components/data-table)
+  (v9 surface: `tableFeatures`, `createColumnHelper`, `useTable`,
+  `<table.FlexRender />`; structure: columns module, row-actions
+  display column, one extracted pagination component). Verified
+  2026-09-02.
 - recipes/form-with-mutation.md —
   [shadcn/ui: React Hook Form](https://ui.shadcn.com/docs/forms/react-hook-form)
   (the CURRENT pattern: RHF `Controller` + the `Field` family —
