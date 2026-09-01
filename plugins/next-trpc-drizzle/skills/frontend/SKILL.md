@@ -70,7 +70,7 @@ recipe is missing.
 | Search, filters, or sort over a list (debounce, URL state) | [`references/recipes/search-and-filters.md`](references/recipes/search-and-filters.md) |
 | A data table — columns, sorting, pagination, row actions | *planned* |
 | Tabs or segmented views (URL-backed, prefetched) | [`references/recipes/tabs.md`](references/recipes/tabs.md) |
-| A form that submits a mutation (validation, field errors) | *planned* |
+| A form that submits a mutation (validation, field errors) | [`references/recipes/form-with-mutation.md`](references/recipes/form-with-mutation.md) |
 | A multi-step flow / wizard | *planned* |
 | Mutation feedback — toasts, optimistic updates, undo | *planned* |
 | An edit surface — dialog, drawer, inline edit | *planned* |

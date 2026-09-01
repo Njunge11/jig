@@ -96,6 +96,17 @@ these pages on 2026-09-01.
   your updates that change the QueryKey into startTransition").
   Verified 2026-09-01. `nuqs` and `use-debounce` confirmed in
   apps/dashboard/package.json.
+- recipes/form-with-mutation.md —
+  [shadcn/ui: React Hook Form](https://ui.shadcn.com/docs/forms/react-hook-form)
+  (the CURRENT pattern: RHF `Controller` + the `Field` family —
+  the old `Form`/`FormField` wrapper anatomy is superseded;
+  `data-invalid` on `Field`, `aria-invalid` on the control,
+  `FieldError` for messages; zod schema + `zodResolver` +
+  `defaultValues`). Verified 2026-09-02. Kit `field.tsx` exports
+  the same family; `react-hook-form` and `@hookform/resolvers`
+  confirmed in apps/dashboard/package.json. Server re-validation
+  before side effects is a project lesson (the job publish
+  VALIDATION contract).
 - recipes/tabs.md —
   [Radix Primitives: Tabs](https://www.radix-ui.com/primitives/docs/components/tabs)
   (controlled `value`/`onValueChange`, `forceMount` on Content,
