@@ -29,6 +29,14 @@ Every skill loads on its own with `/jig:<skill>`. This table shows which ones ca
 | `open-feature-pr` | No — branch, title, and body conventions only. |
 | `skill-audit` | No — it audits skills, not your code. |
 
+## Human in the loop — on purpose
+
+Jig does the heavy lifting. It plans the checklists, writes the tests and the code, runs the suites, opens the PRs, and reviews every diff item by item against the standards. You do not write the code, and you do not walk the review checklists.
+
+Your job is judgment at the checkpoints: answer the spec's open decisions, start each checklist, read each review verdict, and merge. The one hands-on task left is the checklist's `Manual verification` items — checks only a person in a browser can perform, for now.
+
+With more refinement and iteration, jig can automate more of the pipeline. The direction: you hand jig a spec, and it works through the checklists autonomously, manages its own handoffs and worktrees, and returns reviewed PRs for you to merge.
+
 ## Tech stack
 
 Jig's standards and recipes target one stack:
