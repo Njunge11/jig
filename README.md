@@ -1,4 +1,4 @@
-# next-trpc-drizzle
+# jig
 
 A Claude Code plugin: a test-first engineering playbook for the **Next.js + tRPC + Drizzle** stack (the T3-style stack, plus TanStack Query, shadcn/ui + Tailwind, and Vitest). It ships **13 skills**: a spec → tracker → PR pipeline (plan, build, review, open the PR) plus the standards for structure, backend, and frontend work. Backend and frontend mirror each other: a standards skill, a tests skill, a build lane, and a review lane per side.
 
@@ -8,18 +8,18 @@ In Claude Code, add this repo as a marketplace, install the plugin, then reload:
 
 ```text
 /plugin marketplace add Njunge11/next-trpc-drizzle
-/plugin install next-trpc-drizzle@mita-labs-plugins-official
+/plugin install jig@mita-labs-plugins-official
 /reload-plugins
 ```
 
-Needs a recent Claude Code (the `/plugin` command). To try it locally without installing, run `claude --plugin-dir ./plugins/next-trpc-drizzle`.
+Needs a recent Claude Code (the `/plugin` command). To try it locally without installing, run `claude --plugin-dir ./plugins/jig`.
 
 ## Use
 
 Once installed, each skill loads **automatically** when your task matches its description. You can also invoke any skill explicitly by its namespaced name:
 
 ```text
-/next-trpc-drizzle:<skill>      # e.g. /next-trpc-drizzle:frontend
+/jig:<skill>      # e.g. /jig:frontend-standards
 ```
 
 | Skill | Use when |
@@ -42,7 +42,7 @@ Once installed, each skill loads **automatically** when your task matches its de
 
 **Spec → tracker → PRs, test-first.** You stay in control at every handoff.
 
-1. **Plan** — run `/next-trpc-drizzle:implementation-planner <spec doc>`. It audits the repo, asks about the spec's open decisions, and writes a tracker plus implementation checklists — one checklist = one PR, each with its `/goal` run command.
+1. **Plan** — run `/jig:implementation-planner <spec doc>`. It audits the repo, asks about the spec's open decisions, and writes a tracker plus implementation checklists — one checklist = one PR, each with its `/goal` run command.
 2. **Build** — run a checklist's `/goal` command from the tracker. A TDD checklist (work that changes behavior) runs `implement-backend` or `implement-frontend`; a step checklist (structure-only work) runs `implement-steps`, and its `Domain` line picks the rubric.
 3. **Review** — `review-backend-feature` (backend) or `review-frontend-feature` (frontend) walks its rubric against the PR's diff, fixes violations in place, pushes, and reports a per-item verdict.
 4. **Open the PR** — `open-feature-pr` owns the branch, title, and body conventions.

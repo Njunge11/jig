@@ -2,7 +2,7 @@
 name: implement-frontend
 description: Use this skill to build the FRONTEND of a feature test-first — pages, components, queries, mutations — or to rework an existing surface (a prototype, a rule-violating page). The skill drives the feature's checklist + TDD loop to a green vitest run and an open PR. Next.js + tRPC + TanStack Query + shadcn.
 context: fork
-agent: next-trpc-drizzle:frontend-feature-builder
+agent: jig:frontend-feature-builder
 ---
 
 # Implement Frontend

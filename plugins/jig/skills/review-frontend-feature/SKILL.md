@@ -2,7 +2,7 @@
 name: review-frontend-feature
 description: Use to review a feature's FRONTEND after it is built and its PR is open — walks the frontend-standards Rules, the matching recipes' Verify lists, and the frontend-tests Review checklist against the feature's diff, fixes violations in place, pushes so the PR updates, and reports a per-item verdict.
 context: fork
-agent: next-trpc-drizzle:frontend-feature-reviewer
+agent: jig:frontend-feature-reviewer
 ---
 
 # Feature Review — Frontend

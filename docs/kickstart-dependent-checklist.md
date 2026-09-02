@@ -170,7 +170,7 @@ Do not merge the checklist branch into the PR branch to move the work across. Th
 
 ## Sketch: the future skill
 
-Name idea: `kickstart-checklist`. Input: the checklist path, for example `/next-trpc-drizzle:kickstart-checklist docs/mcp-server/checklists/10a-registration-policy.md`.
+Name idea: `kickstart-checklist`. Input: the checklist path, for example `/jig:kickstart-checklist docs/mcp-server/checklists/10a-registration-policy.md`.
 
 What the skill does:
 

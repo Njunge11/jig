@@ -2,7 +2,7 @@
 name: implement-steps
 description: Use this skill to execute a STEP implementation checklist — work that only changes the code's structure, not what the software does. The skill drives the checklist's steps to green standing checks at baseline counts and an open PR. Backend and frontend step checklists both run here; the checklist's Domain picks the rubric.
 context: fork
-agent: next-trpc-drizzle:step-builder
+agent: jig:step-builder
 ---
 
 # Implement Steps

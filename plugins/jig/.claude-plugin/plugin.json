@@ -1,6 +1,6 @@
 {
-  "name": "next-trpc-drizzle",
-  "displayName": "Next + tRPC + Drizzle stack",
+  "name": "jig",
+  "displayName": "Jig",
   "description": "Engineering skills for the Next.js + tRPC + Drizzle (T3-style) stack: a spec-to-PR TDD pipeline plus backend and frontend standards.",
   "author": {
     "name": "Njunge11",

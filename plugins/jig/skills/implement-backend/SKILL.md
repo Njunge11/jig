@@ -2,7 +2,7 @@
 name: implement-backend
 description: Use this skill to build the BACKEND of a feature test-first, before any frontend work. The skill drives the feature's checklist + TDD loop to a green backend suite. tRPC + Drizzle + Vitest/PGlite.
 context: fork
-agent: next-trpc-drizzle:backend-feature-builder
+agent: jig:backend-feature-builder
 ---
 
 # Implement Backend

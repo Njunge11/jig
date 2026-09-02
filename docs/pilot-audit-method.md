@@ -1,6 +1,6 @@
 # Pilot Audit Method
 
-The standard for auditing a pilot run of the next-trpc-drizzle skills. Run after every pilot; output one audit doc per pilot in `docs/audits/<pilot>.md`. The audit is a row-by-row walk of the governing skills against evidence — never spot-checks, never impressions.
+The standard for auditing a pilot run of the jig skills. Run after every pilot; output one audit doc per pilot in `docs/audits/<pilot>.md`. The audit is a row-by-row walk of the governing skills against evidence — never spot-checks, never impressions.
 
 ## 1. Locate the pilot transcript
 
