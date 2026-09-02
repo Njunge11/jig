@@ -1,6 +1,6 @@
 # next-trpc-drizzle
 
-A Claude Code plugin: a test-first engineering playbook for the **Next.js + tRPC + Drizzle** stack (the T3-style stack, plus TanStack Query, shadcn/ui + Tailwind, and Vitest). It ships **9 skills**: a spec → tracker → PR pipeline (plan, build, review, open the PR) plus the standards for backend and frontend work.
+A Claude Code plugin: a test-first engineering playbook for the **Next.js + tRPC + Drizzle** stack (the T3-style stack, plus TanStack Query, shadcn/ui + Tailwind, and Vitest). It ships **10 skills**: a spec → tracker → PR pipeline (plan, build, review, open the PR) plus the standards for structure, backend, and frontend work.
 
 ## Install
 
@@ -29,6 +29,7 @@ Once installed, each skill loads **automatically** when your task matches its de
 | `implement-steps` | Executing a step implementation checklist — structure-only work driven to green standing checks and an open PR. |
 | `review-backend-feature` | Reviewing a built backend against the backend-standards and backend-tests Review checklists; fixes violations and pushes. |
 | `open-feature-pr` | An implementation checklist's work is complete and its PR must be opened — owns branch/title/body conventions. |
+| `structure` | Deciding where any file lives — the feature tree and placement rules; structure never comes from existing code. |
 | `backend-standards` | Writing or reviewing backend code — entry points → service → repository → Drizzle, queries, transactions, migrations. |
 | `backend-tests` | Writing, reviewing, or planning backend tests — PGlite repos, fake-repo services, entry points through real interfaces. |
 | `frontend` | Any frontend work — pages, components, forms, tables, chat, queries, mutations, loading/error UI, styling. Picks the matching recipe and builds to the invariants. |

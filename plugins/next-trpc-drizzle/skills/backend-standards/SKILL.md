@@ -16,29 +16,11 @@ This file gives the rules for backend code. Each rule has one home. The [Review 
 
 ## Structure
 
-A feature is a folder. The schema is central.
-
-```
-features/<feature>/
-  api/
-    <feature>.router.ts        ← entry: tRPC
-    <feature>.service.ts
-    __tests__/
-      <feature>.router.test.ts
-      <feature>.service.test.ts
-  db/
-    <feature>.repo.ts
-    __tests__/
-      <feature>.repo.test.ts
-  mcp/
-    <feature>.tool.ts          ← entry: MCP tool (only if the feature has one)
-  workflows/                   ← entry: durable workflow (only if the feature has one)
-    <name>/
-      index.ts                 ← workflow function
-      steps.ts                 ← step functions
-db/schema/
-  <domain>.ts                  ← one file per domain (users.ts, jobs.ts, billing.ts)
-```
+The `structure` skill owns the feature tree and every
+file-placement rule. If it is not already in your context, invoke
+it before you place a file. Place every file by its tree, never
+by imitating existing code. A feature is a folder. The schema is
+central.
 
 - **The schema lives centrally in `db/schema/`**, with one file per domain. Set `schema: "./db/schema"` in `drizzle.config.ts`. The drizzle-kit tool reads the folder recursively. You must export every table. The schema is central because FKs cross domains constantly. Feature-local schema files would import across features.
 - **Monorepo schema placement**: tables that more than one app uses live in the workspace db package. That package is `packages/db`, which exports the schema and the client. That package owns their drizzle config and their migration history. An app's **private** tables stay in that app's `db/schema/`, with Drizzle's multi-project safeguards. Define every private table through a `pgTableCreator` name prefix (`<app>_`). Set `tablesFilter: ["<app>_*"]`. Give the app its own migrations journal (`migrations: { schema: "drizzle_<app>" }`). Private tables never FK into another app's tables. When a second app needs a table, move that table to the db package.

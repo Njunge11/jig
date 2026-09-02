@@ -3,6 +3,7 @@ name: step-builder
 description: Execute a step implementation checklist — work that only changes the code's structure — with the stack's backend-standards skill preloaded.
 skills:
   - backend-standards
+  - structure
   - open-feature-pr
 ---
 

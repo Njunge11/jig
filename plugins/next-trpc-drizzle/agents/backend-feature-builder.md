@@ -4,6 +4,7 @@ description: Build a feature's backend test-first, driven by a checklist file, w
 skills:
   - backend-tests
   - backend-standards
+  - structure
   - open-feature-pr
 ---
 

@@ -12,6 +12,9 @@ until they match this skill.
 
 ## The loop
 
+Invoke the `structure` skill before step 0 — every file this loop
+produces is placed by its tree, never by imitating existing code.
+
 0. **Restate the UI.** You usually get it as prose. Write the
    page's anatomy — a named tree of parts, one responsibility per
    part, one owner per piece of shared state — before any code.
@@ -57,6 +60,23 @@ this loop. Do this instead:
 If you are running as a subagent, you cannot spawn another agent:
 report the gap and the checklist items you wrote, then stop — the
 main session dispatches the backend builder.
+
+## Existing UI
+
+When the surface already exists but its structure or code
+violates the rules:
+
+1. Never imitate it — existing code is not a precedent (the
+   `structure` skill's authority rule) — and never rebuild it
+   blind.
+2. Walk the rules below, plus the matching recipe's Verify list,
+   over the existing surface; record every violation with
+   `file:line`.
+3. If the surface has no behavior tests, write them first — they
+   guard the rework.
+4. Write the violations as a step implementation checklist
+   (structure-only, behavior unchanged) and run it through the
+   `implement-steps` lane.
 
 ## The catalog — building X → recipe
 
