@@ -85,7 +85,7 @@ and the surface mechanics.
 3. The moment a form grows inside a sheet, move it — dialog for
    short, page for long.
 
-## Don't — failures this repo shipped
+## Don't — common failures
 
 - Don't put a create/edit form in a `Sheet` — quick previews and
   direct actions only.
@@ -96,14 +96,14 @@ and the surface mechanics.
   specific verb.
 - Don't open an edit surface into a fresh spinner — the entity
   was prefetchable on the trigger.
-- Don't hand-roll a fullscreen takeover for an edit — this repo
-  shipped four ad-hoc fullscreen implementations; the surfaces
-  above cover edits.
-- Don't let closing an overlay disturb the page beneath it. This
-  repo shipped the same bug three times: closing a dialog (by
-  button OR backdrop) collapsed collapsibles under it, because a
-  page-level outside-click handler misread the overlay's events —
-  rules 62–63 are the fix.
+- Don't hand-roll a fullscreen takeover for an edit — the
+  surfaces above cover edits; a maximize mode is
+  `expanded-panel.md`.
+- Don't let closing an overlay disturb the page beneath it. The
+  classic bug: closing a dialog (by button OR backdrop) collapses
+  collapsibles under it, because a page-level outside-click
+  handler misreads the overlay's events — rules 62–63 are the
+  fix.
 - Don't put a `DialogTrigger` inside `DropdownMenuContent`.
 
 ## Verify

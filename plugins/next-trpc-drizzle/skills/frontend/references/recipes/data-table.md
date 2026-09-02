@@ -111,10 +111,10 @@ with no v8 call sites there is nothing to migrate.
    `setParams({ page })`, with the page count derived from
    `total` and the page size.
 
-## Don't — failures this repo shipped
+## Don't — common failures
 
-- Don't build another pagination component — this repo shipped
-  five; the kit has one.
+- Don't build another pagination component — the kit has one;
+  duplicates multiply fast.
 - Don't fetch all rows and let the table paginate, sort, or
   filter client-side — manual mode exists because SQL did it.
 - Don't write v8 API (`useReactTable`, `ColumnDef[]`,
@@ -124,8 +124,8 @@ with no v8 call sites there is nothing to migrate.
   that key.
 - Don't hand-roll `<table>` markup — kit `Table` parts +
   `<table.FlexRender />`.
-- Don't resurrect a dead table abstraction found in the repo;
-  this recipe is the standard.
+- Don't adopt or resurrect a table abstraction found in the
+  codebase; this recipe is the standard.
 
 ## Verify
 

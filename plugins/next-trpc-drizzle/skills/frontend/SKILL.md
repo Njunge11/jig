@@ -74,7 +74,7 @@ recipe is missing.
 | A multi-step flow / wizard | *planned* |
 | Mutation feedback — toasts, optimistic updates, undo | [`references/recipes/mutation-feedback.md`](references/recipes/mutation-feedback.md) |
 | An edit surface — dialog, sheet, inline edit, or picking which | [`references/recipes/edit-surfaces.md`](references/recipes/edit-surfaces.md) |
-| A fullscreen / expanded mode for a panel | *planned* |
+| A fullscreen / expanded mode for a panel | [`references/recipes/expanded-panel.md`](references/recipes/expanded-panel.md) |
 | A live preview of rendered output (no iframes) | *planned* |
 | Rich text editing (Lexical) | *planned* |
 | A chat surface (AI SDK + AI Elements) | *planned* |
@@ -413,8 +413,8 @@ export default async function Page() {
     child of `<body>`; a pointer event belongs to the page only
     when its body-level ancestor contains the component's root.
     An enumerated list of known overlays silently breaks with
-    every new primitive — this repo shipped the same collapse bug
-    three times that way.
+    every new primitive — the same collapse bug ships again and
+    again that way.
 63. Guard dismissal races by target identity: Radix layers
     dismiss on `pointerdown`, and by the time a document
     `mousedown` handler runs, the closing layer has detached its

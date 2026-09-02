@@ -4,7 +4,7 @@ Use this recipe when one route shows alternate views the user
 switches between — tabs over a list, segmented detail sections.
 Tabs live inside a page, so load `page-with-data.md` too — this
 recipe only changes what tabs change. Libraries: shadcn `Tabs`
-(Radix) and `nuqs` — both already installed.
+(Radix) and `nuqs` — install either if missing.
 
 ## Build order
 
@@ -88,11 +88,10 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
    tab-scoped params (page, tab-local filters) in the same
    `setParams` call, the way a search commit resets `page`.
 
-## Don't — failures this repo shipped
+## Don't — common failures
 
 - Don't keep the active tab in `useState` and leave the URL
   untouched — reload, share, and back-button then lose the tab.
-  This repo's tabs never wrote the URL back.
 - Don't prefetch or await every tab's data up front — the active
   tab's data plus hover prefetch covers it.
 - Don't compute badge counts with separate logic from the tab

@@ -4,7 +4,7 @@ Use this recipe when the user narrows a list: a search box, filter
 selects, a sort control, pagination. The rules in SKILL.md apply
 throughout; this recipe gives the build order and the
 list-narrowing mechanics. Libraries: `nuqs` for URL state and
-`use-debounce` — both already installed.
+`use-debounce` — install either if missing.
 
 ## Build order
 
@@ -95,7 +95,7 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
    create action. Branch on whether any narrowing param differs
    from its default.
 
-## Don't — failures this repo shipped
+## Don't — common failures
 
 - Don't keep filters in `useState` and leave the URL untouched —
   reload and share then lose the state.
@@ -105,7 +105,7 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
   this.
 - Don't forget `page: 1` when the search or a filter changes.
 - Don't build another pagination component — the kit already has
-  one; this repo shipped five.
+  one.
 - Don't show the filtered-empty message when the table is empty
   because nothing exists yet.
 

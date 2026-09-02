@@ -5,7 +5,7 @@ create or edit form, from one field to a full page. The rules in
 SKILL.md apply throughout. Libraries: `react-hook-form`,
 `@hookform/resolvers/zod`, and the kit's `Field` family
 (`Field`, `FieldLabel`, `FieldDescription`, `FieldError`,
-`FieldGroup`, `FieldSet`) — all already installed.
+`FieldGroup`, `FieldSet`) — install any that are missing.
 
 ## Build order
 
@@ -79,11 +79,11 @@ SKILL.md apply throughout. Libraries: `react-hook-form`,
    navigates away). An edit form does not reset — the invalidated
    query re-syncs it.
 
-## Don't — failures this repo shipped
+## Don't — common failures
 
 - Don't hand-roll label + error `<div>`s around inputs — the
   `Field` family carries the ids, `aria-invalid`, and error
-  wiring. This repo's forms were all hand-rolled.
+  wiring.
 - Don't write a second client-only schema — it drifts from the
   procedure input; share the one module.
 - Don't trust client validation alone — the server re-validates

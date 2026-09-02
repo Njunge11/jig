@@ -98,7 +98,7 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
    irreversible write gets a confirm dialog up front, not an undo
    that cannot work.
 
-## Don't — failures this repo shipped
+## Don't — common failures
 
 - Don't ship a silent mutation — every write shows pending and
   reports its outcome.

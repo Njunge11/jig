@@ -49,7 +49,7 @@ type's specifics.
 7. **Responsive pass**: mobile first, a deliberate `md:` step,
    verify at 375 / 768 / 1024 / 1440.
 
-## Don't — failures this repo shipped
+## Don't — common failures
 
 - Don't build one monolith component with config props that
   reshape it.

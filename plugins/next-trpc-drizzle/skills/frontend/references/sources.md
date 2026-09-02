@@ -102,6 +102,17 @@ these pages on 2026-09-01.
   your updates that change the QueryKey into startTransition").
   Verified 2026-09-01. `nuqs` and `use-debounce` confirmed in
   apps/dashboard/package.json.
+- recipes/expanded-panel.md — grounded in project evidence, not
+  external docs (none authoritative exists for in-app panel
+  expansion): the four divergent dashboard implementations
+  (email-body-editor `fullscreen` prop; jobs/new wizard reducer +
+  overlay with `previewOpen && isFullscreen && isVisible` and a
+  separately-forked editor fullscreen; job-board context
+  `toggleFullscreen`) audited 2026-09-02, and the jobs-v2 locked
+  design decision (docked panel expands via flex reallocation, no
+  overlays or portals — apps/dashboard/docs/jobs-v2/
+  jobs-v2-chat-design.md §8). Rules 62–63 supply the
+  overlay-event rationale.
 - recipes/edit-surfaces.md — verified 2026-09-02 against four
   design-system pages:
   [Primer: Dialog guidelines](https://primer.style/product/components/dialog/guidelines/)
