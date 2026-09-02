@@ -102,6 +102,31 @@ these pages on 2026-09-01.
   your updates that change the QueryKey into startTransition").
   Verified 2026-09-01. `nuqs` and `use-debounce` confirmed in
   apps/dashboard/package.json.
+- recipes/rich-text.md —
+  [Lexical: Getting started with React](https://lexical.dev/docs/getting-started/react)
+  (LexicalComposer `initialConfig` with namespace/theme/onError;
+  plugin composition; `registerUpdateListener`/OnChange for
+  observation) and
+  [Lexical: Serialization](https://lexical.dev/docs/serialization/)
+  (`editorState.toJSON()` / `editor.parseEditorState()` for the
+  JSON round-trip; "HTML serialization is primarily used to
+  transfer data between Lexical and non-Lexical editors (such as
+  Google Docs or Quip) via the copy & paste functionality" —
+  hence JSON as source of truth, HTML derived for render-only).
+  Verified 2026-09-02. Streaming rule from an audited incident:
+  the origin dashboard's jd-editor streaming-plugin.tsx calls
+  `$convertFromMarkdownString(content, TRANSFORMERS)` on the full
+  accumulated markdown each tick (O(n²)); three separate Lexical
+  editors exist there (email-body-editor, jd-editor, v2
+  compose-email). Toolbar layout rule from
+  [MDN: position](https://developer.mozilla.org/en-US/docs/Web/CSS/position)
+  (sticky "sticks to its nearest ancestor that has a 'scrolling
+  mechanism' (created when `overflow` is `hidden`, `scroll`,
+  `auto`, or `overlay`), even if that ancestor isn't the nearest
+  actually scrolling ancestor") plus the audited jd-editor
+  sticky-toolbar hang; per-keystroke export rule from the audited
+  jd-editor `handleChange` (runs `$convertToMarkdownString` on
+  every change).
 - recipes/page-preview.md — grounded in project evidence and CSS
   fundamentals: the slow-preview incident (the origin dashboard's
   job-board preview boots the whole public app in an iframe and
