@@ -72,7 +72,7 @@ recipe is missing.
 | Tabs or segmented views (URL-backed, prefetched) | [`references/recipes/tabs.md`](references/recipes/tabs.md) |
 | A form that submits a mutation (validation, field errors) | [`references/recipes/form-with-mutation.md`](references/recipes/form-with-mutation.md) |
 | A multi-step flow / wizard | *planned* |
-| Mutation feedback — toasts, optimistic updates, undo | *planned* |
+| Mutation feedback — toasts, optimistic updates, undo | [`references/recipes/mutation-feedback.md`](references/recipes/mutation-feedback.md) |
 | An edit surface — dialog, drawer, inline edit | *planned* |
 | A fullscreen / expanded mode for a panel | *planned* |
 | A live preview of rendered output (no iframes) | *planned* |
@@ -389,29 +389,10 @@ export default async function Page() {
     mutation's `variables` + `isPending`; no cache writes; it
     reconciles itself on settle.
 59. Cache-write optimism only when other components must reflect
-    the change immediately. Callbacks receive `context` with
-    `context.client`; `onMutate`'s return arrives as the
-    `onMutateResult` parameter:
-
-```ts
-const filter = trpc.promo.list.queryFilter();
-useMutation(trpc.promo.markPaid.mutationOptions({
-  onMutate: async (vars, context) => {
-    await context.client.cancelQueries(filter);                // 1 cancel
-    const prev = context.client.getQueryData(filter.queryKey); // 2 snapshot
-    context.client.setQueryData(filter.queryKey, apply(prev, vars)); // 3 set
-    return { prev };
-  },
-  onError: (_e, _v, onMutateResult, context) =>
-    context.client.setQueryData(filter.queryKey, onMutateResult.prev), // rollback
-  onSettled: (_d, _e, _v, _r, context) =>
-    context.client.invalidateQueries(filter),                  // reconcile
-}));
-```
-
-    The order matters: `cancelQueries` first (a slow refetch
-    would clobber the optimistic value); invalidate in
-    `onSettled` (it runs even after a rollback).
+    the change immediately, and always in this order: cancel,
+    snapshot, set, rollback on error, invalidate in `onSettled`.
+    The worked pattern with the v5 signatures lives in
+    `references/recipes/mutation-feedback.md`, step 6.
 
 ### Secondary surfaces
 

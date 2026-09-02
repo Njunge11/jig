@@ -96,6 +96,15 @@ these pages on 2026-09-01.
   your updates that change the QueryKey into startTransition").
   Verified 2026-09-01. `nuqs` and `use-debounce` confirmed in
   apps/dashboard/package.json.
+- recipes/mutation-feedback.md —
+  [TanStack Query: Optimistic Updates](https://tanstack.com/query/v5/docs/framework/react/guides/optimistic-updates)
+  (the v5 signatures: `context.client`, `onMutateResult`; the
+  variables-only pattern; the cancel → snapshot → set → rollback
+  order) and [Sonner: toast](https://sonner.emilkowal.ski/toast)
+  (`toast.success`/`toast.error`; the `action` option "renders a
+  primary button, clicking it will close the toast and run the
+  callback passed via `onClick`"). Verified 2026-09-02. Kit ships
+  the sonner toaster (`_ui/sonner.tsx`).
 - recipes/data-table.md — committed to TanStack Table **v9**:
   npm `latest` is 9.2.4 (checked 2026-09-02), and the repo's
   `@tanstack/react-table@^8.21.3` has zero call sites, so the
