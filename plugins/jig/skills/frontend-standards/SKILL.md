@@ -66,7 +66,13 @@ not restate them. This list is also the review checklist.
    `CardHeader`/`CardTitle`/`CardContent` plus a row component.
 5. Use the component's own API: `variant`/`size` for
    permutations, compound parts as intended. Do not recreate what
-   a prop already does.
+   a prop already does. The inverse holds too: never fight the
+   API. A primitive whose variants style its own children (shadcn
+   `Field`'s vertical orientation gives every direct child
+   `w-full`) is not a generic layout box — do not repurpose it as
+   a layout row, and do not override its axis with your own flex
+   classes. Layout rows are plain `div`s; a form primitive's
+   direction is chosen through its `orientation` prop.
 6. Feature components follow the kit's anatomy. When one grows
    sections, name its parts with the standard vocabulary —
    `Trigger` (initiates), `Content` (the shown/hidden body),
