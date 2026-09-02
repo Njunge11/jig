@@ -4,6 +4,14 @@
 
 Jig is a Claude Code plugin that turns a spec into tested, reviewed pull requests. You write the spec. Jig splits it into checklists, builds each checklist test-first, reviews the diff against fixed standards, and opens the PR. The name comes from the factory tool: a jig guides the work so two builders produce the same part.
 
+## Jig is opinionated
+
+Jig ships one code structure and one set of rules. The `structure` skill owns where every file lives, and the standards skills own how each layer is written. The rules win over the code in the repo — existing code is never a precedent.
+
+- **New project:** works from the first PR. Every file lands in jig's structure.
+- **Existing project:** jig works, but it moves your code toward its structure — it does not adapt to yours. A surface that violates the rules gets reworked through a step checklist.
+- **Skills in isolation:** every skill loads on its own with `/jig:<skill>`. The structure rules ride along with `backend-standards`, `frontend-standards`, and every build and review lane. `backend-tests`, `frontend-tests`, and `open-feature-pr` judge only their own domain and enforce no file placement.
+
 ## Tech stack
 
 Jig's standards and recipes target one stack:
@@ -36,8 +44,6 @@ Example: your spec is `docs/growth/spec.md`.
 3. **Merge.** Read the PR and the review verdict, then merge.
 
 You can also invoke any skill directly with `/jig:<skill>` — for example `/jig:frontend-standards` loads the frontend rules while you work by hand. Skills also load automatically when your task matches their descriptions.
-
-`/goal` needs Claude Code v2.1.139 or newer.
 
 ## License
 
