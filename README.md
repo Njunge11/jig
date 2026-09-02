@@ -45,7 +45,7 @@ Jig's standards and recipes target one stack:
 Run these three commands in Claude Code:
 
 ```text
-/plugin marketplace add Njunge11/next-trpc-drizzle
+/plugin marketplace add Njunge11/jig
 /plugin install jig@mita-labs-plugins-official
 /reload-plugins
 ```
