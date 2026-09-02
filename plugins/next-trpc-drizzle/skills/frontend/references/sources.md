@@ -102,6 +102,20 @@ these pages on 2026-09-01.
   your updates that change the QueryKey into startTransition").
   Verified 2026-09-01. `nuqs` and `use-debounce` confirmed in
   apps/dashboard/package.json.
+- recipes/chat.md —
+  [AI SDK v6: Chatbot](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot)
+  (`useChat` + `DefaultChatTransport`; `UIMessage.parts` rendered
+  by `part.type`; status values submitted/streaming/ready/error;
+  `stop()`; input state owned by the caller, not the hook),
+  [AI Elements: Overview](https://elements.ai-sdk.dev/overview)
+  ("a component library and custom registry built on top of
+  shadcn/ui"; "every component is a building block"; component
+  catalog), [AI Elements: Conversation](https://elements.ai-sdk.dev/components/conversation)
+  ("wrap messages and automatically scroll to the bottom. Also
+  includes a scroll button that appears when not at the bottom"),
+  and [AI Elements: Usage/Setup docs](https://elements.ai-sdk.dev/docs/usage)
+  (install via `npx ai-elements@latest`, default target
+  `components/ai-elements/`). Verified 2026-09-02.
 - recipes/rich-text.md —
   [Lexical: Getting started with React](https://lexical.dev/docs/getting-started/react)
   (LexicalComposer `initialConfig` with namespace/theme/onError;

@@ -77,7 +77,7 @@ recipe is missing.
 | A fullscreen / expanded mode for a panel | [`references/recipes/expanded-panel.md`](references/recipes/expanded-panel.md) |
 | A live preview of rendered output beside an editor | [`references/recipes/page-preview.md`](references/recipes/page-preview.md) |
 | Rich text editing (Lexical) | [`references/recipes/rich-text.md`](references/recipes/rich-text.md) |
-| A chat surface (AI SDK + AI Elements) | *planned* |
+| A chat surface (AI SDK + AI Elements) | [`references/recipes/chat.md`](references/recipes/chat.md) |
 
 Authoring a genuinely new compound component (own state, keyboard
 map, `asChild`)? Load
