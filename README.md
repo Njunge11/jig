@@ -1,6 +1,6 @@
 # next-trpc-drizzle
 
-A Claude Code plugin: a test-first engineering playbook for the **Next.js + tRPC + Drizzle** stack (the T3-style stack, plus TanStack Query, shadcn/ui + Tailwind, and Vitest). It ships **11 skills**: a spec → tracker → PR pipeline (plan, build, review, open the PR) plus the standards for structure, backend, and frontend work.
+A Claude Code plugin: a test-first engineering playbook for the **Next.js + tRPC + Drizzle** stack (the T3-style stack, plus TanStack Query, shadcn/ui + Tailwind, and Vitest). It ships **12 skills**: a spec → tracker → PR pipeline (plan, build, review, open the PR) plus the standards for structure, backend, and frontend work.
 
 ## Install
 
@@ -34,6 +34,7 @@ Once installed, each skill loads **automatically** when your task matches its de
 | `backend-standards` | Writing or reviewing backend code — entry points → service → repository → Drizzle, queries, transactions, migrations. |
 | `backend-tests` | Writing, reviewing, or planning backend tests — PGlite repos, fake-repo services, entry points through real interfaces. |
 | `frontend` | Any frontend work — pages, components, forms, tables, chat, queries, mutations, loading/error UI, styling. Picks the matching recipe and builds to the invariants. |
+| `frontend-tests` | Writing, reviewing, or planning frontend/UI tests — behavior over implementation, the UI test harness (Vitest + jsdom + MSW), and the performance levers. |
 | `skill-audit` | Auditing a skill (or a plugin's skills) against the built-in quality checklist and fixing the failures. |
 
 ## Workflow

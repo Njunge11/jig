@@ -30,7 +30,8 @@ produces is placed by its tree, never by imitating existing code.
    undecided.
 3. **TDD the behavior.** One case → one failing test (MSW at the
    network edge, or seed the cache) → build to pass → tick `[x]`
-   → refactor.
+   → refactor. The `frontend-tests` skill owns test quality and
+   the harness — write every test to its Review checklist.
 4. **Integrate.** Wire the real tRPC path against the feature's
    actual router under `features/<name>/api` — never an invented
    shape. Behavior tests must pass against the real router.

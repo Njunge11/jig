@@ -1,13 +1,13 @@
 ---
 name: review-frontend-feature
-description: Use to review a feature's FRONTEND after it is built and its PR is open — walks the frontend skill's Rules and the matching recipes' Verify lists against the feature's diff, fixes violations in place, pushes so the PR updates, and reports a per-item verdict.
+description: Use to review a feature's FRONTEND after it is built and its PR is open — walks the frontend skill's Rules, the matching recipes' Verify lists, and the frontend-tests Review checklist against the feature's diff, fixes violations in place, pushes so the PR updates, and reports a per-item verdict.
 context: fork
 agent: frontend-feature-reviewer
 ---
 
 # Feature Review — Frontend
 
-An independent second walk of the frontend rubric against a feature's diff. This runs in a forked subagent with the `frontend` and `structure` skills preloaded — the frontend skill's `## Rules` list and the matching recipes' Verify lists are the rubric; this skill restates none of their rules.
+An independent second walk of the frontend rubric against a feature's diff. This runs in a forked subagent with the `frontend`, `frontend-tests`, and `structure` skills preloaded — the frontend skill's `## Rules` list, the matching recipes' Verify lists, and the frontend-tests `## Review checklist` are the rubric; this skill restates none of their rules.
 
 **Scope:** `$ARGUMENTS` — the implementation checklist path (`docs/<project>/checklists/NN-<slug>.md` or `features/<name>/checklist.md`) and/or a branch. The diff under review is `git diff main` (or the given branch against main).
 
@@ -17,9 +17,10 @@ An independent second walk of the frontend rubric against a feature's diff. This
 2. **Load the recipes.** Match the changed surfaces against the frontend skill's catalog and load every matching recipe file. Record which recipes you loaded — their Verify lists join the rubric.
 3. Walk the frontend `## Rules` list **item by item against the changed files** — every rule, no skipping, no grep proxies: open the files and look. **Gate:** every rule has a recorded verdict before you go to step 4.
 4. Walk **each loaded recipe's Verify list** item by item against the surface it covers. **Gate:** every item has a recorded verdict before you go to step 5.
-5. Walk the `structure` tree over **every file the diff adds or moves**: is it in its defined place? **Gate:** every added or moved file has a recorded verdict before you go to step 6.
-6. Fix every violation in place. **Gate:** `vitest` is green after the fixes. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
-7. **Return the verdict**: one line per rule and per Verify item — `pass`, `fixed` with `file:line`, or `browser-check` — plus the green `vitest` run, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
+5. Walk the frontend-tests `## Review checklist` **item by item against every new or changed test**. **Gate:** every item has a recorded verdict before you go to step 6.
+6. Walk the `structure` tree over **every file the diff adds or moves**: is it in its defined place? **Gate:** every added or moved file has a recorded verdict before you go to step 7.
+7. Fix every violation in place. **Gate:** `vitest` is green after the fixes. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
+8. **Return the verdict**: one line per item of every rubric list — `pass`, `fixed` with `file:line`, or `browser-check` — plus the green `vitest` run, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
 
 ### The `browser-check` verdict
 
@@ -38,6 +39,11 @@ data-table.md Verify
  1 pass
  2 fixed — features/invites/ui/columns.tsx:30 (v8 API call replaced)
  ... one line per item, per loaded recipe
+
+frontend-tests
+ 1 pass
+ 2 fixed — features/invites/ui/__tests__/member-picker.test.tsx:41 (asserts the dialog, not the handler)
+ ... one line per item, first to last
 
 structure
  features/invites/ui/invites-page.tsx pass
