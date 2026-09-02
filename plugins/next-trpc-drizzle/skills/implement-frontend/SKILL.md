@@ -103,7 +103,7 @@ When the surface already exists but its structure or code violates the rules:
 1. Never imitate it — existing code is not a precedent (the `structure` skill's authority rule) — and never rebuild it blind.
 2. Walk the `## Rules` of the preloaded `frontend-standards` skill, plus the matching recipe's Verify list, over the existing surface; record every violation with `file:line`.
 3. If the surface has no behavior tests, write them first with [the loop](#the-loop) — they guard the rework.
-4. Write the violations as a step implementation checklist (structure-only, behavior unchanged) with `Domain: frontend` in its `## Scope`, and run it through the `implement-steps` lane.
+4. Write the violations as a step implementation checklist (structure-only, behavior unchanged) with `Domain: frontend` in its `## Scope`, then invoke the `implement-steps` skill on it.
 
 ## When a step fails
 

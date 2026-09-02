@@ -34,20 +34,24 @@ A builder is the agent that executes one implementation checklist, task by task,
 
 Write each implementation checklist as `docs/<project>/checklists/NN-<slug>.md`. One question decides which checklist to write: **does the work change what the software does?**
 
-- Yes: write a TDD implementation checklist, per `references/tdd-implementation-checklist.md`. Before you write the first one, invoke the `backend-tests` skill. Its Review checklist defines the tests the builder writes — write every task so its tests can pass that checklist.
-- No — the work only changes the code's structure: write a step implementation checklist, per `references/step-implementation-checklist.md`.
-- Work that does both: split it into two checklists. If the answer is unclear, ask the developer.
-
-Plan the spec's backend work only. The spec's frontend work is out of scope for this skill. Write no checklist for it. List it for the developer at the end of the run.
+- Yes: write a TDD implementation checklist for each domain the work touches — backend work per `references/tdd-backend-implementation-checklist.md`, frontend work per `references/tdd-frontend-implementation-checklist.md`. Work that touches both domains gets one checklist per domain, backend ordered first. Before you write the first checklist of a domain, invoke that domain's tests skill (`backend-tests` or `frontend-tests`). Its Review checklist defines the tests the builder writes — write every task so its tests can pass that checklist.
+- No — the work only changes the code's structure: write a step implementation checklist, per `references/step-implementation-checklist.md`. Its `Domain` line names the domain.
+- Work that changes both behavior and structure: split it into a TDD checklist and a step checklist. If the answer is unclear, ask the developer.
 
 Also give each implementation checklist its Conventional Commits type (`feat`, `fix`, `chore`, `refactor`, ...). The type names its branch and PR title. It does not decide which checklist to write.
 
 Then write the tracker as `docs/<project>/tracker.md` — fill `assets/tracker-template.md`. The tracker carries each implementation checklist's /goal run command:
 
-For a TDD implementation checklist:
+For a backend TDD implementation checklist:
 
 ```
 /goal the implement-backend skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript
+```
+
+For a frontend TDD implementation checklist:
+
+```
+/goal the implement-frontend skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript
 ```
 
 For a step implementation checklist:
@@ -64,7 +68,7 @@ Check every file you wrote. Fix every miss, then check again.
 2. List the files in `checklists/`. Every file must appear in the tracker table. An implementation checklist missing from the tracker is never built.
 3. Read each /goal run command. The path in it must equal the real path of the implementation checklist it runs. With a wrong path, the checklist can never pass its /goal check.
 4. Checklist numbers must agree across the tracker table, the filenames, and the run-command labels. No two implementation checklists share a number.
-5. Each /goal command must match its template in Step 4: the TDD command for a TDD implementation checklist, the step command for a step implementation checklist.
+5. Each /goal command must match its template in Step 4: the TDD command of the checklist's domain for a TDD implementation checklist, the step command for a step implementation checklist.
 6. Every task checkbox in every implementation checklist must be `[ ]`. The builder ticks boxes, not you.
 7. Every implementation checklist this run created must have Status `Not started` in the tracker. A checklist that was already in the tracker before this run keeps its Status.
 8. Every section heading and label in every implementation checklist must come from its template. A label copied from an older document in the repo does not belong — the template decides the format, not the documents already there.
