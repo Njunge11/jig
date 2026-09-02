@@ -1,100 +1,18 @@
 ---
-name: frontend
-description: The one skill for frontend work in Next.js + tRPC + TanStack Query v5 + shadcn/Tailwind apps. Use when building or changing any page, component, form, table, dialog, or chat surface; any query, mutation, loading/error UI, or styling; or when diagnosing slow pages, waterfalls, duplicate fetches, spinner problems, or layout breakage. Identify what you are building, load the matching recipe, and build to the rules.
+name: frontend-standards
+description: The rules for frontend code in Next.js + tRPC + TanStack Query v5 + shadcn/Tailwind apps — shadcn composition, semantic tokens, responsive breakpoints, hooks discipline, the prefetch + useSuspenseQuery data path, loading/error UI. Use when you write or review frontend code — any page, component, form, table, dialog, or chat surface; any query, mutation, or styling — or when you diagnose slow pages, waterfalls, duplicate fetches, spinner problems, or layout breakage. Identify what you are building, load the matching recipe, and build to the rules.
 ---
 
-# Frontend
+# Frontend Standards
 
 Stack: **Next.js App Router + tRPC + TanStack Query v5 + shadcn/ui
 (+ Radix) + Tailwind CSS**. When code in the repo disagrees with a
 rule here, the rule wins. Assume existing repo patterns are wrong
 until they match this skill.
 
-## The loop
-
-Invoke the `structure` skill before step 0 — every file this loop
-produces is placed by its tree, never by imitating existing code.
-
-0. **Restate the UI.** You usually get it as prose. Write the
-   page's anatomy — a named tree of parts, one responsibility per
-   part, one owner per piece of shared state — before any code.
-1. **Pick the recipe(s).** Match what you are building against the
-   catalog below. Load every matching recipe file and follow it —
-   the recipe orders the construction.
-2. **Author the checklist** — the `## Frontend + Integration`
-   section of `features/<name>/checklist.md`, split into
-   **Behavior (test-backed)** `F<n>` items and **Visual &
-   responsive (browser-checked, never jsdom tests)** `V<n>` items.
-   Cover error and empty states, not just the happy path. Preserve
-   described copy verbatim; ask when a screen or state is
-   undecided.
-3. **TDD the behavior.** Invoke the `frontend-tests` skill before
-   the first test — it owns test quality and the harness. Then:
-   one case → one failing test (MSW at the network edge, or seed
-   the cache) → build to pass → tick `[x]` → refactor.
-4. **Integrate.** Wire the real tRPC path against the feature's
-   actual router under `features/<name>/api` — never an invented
-   shape. Behavior tests must pass against the real router.
-5. **Visual & responsive.** Verify in the browser at 375, 768,
-   1024, and 1440.
-6. **Done** when every behavior item is checked and `vitest` is
-   green — then surface the proof in the transcript: the ticked
-   checklist and the green test run. A transcript watcher cannot
-   open files; it sees only what you surface.
-
-## Backend gaps
-
-A backend gap is a value the UI needs that no procedure returns,
-or a real backend/contract bug found while integrating. Never
-patch around one in the client — never derive, hardcode, or fake
-the value so integration passes without the backend — and never
-write backend code in this loop. Do this instead:
-
-1. Write the missing behavior as new items in the `## Backend`
-   section of `features/<name>/checklist.md` — one observable
-   behavior per line. These items are the contract; the frontend
-   builds against them.
-2. If the project has a tracker (`docs/<project>/tracker.md`),
-   append a row for this gap in the same edit: Status
-   `Not started`, run command in the tracker's TDD form, pointing
-   at the checklist that holds the new items. The tracker is the
-   ledger of owed work — an item that is not in it gets lost.
-3. Spawn the `backend-feature-builder` agent:
-   "Implement the unchecked items in
-   `features/<name>/checklist.md` `## Backend`."
-4. Keep building — the whole UI, gap-dependent parts included.
-   A part takes the values it renders as props and never knows
-   the backend exists, so every part is buildable now. The
-   behavior tests drive the parts with fixture props shaped by
-   the written contract.
-5. Wire when the backend lands. Connecting the real procedure in
-   the page tree is the only work that waits — a call to a
-   procedure that is not on the router does not typecheck. The
-   loop's integration gate is unchanged: not done until the
-   backend items are green and the behavior tests pass against
-   the real router.
-
-If you are running as a subagent, you cannot spawn another agent:
-build every part against the written contract, then report the
-gap and the checklist items you wrote — the main session
-dispatches the backend builder, and wiring completes after.
-
-## Existing UI
-
-When the surface already exists but its structure or code
-violates the rules:
-
-1. Never imitate it — existing code is not a precedent (the
-   `structure` skill's authority rule) — and never rebuild it
-   blind.
-2. Walk the rules below, plus the matching recipe's Verify list,
-   over the existing surface; record every violation with
-   `file:line`.
-3. If the surface has no behavior tests, write them first — they
-   guard the rework.
-4. Write the violations as a step implementation checklist
-   (structure-only, behavior unchanged) and run it through the
-   `implement-steps` lane.
+The `structure` skill owns the feature tree and every
+file-placement rule. If it is not already in your context, invoke
+it before you place a file.
 
 ## The catalog — building X → recipe
 

@@ -1,21 +1,21 @@
 ---
 name: review-frontend-feature
-description: Use to review a feature's FRONTEND after it is built and its PR is open — walks the frontend skill's Rules, the matching recipes' Verify lists, and the frontend-tests Review checklist against the feature's diff, fixes violations in place, pushes so the PR updates, and reports a per-item verdict.
+description: Use to review a feature's FRONTEND after it is built and its PR is open — walks the frontend-standards Rules, the matching recipes' Verify lists, and the frontend-tests Review checklist against the feature's diff, fixes violations in place, pushes so the PR updates, and reports a per-item verdict.
 context: fork
 agent: frontend-feature-reviewer
 ---
 
 # Feature Review — Frontend
 
-An independent second walk of the frontend rubric against a feature's diff. This runs in a forked subagent with the `frontend`, `frontend-tests`, and `structure` skills preloaded — the frontend skill's `## Rules` list, the matching recipes' Verify lists, and the frontend-tests `## Review checklist` are the rubric; this skill restates none of their rules.
+An independent second walk of the frontend rubric against a feature's diff. This runs in a forked subagent with the `frontend-standards`, `frontend-tests`, and `structure` skills preloaded — the frontend-standards `## Rules` list, the matching recipes' Verify lists, and the frontend-tests `## Review checklist` are the rubric; this skill restates none of their rules.
 
 **Scope:** `$ARGUMENTS` — the implementation checklist path (`docs/<project>/checklists/NN-<slug>.md` or `features/<name>/checklist.md`) and/or a branch. The diff under review is `git diff main` (or the given branch against main).
 
 ## The work
 
 1. Read the feature's checklist and the full diff.
-2. **Load the recipes.** Match the changed surfaces against the frontend skill's catalog and load every matching recipe file. Record which recipes you loaded — their Verify lists join the rubric.
-3. Walk the frontend `## Rules` list **item by item against the changed files** — every rule, no skipping, no grep proxies: open the files and look. **Gate:** every rule has a recorded verdict before you go to step 4.
+2. **Load the recipes.** Match the changed surfaces against the frontend-standards catalog and load every matching recipe file. Record which recipes you loaded — their Verify lists join the rubric.
+3. Walk the frontend-standards `## Rules` list **item by item against the changed files** — every rule, no skipping, no grep proxies: open the files and look. **Gate:** every rule has a recorded verdict before you go to step 4.
 4. Walk **each loaded recipe's Verify list** item by item against the surface it covers. **Gate:** every item has a recorded verdict before you go to step 5.
 5. Walk the frontend-tests `## Review checklist` **item by item against every new or changed test**. **Gate:** every item has a recorded verdict before you go to step 6.
 6. Walk the `structure` tree over **every file the diff adds or moves**: is it in its defined place? **Gate:** every added or moved file has a recorded verdict before you go to step 7.
@@ -29,7 +29,7 @@ Read the code first — it settles most rules. When only the rendered browser ca
 ### Verdict format
 
 ```
-frontend Rules
+frontend-standards Rules
  1 pass
  2 pass
  3 fixed — features/invites/ui/member-picker.tsx:12 (Base UI import replaced with the kit's Popover + Command)
@@ -61,4 +61,4 @@ structure
 - **Only the rubric.** Fix what a rule or Verify item rejects, nothing else — no taste-based refactors, no restructuring beyond what the violated item requires.
 - **A test edit is legitimate only when the test itself violates a rule** (e.g. asserts implementation detail, pastes implementation output as the expectation). The fixed test must still cover the same behavior — never weaken or delete a test to get to green.
 - **The feature checklist is immutable**: never add, remove, reword, or re-check its items.
-- **Stop at the frontend.** Don't touch backend files. A backend defect you find is a finding in the report — write it as `## Backend` checklist items per the frontend skill's Backend gaps section, and when the project has a tracker (`docs/<project>/tracker.md`), append its row in the same edit (Status `Not started`, run command pointing at that checklist). Then continue the review; the main session dispatches the backend builder.
+- **Stop at the frontend.** Don't touch backend files. A backend defect you find is a finding in the report — write it as `## Backend` checklist items in the feature's checklist, one observable behavior per line, and when the project has a tracker (`docs/<project>/tracker.md`), append its row in the same edit (Status `Not started`, run command pointing at that checklist). Then continue the review; the main session dispatches the backend builder.

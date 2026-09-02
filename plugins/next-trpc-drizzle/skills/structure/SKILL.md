@@ -71,7 +71,7 @@ components/ui/               ← the kit, plus app-wide compound components
    every branch of the tree.
 5. **The backend branches** (`api/`, `db/`, schema placement,
    factories) follow `backend-standards`; the `ui/` branch
-   follows the `frontend` skill. This skill owns only where
+   follows the `frontend-standards` skill. This skill owns only where
    things live.
 6. **Check before you finish.** Walk every file you created or
    moved against the tree. Fix a misplaced file now — do not

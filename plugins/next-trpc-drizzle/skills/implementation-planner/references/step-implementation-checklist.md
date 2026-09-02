@@ -4,7 +4,7 @@ How to write a step implementation checklist for work that only changes the code
 
 ## How to fill it
 
-- The `implement-steps` skill executes the checklist in a forked builder that has the `backend-standards` skill preloaded. The `implement-steps` skill also owns the branch, the baseline run, the review walk, and the PR. Write only the work into `## Steps` — no load-a-skill step, no branch step, no baseline step.
+- The `implement-steps` skill executes the checklist in a forked builder that has the `backend-standards` and `frontend-standards` skills preloaded — the `Domain` line in `## Scope` picks which one governs the edits. The `implement-steps` skill also owns the branch, the baseline run, the review walk, and the PR. Write only the work into `## Steps` — no load-a-skill step, no branch step, no baseline step.
 - Copy the spec's wording verbatim. Do not invent labels or microcopy.
 - Write each step as a mechanical rule, never a vague intention. A mechanical rule names the files and the exact change, so that two builders produce the same diff from it.
   - Write: "move `apps/web/lib/email/` to `packages/email/src/`, and change every `@/lib/email` import to `@repo/email`"
@@ -26,6 +26,7 @@ Copy the template below. Replace each `<placeholder>` with this implementation c
 <What this implementation checklist does.> Spec: `docs/<spec>.md`, section <section>.
 Builds on: <earlier checklists, or none>.
 Type: <Conventional Commits type>. Branch: `<type>/<slug>`.
+Domain: <backend or frontend — picks the governing rubric and the review skill>.
 
 ## Steps
 
