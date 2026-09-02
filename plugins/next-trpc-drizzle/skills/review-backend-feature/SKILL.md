@@ -2,7 +2,7 @@
 name: review-backend-feature
 description: Use to review a feature's BACKEND after it is built and its PR is open — walks the backend-standards and backend-tests Review checklists against the feature's diff, fixes violations in place, pushes so the PR updates, and reports a per-item verdict.
 context: fork
-agent: backend-feature-reviewer
+agent: next-trpc-drizzle:backend-feature-reviewer
 ---
 
 # Feature Review — Backend
