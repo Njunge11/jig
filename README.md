@@ -10,7 +10,24 @@ Jig ships one code structure and one set of rules. The `structure` skill owns wh
 
 - **New project:** works from the first PR. Every file lands in jig's structure.
 - **Existing project:** jig works, but it moves your code toward its structure — it does not adapt to yours. A surface that violates the rules gets reworked through a step checklist.
-- **Skills in isolation:** every skill loads on its own with `/jig:<skill>`. The structure rules ride along with `backend-standards`, `frontend-standards`, and every build and review lane. `backend-tests`, `frontend-tests`, and `open-feature-pr` judge only their own domain and enforce no file placement.
+
+Every skill loads on its own with `/jig:<skill>`. This table shows which ones carry the structure opinion. A **No** row is safe in isolation — it never moves your files. A **Partly** row applies its rules without touching your structure, but its setup reference names jig's paths.
+
+| Skill | Imposes jig's structure? |
+| --- | --- |
+| `structure` | Yes — it is the structure. |
+| `backend-standards` | Yes — places every file by the structure tree. |
+| `frontend-standards` | Yes — places every file by the structure tree. |
+| `implement-backend` | Yes — the lane preloads the structure skill. |
+| `implement-frontend` | Yes — the lane preloads the structure skill. |
+| `implement-steps` | Yes — the lane preloads the structure skill. |
+| `review-backend-feature` | Yes — the review walks the structure tree over the diff. |
+| `review-frontend-feature` | Yes — the review walks the structure tree over the diff. |
+| `implementation-planner` | Yes — it writes `docs/<project>/`, and its checklists run the lanes above. |
+| `backend-tests` | Partly — the test-quality rules are structure-free; the harness setup expects tests in `features/**/{api,db}/__tests__/`. |
+| `frontend-tests` | Partly — the test-quality rules are structure-free; the harness setup expects tests in `features/**/ui/__tests__/`. |
+| `open-feature-pr` | No — branch, title, and body conventions only. |
+| `skill-audit` | No — it audits skills, not your code. |
 
 ## Tech stack
 
