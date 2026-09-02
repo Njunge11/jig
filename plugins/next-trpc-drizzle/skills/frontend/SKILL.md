@@ -75,7 +75,7 @@ recipe is missing.
 | Mutation feedback — toasts, optimistic updates, undo | [`references/recipes/mutation-feedback.md`](references/recipes/mutation-feedback.md) |
 | An edit surface — dialog, sheet, inline edit, or picking which | [`references/recipes/edit-surfaces.md`](references/recipes/edit-surfaces.md) |
 | A fullscreen / expanded mode for a panel | [`references/recipes/expanded-panel.md`](references/recipes/expanded-panel.md) |
-| A live preview of rendered output (no iframes) | *planned* |
+| A live preview of rendered output beside an editor | [`references/recipes/page-preview.md`](references/recipes/page-preview.md) |
 | Rich text editing (Lexical) | *planned* |
 | A chat surface (AI SDK + AI Elements) | *planned* |
 

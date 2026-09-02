@@ -102,6 +102,27 @@ these pages on 2026-09-01.
   your updates that change the QueryKey into startTransition").
   Verified 2026-09-01. `nuqs` and `use-debounce` confirmed in
   apps/dashboard/package.json.
+- recipes/page-preview.md — grounded in project evidence and CSS
+  fundamentals: the slow-preview incident (the origin dashboard's
+  job-board preview boots the whole public app in an iframe and
+  syncs via postMessage — preview-panel.tsx audited 2026-09-02);
+  the working precedent (marketing hero renders real dashboard
+  pages in-document under a `data-theme` scope; packages/ui
+  components take data as props); and the viewport fact that
+  media queries evaluate against the viewport, not a container
+  (Tailwind responsive docs, cited at rules 15–18). Device-toggle
+  mechanism verified against
+  [Storybook: Viewport](https://storybook.js.org/docs/essentials/viewport)
+  ("adjust the dimensions of the iframe your story is rendered
+  in") on 2026-09-02. Iframe load timing verified against
+  [MDN: iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe)
+  (`loading="eager"` default: "Load the iframe immediately on
+  page load") and
+  [MDN: Speculation Rules API](https://developer.mozilla.org/en-US/docs/Web/API/Speculation_Rules_API)
+  (prefetch/prerender "targets document URLs", top-level
+  navigations — no iframe prefetch exists, hence mount-early).
+  Sandboxed `srcDoc` for untrusted HTML is standard platform
+  guidance (iframe `sandbox` attribute).
 - recipes/expanded-panel.md — grounded in project evidence, not
   external docs (none authoritative exists for in-app panel
   expansion): the four divergent dashboard implementations
