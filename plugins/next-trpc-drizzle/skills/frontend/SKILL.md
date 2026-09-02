@@ -458,6 +458,6 @@ export default async function Page() {
 
 ## Review
 
-Rules 1–63, plus the Verify list of every recipe the build
-declared, are this skill's review checklist — run by the
-`review-frontend-feature` skill.
+Rules 1–63, plus the Verify list of every recipe whose catalog
+row matches the build, are this skill's review checklist — run by
+the `review-frontend-feature` skill.
