@@ -1,10 +1,23 @@
 # jig
 
-A Claude Code plugin: a test-first engineering playbook for the **Next.js + tRPC + Drizzle** stack (the T3-style stack, plus TanStack Query, shadcn/ui + Tailwind, and Vitest). It ships **13 skills**: a spec → tracker → PR pipeline (plan, build, review, open the PR) plus the standards for structure, backend, and frontend work. Backend and frontend mirror each other: a standards skill, a tests skill, a build lane, and a review lane per side.
+## What jig is
 
-## Install
+Jig is a Claude Code plugin that turns a spec into tested, reviewed pull requests. You write the spec. Jig splits it into checklists, builds each checklist test-first, reviews the diff against fixed standards, and opens the PR. The name comes from the factory tool: a jig guides the work so two builders produce the same part.
 
-In Claude Code, add this repo as a marketplace, install the plugin, then reload:
+## Tech stack
+
+Jig's standards and recipes target one stack:
+
+- Next.js (App Router)
+- tRPC
+- Drizzle ORM + PostgreSQL
+- TanStack Query v5
+- shadcn/ui + Tailwind CSS
+- Vitest — PGlite for backend tests, jsdom + MSW for UI tests
+
+## How to install
+
+Run these three commands in Claude Code:
 
 ```text
 /plugin marketplace add Njunge11/next-trpc-drizzle
@@ -12,44 +25,19 @@ In Claude Code, add this repo as a marketplace, install the plugin, then reload:
 /reload-plugins
 ```
 
-Needs a recent Claude Code (the `/plugin` command). To try it locally without installing, run `claude --plugin-dir ./plugins/jig`.
+To try it without installing, start Claude Code from this repo with `claude --plugin-dir ./plugins/jig`.
 
-## Use
+## How to use
 
-Once installed, each skill loads **automatically** when your task matches its description. You can also invoke any skill explicitly by its namespaced name:
+Example: your spec is `docs/growth/spec.md`.
 
-```text
-/jig:<skill>      # e.g. /jig:frontend-standards
-```
+1. **Plan.** Run `/jig:implementation-planner docs/growth/spec.md`. The planner audits the repo, asks you about the spec's open decisions, then writes `docs/growth/tracker.md` and one checklist per PR. Each tracker row carries a `/goal` run command.
+2. **Build.** Copy one checklist's `/goal` command from the tracker and run it. The command starts the right lane — `implement-backend`, `implement-frontend`, or `implement-steps` — and keeps it working until every Done item is proven in the transcript. The lane builds test-first, opens the PR, and runs an independent review that reports a per-item verdict.
+3. **Merge.** Read the PR and the review verdict, then merge.
 
-| Skill | Use when |
-| --- | --- |
-| `implementation-planner` | You have a spec doc and want it split into a tracker plus one-PR implementation checklists. |
-| `implement-backend` | Building a feature's backend test-first — drives its checklist + TDD loop to a green backend suite. |
-| `implement-frontend` | Building a feature's frontend test-first, or reworking an existing surface — drives its checklist + TDD loop to a green `vitest` run and an open PR. |
-| `implement-steps` | Executing a step implementation checklist — structure-only work driven to green standing checks and an open PR. |
-| `review-backend-feature` | Reviewing a built backend against the backend-standards and backend-tests Review checklists; fixes violations and pushes. |
-| `review-frontend-feature` | Reviewing a built frontend against the frontend-standards Rules and the matching recipes' Verify lists; fixes violations and pushes. |
-| `open-feature-pr` | An implementation checklist's work is complete and its PR must be opened — owns branch/title/body conventions. |
-| `structure` | Deciding where any file lives — the feature tree and placement rules; structure never comes from existing code. |
-| `backend-standards` | Writing or reviewing backend code — entry points → service → repository → Drizzle, queries, transactions, migrations. |
-| `backend-tests` | Writing, reviewing, or planning backend tests — PGlite repos, fake-repo services, entry points through real interfaces. |
-| `frontend-standards` | Writing or reviewing frontend code — shadcn composition, tokens, responsive rules, hooks discipline, the tRPC + TanStack Query data path. Picks the matching recipe from its catalog. |
-| `frontend-tests` | Writing, reviewing, or planning frontend/UI tests — behavior over implementation, the UI test harness (Vitest + jsdom + MSW), and the performance levers. |
-| `skill-audit` | Auditing a skill (or a plugin's skills) against the built-in quality checklist and fixing the failures. |
+You can also invoke any skill directly with `/jig:<skill>` — for example `/jig:frontend-standards` loads the frontend rules while you work by hand. Skills also load automatically when your task matches their descriptions.
 
-## Workflow
-
-**Spec → tracker → PRs, test-first.** You stay in control at every handoff.
-
-1. **Plan** — run `/jig:implementation-planner <spec doc>`. It audits the repo, asks about the spec's open decisions, and writes a tracker plus implementation checklists — one checklist = one PR, each with its `/goal` run command.
-2. **Build** — run a checklist's `/goal` command from the tracker. A TDD checklist (work that changes behavior) runs `implement-backend` or `implement-frontend`; a step checklist (structure-only work) runs `implement-steps`, and its `Domain` line picks the rubric.
-3. **Review** — `review-backend-feature` (backend) or `review-frontend-feature` (frontend) walks its rubric against the PR's diff, fixes violations in place, pushes, and reports a per-item verdict.
-4. **Open the PR** — `open-feature-pr` owns the branch, title, and body conventions.
-
-**Frontend work** runs through `implement-frontend` (features and reworks) with the `frontend-standards` rules and recipes preloaded: identify what you are building, load the matching recipe from the catalog, build to its invariants, and verify in the browser at 375 / 768 / 1024 / 1440px.
-
-> **About `/goal`:** a Claude Code harness command (v2.1.139+) **you** run to keep the agent working autonomously until a condition holds — it loops after each turn until satisfied or you `/goal clear`. Its evaluator only reads the session transcript; it can't open files or run commands, so the condition must be something the agent **proves in its output**. The build skills handle that for you — they surface the checklist state and paste the test run — which is why the prompt can stay this short. Append a cap like `… or stop after 25 turns` if you want a hard turn limit.
+`/goal` needs Claude Code v2.1.139 or newer.
 
 ## License
 
