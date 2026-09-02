@@ -1,6 +1,6 @@
 # next-trpc-drizzle
 
-A Claude Code plugin: a test-first engineering playbook for the **Next.js + tRPC + Drizzle** stack (the T3-style stack, plus TanStack Query, shadcn/ui + Tailwind, and Vitest). It ships **10 skills**: a spec → tracker → PR pipeline (plan, build, review, open the PR) plus the standards for structure, backend, and frontend work.
+A Claude Code plugin: a test-first engineering playbook for the **Next.js + tRPC + Drizzle** stack (the T3-style stack, plus TanStack Query, shadcn/ui + Tailwind, and Vitest). It ships **11 skills**: a spec → tracker → PR pipeline (plan, build, review, open the PR) plus the standards for structure, backend, and frontend work.
 
 ## Install
 
@@ -28,6 +28,7 @@ Once installed, each skill loads **automatically** when your task matches its de
 | `implement-backend` | Building a feature's backend test-first — drives its checklist + TDD loop to a green backend suite. |
 | `implement-steps` | Executing a step implementation checklist — structure-only work driven to green standing checks and an open PR. |
 | `review-backend-feature` | Reviewing a built backend against the backend-standards and backend-tests Review checklists; fixes violations and pushes. |
+| `review-frontend-feature` | Reviewing a built frontend against the frontend skill's Rules and the matching recipes' Verify lists; fixes violations and pushes. |
 | `open-feature-pr` | An implementation checklist's work is complete and its PR must be opened — owns branch/title/body conventions. |
 | `structure` | Deciding where any file lives — the feature tree and placement rules; structure never comes from existing code. |
 | `backend-standards` | Writing or reviewing backend code — entry points → service → repository → Drizzle, queries, transactions, migrations. |
@@ -41,7 +42,7 @@ Once installed, each skill loads **automatically** when your task matches its de
 
 1. **Plan** — run `/next-trpc-drizzle:implementation-planner <spec doc>`. It audits the repo, asks about the spec's open decisions, and writes a tracker plus implementation checklists — one checklist = one PR, each with its `/goal` run command.
 2. **Build** — run a checklist's `/goal` command from the tracker. A TDD checklist (work that changes behavior) runs `implement-backend`; a step checklist (structure-only work) runs `implement-steps`.
-3. **Review** — `review-backend-feature` walks the backend Review checklists against the PR's diff, fixes violations in place, pushes, and reports a per-item verdict.
+3. **Review** — `review-backend-feature` (backend) or `review-frontend-feature` (frontend) walks its rubric against the PR's diff, fixes violations in place, pushes, and reports a per-item verdict.
 4. **Open the PR** — `open-feature-pr` owns the branch, title, and body conventions.
 
 **Frontend work** loads the `frontend` skill: identify what you are building, load the matching recipe from its catalog, build to its invariants, and verify in the browser at 375 / 768 / 1024 / 1440px.

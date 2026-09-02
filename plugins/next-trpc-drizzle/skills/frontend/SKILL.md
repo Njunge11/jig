@@ -45,21 +45,38 @@ produces is placed by its tree, never by imitating existing code.
 
 A backend gap is a value the UI needs that no procedure returns,
 or a real backend/contract bug found while integrating. Never
-patch around one in the client, and never write backend code in
-this loop. Do this instead:
+patch around one in the client — never derive, hardcode, or fake
+the value so integration passes without the backend — and never
+write backend code in this loop. Do this instead:
 
-1. Stop the frontend work.
-2. Write the missing behavior as new items in the `## Backend`
+1. Write the missing behavior as new items in the `## Backend`
    section of `features/<name>/checklist.md` — one observable
-   behavior per line.
+   behavior per line. These items are the contract; the frontend
+   builds against them.
+2. If the project has a tracker (`docs/<project>/tracker.md`),
+   append a row for this gap in the same edit: Status
+   `Not started`, run command in the tracker's TDD form, pointing
+   at the checklist that holds the new items. The tracker is the
+   ledger of owed work — an item that is not in it gets lost.
 3. Spawn the `backend-feature-builder` agent:
    "Implement the unchecked items in
    `features/<name>/checklist.md` `## Backend`."
-4. Continue the frontend build when its tests are green.
+4. Keep building — the whole UI, gap-dependent parts included.
+   A part takes the values it renders as props and never knows
+   the backend exists, so every part is buildable now. The
+   behavior tests drive the parts with fixture props shaped by
+   the written contract.
+5. Wire when the backend lands. Connecting the real procedure in
+   the page tree is the only work that waits — a call to a
+   procedure that is not on the router does not typecheck. The
+   loop's integration gate is unchanged: not done until the
+   backend items are green and the behavior tests pass against
+   the real router.
 
 If you are running as a subagent, you cannot spawn another agent:
-report the gap and the checklist items you wrote, then stop — the
-main session dispatches the backend builder.
+build every part against the written contract, then report the
+gap and the checklist items you wrote — the main session
+dispatches the backend builder, and wiring completes after.
 
 ## Existing UI
 
@@ -80,9 +97,8 @@ violates the rules:
 
 ## The catalog — building X → recipe
 
-Load every row that matches. A row marked *planned* has no file
-yet: build from the rules below and tell the developer which
-recipe is missing.
+Load every row that matches. No row matches? Build from the
+rules below and tell the developer which recipe is missing.
 
 | Building | Recipe |
 |---|---|
@@ -91,7 +107,6 @@ recipe is missing.
 | A data table — columns, sorting, pagination, row actions | [`references/recipes/data-table.md`](references/recipes/data-table.md) |
 | Tabs or segmented views (URL-backed, prefetched) | [`references/recipes/tabs.md`](references/recipes/tabs.md) |
 | A form that submits a mutation (validation, field errors) | [`references/recipes/form-with-mutation.md`](references/recipes/form-with-mutation.md) |
-| A multi-step flow / wizard | *planned* |
 | Mutation feedback — toasts, optimistic updates, undo | [`references/recipes/mutation-feedback.md`](references/recipes/mutation-feedback.md) |
 | An edit surface — dialog, sheet, inline edit, or picking which | [`references/recipes/edit-surfaces.md`](references/recipes/edit-surfaces.md) |
 | A fullscreen / expanded mode for a panel | [`references/recipes/expanded-panel.md`](references/recipes/expanded-panel.md) |
