@@ -54,6 +54,23 @@ To try it without installing, start Claude Code from this repo with `claude --pl
 
 ## How to use
 
+The workflow, end to end:
+
+```mermaid
+flowchart TD
+    S[Spec doc] --> P[implementation-planner]
+    P --> T["tracker.md + checklists — one checklist = one PR"]
+    T -->|"backend TDD /goal"| B[implement-backend]
+    T -->|"frontend TDD /goal"| F[implement-frontend]
+    T -->|"step /goal"| SL[implement-steps]
+    B --> O[open-feature-pr opens the PR]
+    F --> O
+    SL --> O
+    O --> R["independent review — review-backend-feature or review-frontend-feature"]
+    R --> V[per-item verdict pushed to the PR]
+    V --> M[you read the verdict and merge]
+```
+
 Example: your spec is `docs/growth/spec.md`.
 
 1. **Plan.** Run `/jig:implementation-planner docs/growth/spec.md`. The planner audits the repo, asks you about the spec's open decisions, then writes `docs/growth/tracker.md` and one checklist per PR. Each tracker row carries a `/goal` run command.
