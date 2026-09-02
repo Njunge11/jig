@@ -1,0 +1,20 @@
+# Sources — what grounds each rule
+
+Load this file only when a rule's ground is questioned. Verified September 2026.
+
+## The doctrine (Review checklist items 1–8)
+
+- **Items 1–3, 8 — behavior over implementation.** Kent C. Dodds, [Testing Implementation Details](https://kentcdodds.com/blog/testing-implementation-details): "Implementation details are things which users of your code will not typically use, see, or even know about" — state variable names, method names, internal structure. Two named failure modes: **false negatives** (a rename breaks the test though the component works — item 8's litmus) and **false positives** (the test passes while the click is broken — why item 2 asserts the outcome, not `toHaveBeenCalled`).
+- **The banner principle.** Testing Library, [Guiding Principles](https://testing-library.com/docs/guiding-principles/): "The more your tests resemble the way your software is used, the more confidence they can give you." Utilities deal with DOM nodes, not component instances.
+- **Item 5 — query priority.** Testing Library, [About Queries — Priority](https://testing-library.com/docs/queries/about/): `getByRole` "should be your top preference for just about everything"; `getByTestId` is last — "The user cannot see (or hear) these, so this is only recommended for cases where you can't match by role or text or it doesn't make sense (e.g. the text is dynamic)."
+- **Item 6 — async and absence.** Same page: `findBy*` returns a Promise and retries until timeout; `queryBy*` returns `null` without waiting — the way to assert absence.
+- **Item 7 — no visual assertions in jsdom.** [jsdom README](https://github.com/jsdom/jsdom): jsdom does not implement layout — "the ability to calculate where elements will be visually laid out as a result of CSS" — and returns "zeros for many layout-related properties". A visual or responsive assertion in jsdom asserts dummy values.
+- **Item 4 — the mocking boundary.** TkDodo, [Testing React Query](https://tkdodo.eu/blog/testing-react-query): use MSW as "your single source of truth when it comes to mocking your apis" — over mocking fetch, axios, or an api client (he seconds KCD's "Stop mocking fetch"). The article also grounds the harness: a new QueryClient per test ("tests are completely isolated... otherwise you might get unexpected and flaky results"). The no-mocking-your-own-hooks rule derives from KCD's implementation-details definition — your hooks are things no user knows about — and his testing process draws the same boundary: it asserts against the mocked network ("ensure the mocked /checkout API was called with the right data"), never against your own handlers or state.
+
+## The harness (references/test-setup.md)
+
+- [Vitest — Test Projects](https://vitest.dev/guide/projects): `projects` is current through Vitest 4; the `workspace` file is deprecated since 3.2; `extends: true` inherits the root config.
+- [Vitest — Improving Performance](https://vitest.dev/guide/improving-performance) (full read): the `Duration` phase breakdown and `vitest doctor`; "jsdom costs roughly 200-500ms per import and happy-dom roughly 90-200ms" per file under default isolation — "often the largest cost" of DOM suites; "Prefer `isolate: false` with `threads` if the tests tolerate shared state"; `vmThreads` trade-offs; sharding via `--shard` + `--reporter=blob` + `--merge-reports`; `fsModuleCache` and `NODE_COMPILE_CACHE`.
+- [TanStack Query — Testing](https://tanstack.com/query/v5/docs/framework/react/guides/testing): `retry: false` on the test QueryClient ("your tests are likely to timeout if you want to test an erroneous query"); a fresh QueryClient per test keeps tests isolated.
+- [msw-trpc](https://github.com/maloguertin/msw-trpc): v2.0.1, peers `@trpc/server@^11` + `msw@^2` (npm). v2 requires `createTRPCMsw<AppRouter>({ links: [httpLink({ url })] })` with `httpLink` imported from `msw-trpc` — proven from the repo's own `packages/test-react/src/basic.test.tsx`; the README omits the example.
+- [@testing-library/jest-dom](https://www.npmjs.com/package/@testing-library/jest-dom): the `./vitest` export entry is real in v7 (npm exports field).
