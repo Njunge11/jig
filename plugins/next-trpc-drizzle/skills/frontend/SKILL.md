@@ -73,7 +73,7 @@ recipe is missing.
 | A form that submits a mutation (validation, field errors) | [`references/recipes/form-with-mutation.md`](references/recipes/form-with-mutation.md) |
 | A multi-step flow / wizard | *planned* |
 | Mutation feedback — toasts, optimistic updates, undo | [`references/recipes/mutation-feedback.md`](references/recipes/mutation-feedback.md) |
-| An edit surface — dialog, drawer, inline edit | *planned* |
+| An edit surface — dialog, sheet, inline edit, or picking which | [`references/recipes/edit-surfaces.md`](references/recipes/edit-surfaces.md) |
 | A fullscreen / expanded mode for a panel | *planned* |
 | A live preview of rendered output (no iframes) | *planned* |
 | Rich text editing (Lexical) | *planned* |
@@ -405,8 +405,24 @@ export default async function Page() {
     their data on hover, so opening is instant despite the lazy
     code.
 
+### Portals and dismissal
+
+62. An outside-click handler on a page component tests
+    structurally, never by enumerating overlay surfaces. A
+    portaled layer (dialog, select, popover content) is a direct
+    child of `<body>`; a pointer event belongs to the page only
+    when its body-level ancestor contains the component's root.
+    An enumerated list of known overlays silently breaks with
+    every new primitive — this repo shipped the same collapse bug
+    three times that way.
+63. Guard dismissal races by target identity: Radix layers
+    dismiss on `pointerdown`, and by the time a document
+    `mousedown` handler runs, the closing layer has detached its
+    node — check `!target.isConnected`. A boolean ref cannot
+    bridge that event ordering.
+
 ## Review
 
-Rules 1–61, plus the Verify list of every recipe the build
+Rules 1–63, plus the Verify list of every recipe the build
 declared, are this skill's review checklist — run by the
 `review-frontend-feature` skill.

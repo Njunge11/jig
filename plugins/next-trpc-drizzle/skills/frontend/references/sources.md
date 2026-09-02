@@ -61,7 +61,7 @@ these pages on 2026-09-01.
   44×44px (iOS) / 48dp (Android) touch targets; "never
   `maximum-scale=1` or `user-scalable=no`."
 
-## Data (31–61)
+## Data (31–61) and portals (62–63)
 
 - Rules 31–35, 38, 43 — [tRPC: Server Components setup](https://trpc.io/docs/client/tanstack-react-query/server-components).
   Awaited prefetch: "the server must complete the query before
@@ -78,6 +78,12 @@ these pages on 2026-09-01.
   `server-parallel-fetching`, `async-suspense-boundaries`,
   `bundle-preload`, `bundle-dynamic-imports`) so nothing depends
   on an external skill being installed.
+
+- Rules 62–63 — project incidents recorded in
+  apps/dashboard/docs/frontend-do-dont.md §1–2 (the dialog-close
+  collapse shipped three times against an enumerated-surface
+  outside-click handler; the dismissal race yielded only to the
+  `!target.isConnected` guard).
 
 ## Recipes
 
@@ -96,6 +102,28 @@ these pages on 2026-09-01.
   your updates that change the QueryKey into startTransition").
   Verified 2026-09-01. `nuqs` and `use-debounce` confirmed in
   apps/dashboard/package.json.
+- recipes/edit-surfaces.md — verified 2026-09-02 against four
+  design-system pages:
+  [Primer: Dialog guidelines](https://primer.style/product/components/dialog/guidelines/)
+  ("Avoid creating a whole page inside a Dialog"; backdrop
+  "won't dismiss the Dialog" when a form has unsaved changes;
+  right side sheets "for quick previews", "Don't use side sheets
+  to present create/edit forms … use a page instead"),
+  [Carbon: Modal usage](https://carbondesignsystem.com/components/modal/usage/)
+  ("Modals interrupt a user's workflow for short and non-frequent
+  tasks"; repeated tasks belong on the main page; destructive →
+  "transactional danger modal"; button labels are active verbs,
+  "Avoid vague or passive words, such as Done or OK"),
+  [Carbon: Dialog pattern](https://carbondesignsystem.com/patterns/dialog-pattern/)
+  ("A modal is not an alternative to page"; needing outside
+  information → full page), and
+  [Polaris: Modal](https://shopify.dev/docs/api/app-home/polaris-web-components/overlays/modal)
+  ("Use as a last resort for important decisions"; "For
+  destructive actions, explain the consequences in the modal
+  body"). Inline auto-save ground:
+  [Primer: Saving patterns](https://primer.style/product/ui-patterns/saving/)
+  ("Automatic saving should be used when the user expects instant
+  feedback").
 - recipes/mutation-feedback.md —
   [TanStack Query: Optimistic Updates](https://tanstack.com/query/v5/docs/framework/react/guides/optimistic-updates)
   (the v5 signatures: `context.client`, `onMutateResult`; the
