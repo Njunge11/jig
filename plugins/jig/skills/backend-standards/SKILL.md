@@ -1,6 +1,6 @@
 ---
 name: backend-standards
-description: Layered backend architecture — entry points (tRPC router, MCP tool, durable workflow) → service → repository → Drizzle. Use when you write or review backend code — routers, MCP tools, workflows, services, repositories, queries, transactions, or migrations.
+description: Layered backend architecture — entry points (tRPC router, MCP tool, eve agent tool, durable workflow) → service → repository → Drizzle. Use when you write or review backend code — routers, MCP tools, eve agent tools, workflows, services, repositories, queries, transactions, or migrations.
 ---
 
 # Backend Standards
@@ -99,8 +99,8 @@ export const invitesRouter = createTRPCRouter({
 ## Layers
 
 ```
-Entry:  tRPC Router  │  MCP tool  │  Workflow ("use workflow" + steps)
-              └──────────┬──────────┘
+Entry:  tRPC Router  │  MCP tool  │  eve tool  │  Workflow ("use workflow" + steps)
+              └───────────────┬────────────────┘
                       Service
                          │
                      Repository
@@ -130,6 +130,12 @@ Use a workflow for multi-step work that must survive crashes and waits — LLM c
 A tool is a router for an external agent (Claude/ChatGPT). The client owns the conversation and the loop. Each call is stateless.
 
 **Load `references/mcp-entry.md` before you write or review an MCP tool.** It holds the `registerTool` contract, the `structuredContent` + text fallback, the annotation defaults, the two error channels, the server-derived idempotency key, and the wire-once transport setup. It backs Review checklist items 8–9.
+
+### Entry — eve agent tool (`agent/tools/<tool_name>.ts`)
+
+A tool is a router for the app's own eve agent. eve owns the conversation, the loop and the session; the file name is the tool name, and the file is the composition root.
+
+**Load `references/eve-entry.md` before you write or review an eve tool.** It holds the one-file-per-tool rule, the module-scope `execute` the compiler requires, the shared caller helper, the return-value error channel, the one-eval-per-tool proof on the compiled build, and the wire-once agent, channel and eval setup. It backs Review checklist items 26–27.
 
 ### Service — `api/*.service.ts`
 
@@ -301,11 +307,11 @@ type GetUser = inferRouterOutputs<AppRouter>["user"]["get"];
 
 ## Review checklist
 
-Reject the change if any item is true. Items 5–7 need `references/workflow-entry.md`; items 8–9 need `references/mcp-entry.md` — load each file before you judge its items, and skip those items when the diff has no workflow or no MCP tool.
+Reject the change if any item is true. Items 5–7 need `references/workflow-entry.md`; items 8–9 need `references/mcp-entry.md`; items 26–27 need `references/eve-entry.md` — load each file before you judge its items, and skip those items when the diff has no workflow, no MCP tool or no eve tool.
 
 1. A file is outside the feature tree, or the schema is outside its correct home (`db/schema/`; in a monorepo: the workspace db package for shared tables, the prefixed app-local `db/schema/` for private ones).
 2. A service or a repo is a class or a module singleton, or a layer below the entry point imports the db client.
-3. An entry point (router, MCP tool, or workflow) accesses the DB or contains business logic.
+3. An entry point (router, MCP tool, eve tool, or workflow) accesses the DB or contains business logic.
 4. An auth check is written by hand inside a procedure body instead of in a composed base procedure.
 5. A workflow function (`"use workflow"`) does I/O, calls a service, or reads the clock or randomness.
 6. A workflow step performs a side effect and does not check that the effect is still needed, or the orchestrator branches on data other than the step returns and the input.
@@ -328,3 +334,5 @@ Reject the change if any item is true. Items 5–7 need `references/workflow-ent
 23. A function returns a function to bind a dependency that could be a parameter, or a factory wraps something that is not a service or a repository.
 24. A factory writes a method body inside the object it returns, instead of returning a list of named functions.
 25. A call takes a function of more than one line, or an object literal of more than a few lines, as an inline argument — instead of a named function or a named constant declared above the call.
+26. An eve tool's `execute` is declared inside a function body or wrapped in a factory, instead of a named function at module scope in `agent/tools/<tool_name>.ts`; or the tool throws an expected failure instead of returning it.
+27. An eve tool has no eval in `evals/tools/<tool_name>.eval.ts` that runs it through the compiled agent, or the project's check target does not run the evals.

@@ -54,6 +54,14 @@ app/<route>/
   error.tsx
 components/ui/               ← the kit, plus app-wide compound components
                                (Panel, RichTextEditor)
+agent/                       ← only if the app has an eve agent
+  agent.ts                   ← the agent definition (wired once)
+  channels/<name>.ts         ← one channel with its auth walk (wired once)
+  tools/<tool_name>.ts       ← entry: eve agent tool; eve names the tool after the file
+  lib/                       ← the caller helper and the parts every tool shares
+evals/
+  evals.config.ts
+  tools/<tool_name>.eval.ts  ← one eval per eve tool, on the compiled build
 ```
 
 ## Placement rules
@@ -73,6 +81,11 @@ components/ui/               ← the kit, plus app-wide compound components
    factories) follow `backend-standards`; the `ui/` branch
    follows the `frontend-standards` skill. This skill owns only where
    things live.
-6. **Check before you finish.** Walk every file you created or
+6. **eve fixes the tool path.** An eve tool lives at
+   `agent/tools/<tool_name>.ts`, never in the feature folder,
+   because eve registers that directory and names the tool after
+   the file. The service the tool calls stays in its feature's
+   `api/`; the tool file only composes it.
+7. **Check before you finish.** Walk every file you created or
    moved against the tree. Fix a misplaced file now — do not
    record it for later.
