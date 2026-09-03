@@ -7,7 +7,7 @@ agent: jig:frontend-feature-reviewer
 
 # Feature Review — Frontend
 
-An independent second walk of the frontend rubric against a feature's diff. This runs in a forked subagent with the `frontend-standards`, `frontend-tests`, and `structure` skills preloaded — the frontend-standards `## Rules` list, the matching recipes' Verify lists, and the frontend-tests `## Review checklist` are the rubric; this skill restates none of their rules.
+An independent second walk of the frontend rubric against a feature's diff. This runs in a forked subagent with the `frontend-standards`, `frontend-tests`, and `structure` skills preloaded — the frontend-standards `## Rules` list, the matching recipes' Verify lists, and the frontend-tests `## Review checklist` are the rubric; this skill restates none of their rules. A `## Design facts` section in the feature's checklist joins the rubric.
 
 **Scope:** `$ARGUMENTS` — the implementation checklist path (`docs/<project>/checklists/NN-<slug>.md` or `features/<name>/checklist.md`) and/or a branch. The diff under review is `git diff main` (or the given branch against main).
 
@@ -19,8 +19,9 @@ An independent second walk of the frontend rubric against a feature's diff. This
 4. Walk **each loaded recipe's Verify list** item by item against the surface it covers. **Gate:** every item has a recorded verdict before you go to step 5.
 5. Walk the frontend-tests `## Review checklist` **item by item against every new or changed test**. **Gate:** every item has a recorded verdict before you go to step 6.
 6. Walk the `structure` tree over **every file the diff adds or moves**: is it in its defined place? **Gate:** every added or moved file has a recorded verdict before you go to step 7.
-7. Fix every violation in place. **Gate:** `vitest` is green after the fixes. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
-8. **Return the verdict**: one line per item of every rubric list — `pass`, `fixed` with `file:line`, or `browser-check` — plus the green `vitest` run, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
+7. Walk the checklist's `## Design facts` section, when it has one, **item by item against the changed files** — open the files and check each `D<n>` statement. **Gate:** every fact has a recorded verdict before you go to step 8.
+8. Fix every violation in place. **Gate:** `vitest` is green after the fixes. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
+9. **Return the verdict**: one line per item of every rubric list — `pass`, `fixed` with `file:line`, or `browser-check` — plus the green `vitest` run, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
 
 ### The `browser-check` verdict
 
@@ -44,6 +45,12 @@ frontend-tests
  1 pass
  2 fixed — features/invites/ui/__tests__/member-picker.test.tsx:41 (asserts the dialog, not the handler)
  ... one line per item, first to last
+
+design-facts
+ D1 pass
+ D4 fixed — features/invites/ui/day-row.tsx:18 (the toggle sits left of the day name)
+ D9 browser-check
+ ... one line per fact, when the checklist has a ## Design facts section
 
 structure
  features/invites/ui/invites-page.tsx pass

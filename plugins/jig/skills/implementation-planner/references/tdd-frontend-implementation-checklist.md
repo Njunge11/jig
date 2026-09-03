@@ -6,6 +6,9 @@ How to write a TDD implementation checklist for frontend work that changes what 
 
 - Copy the spec's wording verbatim. Do not invent labels, headings, or microcopy.
 - Split the tasks into **Behavior (test-backed)** `F<n>` items and **Visual & responsive (browser-checked, never jsdom tests)** `V<n>` items. A behavior is testable in jsdom through what the user sees and does; layout, spacing, and breakpoints are not — they go under `V<n>`.
+- When mockup images come with the spec, add a `## Design facts` section: one `D<n>` statement per checkable fact, grouped by image. A fact states one thing the image shows — a part, its position or order, its count, its alignment, its variant, or its copy word for word. Never write a pixel size or a color read off the image: the codebase's design system supplies the tokens, so a fact says "icon-only", "muted", or "beside the day name" — never "32px" or "#6b7280".
+- Write each `V<n>` item to cite the `D<n>` facts it verifies, e.g. `V2 (D4–D7) At 768 ...`. A fact about copy, counts, or states is jsdom-testable — cover it with an `F<n>` item.
+- When you write a `## Design facts` section, add this item to `## Done`: `- [ ] One verdict per D item pasted: pass, fixed with file:line, or browser-check.` It makes the builder's fact walk visible to the /goal watcher.
 - Write each `F<n>` task so its tests can pass the Review checklist of the `frontend-tests` skill (invoked in Step 4): one observable behavior, expected values from the spec, driven through what the user sees and does.
 - Each failure path and each empty state the spec states is a behavior: give it its own `F<n>` task. The task list is the feature's coverage contract — a behavior with no task gets no test.
 - Write no `## Backend` section. Backend work gets its own checklist. The builder adds a `## Backend` section only for a gap it discovers while integrating.
@@ -23,6 +26,15 @@ Copy the template below. Replace each `<placeholder>` with this implementation c
 <What this builds.> Spec: `docs/<spec>.md`, section <section>.
 Target: <app>, feature <slug>. Builds on: <earlier checklists, or none>.
 Type: <Conventional Commits type>. Branch: `<type>/<slug>`.
+
+## Design facts
+
+<Only when mockup images came with the spec; omit the section otherwise.>
+Transcribed from the mockup images. The builder builds to these statements, and the builder and the reviewer each walk them against the diff.
+
+### <image 1: what it shows>
+
+- D1 <one checkable statement from the image>
 
 ## Frontend + Integration
 

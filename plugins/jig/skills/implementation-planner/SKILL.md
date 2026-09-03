@@ -38,6 +38,8 @@ Write each implementation checklist as `docs/<project>/checklists/NN-<slug>.md`.
 - No — the work only changes the code's structure: write a step implementation checklist, per `references/step-implementation-checklist.md`. Its `Domain` line names the domain.
 - Work that changes both behavior and structure: split it into a TDD checklist and a step checklist. If the answer is unclear, ask the developer.
 
+When mockup images come with the spec, transcribe each image into a `## Design facts` section in the frontend checklist, as `references/tdd-frontend-implementation-checklist.md` specifies. Read every image in this session. An image the spec references but you cannot see is a Step 3 gap — ask the developer for it.
+
 Also give each implementation checklist its Conventional Commits type (`feat`, `fix`, `chore`, `refactor`, ...). The type names its branch and PR title. It does not decide which checklist to write.
 
 Then write the tracker as `docs/<project>/tracker.md` — fill `assets/tracker-template.md`. The tracker carries each implementation checklist's /goal run command:
@@ -72,6 +74,7 @@ Check every file you wrote. Fix every miss, then check again.
 6. Every task checkbox in every implementation checklist must be `[ ]`. The builder ticks boxes, not you.
 7. Every implementation checklist this run created must have Status `Not started` in the tracker. A checklist that was already in the tracker before this run keeps its Status.
 8. Every section heading and label in every implementation checklist must come from its template. A label copied from an older document in the repo does not belong — the template decides the format, not the documents already there.
+9. When mockup images came with the spec, each frontend TDD implementation checklist must have a `## Design facts` section, and every `D<n>` number a `V<n>` item cites must exist in that section.
 
 When every check passes, you are done.
 
