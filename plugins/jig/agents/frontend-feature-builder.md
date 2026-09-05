@@ -5,6 +5,7 @@ skills:
   - frontend-tests
   - frontend-standards
   - structure
+  - eve-agent
   - open-feature-pr
 ---
 

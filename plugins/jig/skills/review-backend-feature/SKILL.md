@@ -16,8 +16,9 @@ An independent second walk of the backend Review checklists against a feature's 
 1. Read the feature's checklist and the full diff.
 2. Walk the `backend-standards` Review checklist **item by item against the changed files** — every item, no skipping, no grep proxies: open the files and look. **Gate:** every item has a recorded verdict before you go to step 3.
 3. Walk the `backend-tests` Review checklist **item by item against every new or changed test**. **Gate:** every item has a recorded verdict before you go to step 4.
-4. Fix every violation in place. **Gate:** `vitest --project backend` is green after the fixes. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
-5. **Return the verdict**: one line per checklist item — `pass`, or `fixed` with `file:line` and the item number — plus the green `vitest --project backend` run, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
+4. Walk the `eve-agent` Review checklist **item by item** when the diff touches `agent/`, `evals/`, or a file that imports `eve/react`, and run its Gates. When the diff touches none of them, record `skipped — no agent files` and go on. **Gate:** every item has a recorded verdict, and the Gates' output is in the verdict, before you go to step 5.
+5. Fix every violation in place. **Gate:** `vitest --project backend` is green after the fixes, and the `eve-agent` Gates pass again when step 4 ran. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
+6. **Return the verdict**: one line per checklist item — `pass`, or `fixed` with `file:line` and the item number — plus the green `vitest --project backend` run, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
 
 ### Verdict format
 
@@ -32,6 +33,12 @@ backend-tests
  1 fixed — src/features/invites/invites.service.test.ts:88 (asserts the returned invite, not the repo call)
  2 pass
  ... one line per item, first to last
+
+eve-agent
+ 1 pass
+ 3 fixed — agent/tools/get_job.ts:40 (toModelOutput added)
+ ... one line per item, first to last — or: skipped — no agent files
+ gates <paste `pnpm exec eve info` and the eval script's run>
 ```
 
 ### When a step fails
