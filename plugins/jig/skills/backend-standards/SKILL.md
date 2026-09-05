@@ -185,6 +185,7 @@ Errors flow up: Repository → Service → Entry → the global handler (tRPC) o
 - Do not wrap every function in `try/catch`.
 - Catch **only** for these purposes: to add context, to convert an infrastructure error into a domain error, or to recover from an expected failure.
 - Never discard an error — let it propagate.
+- **Log every failure an entry hands to a client.** A `refused`, `notFound` or `forbidden` return and a thrown mutation error reach the server log with the procedure or tool name, the ids and the message. A failure the server does not log cannot be read when the user reports a dead screen.
 
 ## Control flow
 
@@ -336,3 +337,4 @@ Reject the change if any item is true. Items 5–7 need `references/workflow-ent
 25. A call takes a function of more than one line, or an object literal of more than a few lines, as an inline argument — instead of a named function or a named constant declared above the call.
 26. An eve tool's `execute` is declared inside a function body or wrapped in a factory, instead of a named function at module scope in `agent/tools/<tool_name>.ts`; or the tool throws an expected failure instead of returning it.
 27. An eve tool has no eval in `evals/tools/<tool_name>.eval.ts` that runs it through the compiled agent, or the project's check target does not run the evals.
+28. An entry hands a failure to a client that the server does not log with the procedure or tool name, the ids and the message.

@@ -337,7 +337,10 @@ export default async function Page() {
 56. Route errors by channel: read failures render in the
     boundary; mutation failures surface as a toast naming the
     action; form-field validation renders inline at the field. Do
-    not mix the channels.
+    not mix the channels. Each channel shows the message the
+    server returned: a `refused`, `notFound` or `forbidden` result
+    becomes a sentence, never `null`, and a thrown mutation error
+    shows the server's message, never a fixed line.
 
 ### Optimistic updates
 

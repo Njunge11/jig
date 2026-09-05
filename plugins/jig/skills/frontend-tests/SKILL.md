@@ -21,6 +21,7 @@ Reject the test if any item is true. This list judges each test's quality, not t
 6. The test asserts **async UI without `findBy*`** (which waits), or asserts absence without `queryBy*`.
 7. A **jsdom test asserts a visual or responsive outcome** — those are Visual items, browser-checked, never jsdom tests.
 8. The test fails the **litmus test**: rewriting the component's internals (state lib, data lib, markup) with behavior unchanged would break it.
+9. A **stream or event fixture** takes its event order from what the author assumed instead of from the trace of one real turn (for an eve client, `pnpm exec eve traces`). A fixture that streams the words before the tool result keeps the suite green and hides a client that draws every card wrong.
 
 ## What to assert
 
