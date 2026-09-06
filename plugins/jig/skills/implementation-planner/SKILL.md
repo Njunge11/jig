@@ -26,6 +26,8 @@ Two kinds of gap stop the work:
 
 In both cases, ask the developer. Write the resolution into the spec doc. Then continue from the amended spec. Do not design the answer yourself.
 
+Every resolution you write into the spec carries a `Developer said:` line that quotes the developer's answer word for word, from this session. A resolution with no such line is one you designed: delete it and report the gap as open. The quote is the audit trail Step 5 checks.
+
 ### Step 4: Split the work into implementation checklists
 
 Split the spec's work into implementation checklists. One implementation checklist is one PR: the smallest unit of work a builder can implement and test on its own. Smaller units make testing and review easier. Order the checklists so that each one depends only on earlier ones.
@@ -75,6 +77,7 @@ Check every file you wrote. Fix every miss, then check again.
 7. Every implementation checklist this run created must have Status `Not started` in the tracker. A checklist that was already in the tracker before this run keeps its Status.
 8. Every section heading and label in every implementation checklist must come from its template. A label copied from an older document in the repo does not belong — the template decides the format, not the documents already there.
 9. When mockup images came with the spec, each frontend TDD implementation checklist must have a `## Design facts` section, and every `D<n>` number a `V<n>` item cites must exist in that section.
+10. Every resolution this run wrote into the spec has a `Developer said:` line quoting the developer's own message from this session. A resolution without one is deleted, and its gap is reported as open in the run's final report.
 
 When every check passes, you are done.
 
