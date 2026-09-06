@@ -89,6 +89,7 @@ Each rule names its doc page under `node_modules/eve/docs/`. `references/sources
 ### Measure
 
 - **Read the turn from its trace.** `pnpm exec eve traces` prints the span tree of the last turn: each model step with its tokens, each `execute_tool` span with its tool name and duration. Set `EVE_TRACES_CONTENT=on` in `.env.local` to capture prompts and tool payloads. Source: `reference/cli.md` § "eve traces".
+- **The trace counts model steps and tool calls, not statements.** A tool's statements are its service's statement budget, asserted by the budget test `backend-standards` § "Queries & performance" demands. A lane is within budget when both hold: the trace's tool list and step count, and each tool's statement count. Source: `reference/cli.md` § "eve traces" — span rows carry token counts, gateway cost and the tool name of `execute_tool` spans; no span carries a statement count.
 
 ## Common failures
 

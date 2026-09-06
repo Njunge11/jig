@@ -166,11 +166,13 @@ Before you write a query, check these options: one query instead of several, one
 - Reuse hot queries as prepared statements. Call `.prepare()` with `sql.placeholder(...)` for the dynamic values — then the driver reuses precompiled SQL.
 - Index the columns that queries use frequently. Enforce the constraints in the schema.
 - Keep the queries deterministic (a stable order for pagination).
+- Give every entry-point call a statement budget. Before you write a procedure, tool or step, list the statements the behavior needs — one per row set it reads or writes — and write the count into the task. A test on the real database asserts that exact count (`backend-tests`, "Statement budget"). A budget that rises names, in the task, the behavior that needs the extra statement.
 
 **Never**
 - No queries inside loops. No duplicate queries for the same data.
 - No sequential `await`s for independent operations — use `Promise.all`.
 - No unbounded list queries. No full table scans where an index should exist.
+- No statement the behavior does not need: a read whose rows another statement in the same call already returned, a re-read after a write that `.returning()` answers, a count beside the list it counts, a gate query the caller already ran. On a remote database each one is a round trip the user waits for.
 
 ## Transactions
 
@@ -338,3 +340,4 @@ Reject the change if any item is true. Items 5–7 need `references/workflow-ent
 26. An eve tool's `execute` is declared inside a function body or wrapped in a factory, instead of a named function at module scope in `agent/tools/<tool_name>.ts`; or the tool throws an expected failure instead of returning it.
 27. An eve tool has no eval in `evals/tools/<tool_name>.eval.ts` that runs it through the compiled agent, or the project's check target does not run the evals.
 28. An entry hands a failure to a client that the server does not log with the procedure or tool name, the ids and the message.
+29. An entry-point call has no statement-budget test, or the diff raises a call's statement count without the behavior that needs the extra statement named in the task.

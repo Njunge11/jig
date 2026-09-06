@@ -7,6 +7,7 @@ How to write a TDD implementation checklist for backend work that changes what t
 - Copy the spec's wording verbatim. Do not invent labels or microcopy.
 - Write each task so its tests can pass the Review checklist of the `backend-tests` skill (invoked in Step 4): one observable behavior, expected values from the spec, testable in its layer's test setup.
 - Each failure path the spec states is a behavior: give it its own task. The task list is the feature's coverage contract — a behavior with no task gets no test.
+- Each entry-point call the checklist adds or changes (a procedure, an MCP tool, an eve tool, a workflow step) gets one statement-budget task. List the statements the behavior needs, one per row set read or written, and write the count and the list into the task. The builder's test asserts that exact count on the real database (`backend-standards` § "Queries & performance"; `backend-tests` Review item 14). Derive the list from the spec and the repo audit, never from a run.
 - If the implementation checklist creates a new app or package, list its setup in Scope: package.json with the standard scripts, tsconfig, vitest setup, drizzle config, `db/schema/`.
 - `## Done` holds only what the builder can prove with output it can paste: a test run, a command, or the diff. A spec-stated check that only a human can perform goes under `## Manual verification` — the developer runs it, not the builder.
 
@@ -31,6 +32,7 @@ Setup (only when this checklist creates a new app or package):
 ### <source file>
 
 - [ ] <one task: an observable behavior with expected values from the spec>
+- [ ] <the call> runs exactly <N> statements: <one line per statement, naming the row set it reads or writes>
 
 ## Manual verification
 

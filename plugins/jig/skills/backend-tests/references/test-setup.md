@@ -35,6 +35,32 @@ await db.transaction(async (tx) => {
 
 - When a test must actually commit (it asserts across committed transactions), snapshot the freshly-pushed empty DB once and restore per test instead.
 
+### Statement counter
+
+A statement-budget test (`backend-tests` Review item 14) reads how many statements one call ran. Count them where every statement passes: the Drizzle `logger` option. Drizzle calls `logQuery` once per statement it sends, so a logger that increments a counter is exact and costs nothing.
+
+```ts
+// test/statement-counter.ts
+import type { Logger } from "drizzle-orm/logger";
+
+let count = 0;
+
+export const countingLogger: Logger = {
+  logQuery() {
+    count += 1;
+  },
+};
+
+export function statementCount(): number {
+  return count;
+}
+statementCount.reset = () => {
+  count = 0;
+};
+```
+
+Pass `countingLogger` to `drizzle(client, { logger: countingLogger })` when the test setup builds the PGlite db, and call `statementCount.reset()` in `beforeEach`. Statements inside a transaction count the same way. The transaction markers (`BEGIN`, `COMMIT`, `ROLLBACK`) do not pass through the logger, so a budget lists only the statements the call runs. Verified on drizzle-orm with the PGlite driver: two plain statements count 2; one statement inside a transaction counts 1, committed or rolled back.
+
 ## Service tests — fake repo
 
 Use no DB. Assert the returned values and the data persisted to the fake.

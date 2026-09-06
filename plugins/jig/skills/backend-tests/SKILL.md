@@ -22,6 +22,7 @@ Reject the test if any item is true. This list judges each test's quality, not t
 11. The test verifies **more than one specified behavior**. One behavior per test; a task with several behaviors gets several tests.
 12. The test targets **code that is not ours or has no behavior of its own**: a third-party library's correctness (Zod parsing, Drizzle SQL generation), a trivial pass-through, or a private helper already covered through its public API.
 13. The test asserts **behavior that lives in the fake**, not in the code under test: the fake re-implements production logic (filtering, stamping, ordering), and the assertion observes that logic. A stateful fake lives in `<source>.repo.fake.ts` beside the real repo, with a contract test that proves it against the real implementation — never inline in one test file.
+14. A **statement-budget test** runs through a fake repo or a mocked client instead of the real database, or asserts a bound (`toBeLessThan`) where the exact count is knowable, or the count it asserts was read off the implementation instead of listed from the behavior (item 4).
 
 ## What not to do — and what to do instead
 
@@ -144,6 +145,24 @@ await expect(caller.users.register({ email: "no-at-sign" })).rejects.toThrow(
   /invalid email/,
 );
 ```
+
+**Checklist item 14 — Statement budget. Count the statements the behavior needs, then assert that the call runs exactly that many.**
+
+The budget is the one test that fails when a call grows a query nobody needs. It runs at the entry-point layer on the real database, with the counter `references/test-setup.md` § "Statement counter" describes.
+
+```ts
+// ❌ a bound hides growth, and a fake counts nothing
+expect(statementCount()).toBeLessThan(10);
+
+// ✅ listed from the behavior: the gate reads the membership (1),
+//    the update writes the draft and returns it (1), the review reads
+//    the draft's places (1) — three statements, no more
+statementCount.reset();
+await caller.submitDetails({ companyId, draftId, employmentType: "Full-time" });
+expect(statementCount()).toBe(3);
+```
+
+The expected count is written before the code, from the statements the task lists (`backend-standards`, "Give every entry-point call a statement budget"). When the count must rise, the task names the behavior that needs the extra statement, and the test's comment names it too.
 
 ## Test setup
 
