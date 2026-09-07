@@ -78,6 +78,7 @@ Check every file you wrote. Fix every miss, then check again.
 8. Every section heading and label in every implementation checklist must come from its template. A label copied from an older document in the repo does not belong — the template decides the format, not the documents already there.
 9. When mockup images came with the spec, each frontend TDD implementation checklist must have a `## Design facts` section, and every `D<n>` number a `V<n>` item cites must exist in that section.
 10. Every resolution this run wrote into the spec has a `Developer said:` line quoting the developer's own message from this session. A resolution without one is deleted, and its gap is reported as open in the run's final report.
+11. No `## Manual verification` item names a script the repo can run. One that does moves to `## Done`, with the task that makes the script load its own keys when it needs them.
 
 When every check passes, you are done.
 

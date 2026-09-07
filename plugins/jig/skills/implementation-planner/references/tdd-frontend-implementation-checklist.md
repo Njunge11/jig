@@ -13,6 +13,7 @@ How to write a TDD implementation checklist for frontend work that changes what 
 - Each failure path and each empty state the spec states is a behavior: give it its own `F<n>` task. The task list is the feature's coverage contract — a behavior with no task gets no test.
 - Write no `## Backend` section. Backend work gets its own checklist. The builder adds a `## Backend` section only for a gap it discovers while integrating.
 - `## Done` holds only what the builder can prove with output it can paste: a test run, a command, or the diff. A spec-stated check that only a human can perform goes under `## Manual verification` — the developer runs it, not the builder.
+- A check the repo runs from a script is the builder's, even when it needs a key. When the script does not load its keys, the checklist's first task makes it (`dotenv -e .env -- …`), and the check is a Done item. Only a check with no script (a browser, a device, a person) is manual.
 
 ## Template
 

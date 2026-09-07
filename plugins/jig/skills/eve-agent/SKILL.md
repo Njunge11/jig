@@ -83,7 +83,10 @@ Each rule names its doc page under `node_modules/eve/docs/`. `references/sources
 - **`evals/evals.config.ts` exists, and one `.eval.ts` file is one case.** Source: `evals/overview.mdx` § "`evals.config.ts`"; `evals/cases.mdx`.
 - **One eval per tool runs on the compiled build.** A scripted `mockModel` turns one message into the one tool call. This is the only test that sees what the eve compiler breaks. Source: `evals/overview.mdx` § "Deterministic fixture models"; `backend-standards` Review item 27.
 - **A lane eval asserts the exact tool list, in order, and the budget.** Use `t.toolOrder([...])` and `t.maxToolCalls(n)`, so a chain that grows by one tool fails. Source: `evals/assertions.mdx` § "Scoped assertions".
-- **Tag the evals that need a real model `live`, and exclude the tag in the default script.** A `--tag` that matches nothing is a configuration error. Source: `evals/running.mdx`.
+- **Tag the evals that need a real model `live`, and exclude the tag in the default script.** A `--tag` that matches nothing is a configuration error. The live script loads its own keys (`dotenv -e .env -- eve eval --tag live`), so the builder runs it alone. Source: `evals/running.mdx`.
+- **A judge sees the criteria and `on`, nothing else.** Every fact the criteria name (the JD, the brief, the reference) goes inside the `on` value; the reply carries none of it. Source: `evals/judge.mdx` § "The graders".
+- **A bar is `.gate(n)`.** `.atLeast(n)` is soft: a missed score marks the case `scored` and the run still exits `0`. Source: `evals/judge.mdx` § "Soft scoring and thresholds".
+- **A live seed ensures reference rows and never deletes them.** Cases run concurrently against one database, so a seed inserts a unique row with `onConflictDoNothing` and its cleanup removes only the rows the case owns. Source: `evals/running.mdx`, the opening paragraph ("runs the evals concurrently").
 - **A client stream fixture copies a real trace.** The `frontend-tests` Review checklist owns that rule. Capture the trace with `eve traces` (below).
 
 ### Measure
@@ -97,6 +100,7 @@ Each rule names its doc page under `node_modules/eve/docs/`. `references/sources
 
 - **`eve eval` reports a dev server already running.** The record in `.eve/dev-server-state.v1.json` points at the project's dev server. Move the file aside for the eval run and put it back. Never stop that server; it belongs to whoever runs `dev`. Source: `reference/cli.md` § "eve dev", the paragraph on `dev-server-state.v1.json`.
 - **A tool compiles and throws `ReferenceError` on its first call.** Its `execute` sits inside a function body. Move it to module scope. See `backend-standards` `references/eve-entry.md`.
+- **A tool throws `ERR_INVALID_THIS` on the compiled build only.** A method was passed bare (`uuid: crypto.randomUUID`) and lost its `this`; the unit tests inject a fake and never see it. Wrap it: `uuid: () => crypto.randomUUID()`.
 - **A model runs `bash` or reads the environment unprompted.** A default tool is still on. Disable it (Built-in tools).
 - **The model repeats ids or option lists back.** The tool has no `toModelOutput` (Tools).
 - **Every typed answer costs three model calls.** A model call sits on a step the instructions fix (Instructions).
@@ -107,7 +111,7 @@ Run all of these before a commit that touches `agent/`, `evals/` or a `useEveAge
 
 1. `pnpm exec eve info`, run from the app root, prints no diagnostic.
 2. The project's eval script (mock model, `--exclude-tag live`) exits `0`.
-3. `pnpm exec eve eval --tag live` exits `0` when model credentials are in the shell. Say so when they are not.
+3. The project's live eval script exits `0`. It loads its own keys (Evals); a run skipped for a missing key is a failed gate, never a note in the handoff.
 4. For a lane change, `pnpm exec eve traces` of one real turn, with the count of model calls equal to the lane's budget.
 
 ## Review checklist
@@ -124,3 +128,4 @@ Reject the change if any item is true. Walk it against every changed file under 
 8. A lane has no eval that asserts its tool order and its call budget, or the eval is not tagged for the model it needs.
 9. A `useEveAgent` client resumes a thread without `initialSession` and `resume: true`, or reuses one store across threads.
 10. A gate in the Gates section was not run, or its output is not in the proof.
+11. A judge assertion's `on` lacks a fact its criteria name, or a threshold the spec states rides `.atLeast` instead of `.gate`.

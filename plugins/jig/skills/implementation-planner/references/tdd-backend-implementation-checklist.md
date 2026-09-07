@@ -10,6 +10,7 @@ How to write a TDD implementation checklist for backend work that changes what t
 - Each entry-point call the checklist adds or changes (a procedure, an MCP tool, an eve tool, a workflow step) gets one statement-budget task. List the statements the behavior needs, one per row set read or written, and write the count and the list into the task. The builder's test asserts that exact count on the real database (`backend-standards` § "Queries & performance"; `backend-tests` Review item 14). Derive the list from the spec and the repo audit, never from a run.
 - If the implementation checklist creates a new app or package, list its setup in Scope: package.json with the standard scripts, tsconfig, vitest setup, drizzle config, `db/schema/`.
 - `## Done` holds only what the builder can prove with output it can paste: a test run, a command, or the diff. A spec-stated check that only a human can perform goes under `## Manual verification` — the developer runs it, not the builder.
+- A check the repo runs from a script is the builder's, even when it needs a key. When the script does not load its keys, the checklist's first task makes it (`dotenv -e .env -- …`), and the check is a Done item. Only a check with no script (a browser, a device, a person) is manual.
 
 ## Template
 
