@@ -46,7 +46,7 @@ features/<feature>/
     search-params.ts         ← the route's shared nuqs parsers module
     cards/                   ← chat surfaces only: one folder per streamed part type
       index.ts               ← the part-type → card map; the only file that names every card
-      <card>/                ← the card's component, apply, handlers, fixture
+      <card>/                ← one card's files; the frontend-standards chat recipe says what
     __tests__/
       <part>.test.tsx        ← behavior tests
 db/schema/

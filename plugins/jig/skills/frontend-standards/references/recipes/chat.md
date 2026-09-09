@@ -64,7 +64,8 @@ and the AI Elements registry.
 
 6. **Structured AI output is typed data parts, one card each.**
    The server streams `data-*` parts. Each `data-*` type is one
-   card folder, `ui/cards/<card>/`, and the folder holds
+   card folder (placement: the `structure` skill's
+   `ui/cards/<card>/` entry), and the folder holds
    everything that type needs: the component, an
    `apply(state, part)` when the part changes client state, the
    click handlers, and the fixture its tests use. The card
@@ -75,17 +76,21 @@ and the AI Elements registry.
    markdown renders through `Response`, never through a
    hand-parsed accumulator (the rich-text recipe's streaming
    rule). Handlers a card needs from the surface (send, open a
-   panel, a mutation) arrive through one typed context, not one
-   prop per card.
+   panel, a mutation) arrive through one typed context scoped to
+   that surface: not one prop per card, and not one context
+   shared by every chat surface in the app.
 
 7. **React to a part's arrival where the stream delivers it.**
    `useChat` calls `onData` for every data part; an app with its
    own stream reducer sees the same arrival as an event. Run a
    card's `apply` and any state change there. Never watch
    `messages` in a `useEffect` to notice that a part arrived:
-   the arrival is an event, and rule 22 puts a reaction to an
-   event in the handler. The surface's persistence (a saved
-   thread) runs once when the turn ends, from the same handler.
+   the stream already delivers the arrival to a callback, so no
+   effect is needed, and rule 20 allows an effect only for an
+   external system the component must subscribe to itself. The
+   surface's persistence (a saved thread) runs once when the
+   turn ends, in `onFinish` or the stream reducer's end-of-turn
+   branch, not in `onData`.
 
 8. **A docked chat panel is an expanded-panel surface.** Its
    collapse/expand follows `expanded-panel.md` — the same mounted
