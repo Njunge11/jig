@@ -24,33 +24,31 @@ and the AI Elements registry.
    });
    ```
 
-3. **Render messages as parts.** A `UIMessage` carries a `parts`
-   array — switch on `part.type`; never treat a message as one
-   text string:
+3. **Render messages as parts, through a card map.** A
+   `UIMessage` carries a `parts` array; never treat a message as
+   one text string. Each part type has one card module, and one
+   map goes from part type to card. The transcript looks each
+   part up and renders it. Unknown types render nothing:
 
    ```tsx
-   <Conversation>
-     <ConversationContent>
-       {messages.map((m) => (
-         <Message from={m.role} key={m.id}>
-           <MessageContent>
-             {m.parts.map((part, i) => {
-               switch (part.type) {
-                 case "text":
-                   return <Response key={i}>{part.text}</Response>;
-                 // case "data-candidateCard":
-                 //   return <CandidateCard key={i} {...part.data} />;
-                 default:
-                   return null; // unknown parts render nothing, never crash
-               }
-             })}
-           </MessageContent>
-         </Message>
-       ))}
-     </ConversationContent>
-     <ConversationScrollButton />
-   </Conversation>
+   // ui/cards/index.ts — the only file that names every card
+   export const CARDS = {
+     text: textCard,
+     "data-candidate": candidateCard,
+     "data-offer": offerCard,
+   } satisfies Record<AppMessagePart["type"], Card>;
+
+   // ui/transcript.tsx — no `part.type ===` branch anywhere
+   function MessagePart({ part }: { part: AppMessagePart }) {
+     const card = CARDS[part.type];
+     return card ? <card.Component part={part} /> : null;
+   }
    ```
+
+   `satisfies Record<…>` makes `tsc` fail on a part type with no
+   card, so a new type cannot ship unrendered. A `switch` on
+   `part.type` is acceptable only while a surface has three part
+   types or fewer; a fourth type moves it to the map.
 
 4. **Scrolling belongs to `Conversation`.** It wraps the messages,
    scrolls to the bottom on new content, and shows the scroll
@@ -64,14 +62,32 @@ and the AI Elements registry.
    retry — a chat failure is inline in the conversation, not a
    route boundary.
 
-6. **Structured AI output is typed data parts.** The server
-   streams `data-*` parts; the client maps each `data-` type to
-   its own component (a card, a form). A form inside chat follows
-   `form-with-mutation.md`; streamed markdown renders through
-   `Response` — never through a hand-parsed accumulator (the
-   rich-text recipe's streaming rule).
+6. **Structured AI output is typed data parts, one card each.**
+   The server streams `data-*` parts. Each `data-*` type is one
+   card folder, `ui/cards/<card>/`, and the folder holds
+   everything that type needs: the component, an
+   `apply(state, part)` when the part changes client state, the
+   click handlers, and the fixture its tests use. The card
+   imports from the surface (its state type, its hooks); nothing
+   in the surface imports a card except the map. A new card is
+   one folder and one map line, and no existing file changes.
+   A form inside a card follows `form-with-mutation.md`; streamed
+   markdown renders through `Response`, never through a
+   hand-parsed accumulator (the rich-text recipe's streaming
+   rule). Handlers a card needs from the surface (send, open a
+   panel, a mutation) arrive through one typed context, not one
+   prop per card.
 
-7. **A docked chat panel is an expanded-panel surface.** Its
+7. **React to a part's arrival where the stream delivers it.**
+   `useChat` calls `onData` for every data part; an app with its
+   own stream reducer sees the same arrival as an event. Run a
+   card's `apply` and any state change there. Never watch
+   `messages` in a `useEffect` to notice that a part arrived:
+   the arrival is an event, and rule 22 puts a reaction to an
+   event in the handler. The surface's persistence (a saved
+   thread) runs once when the turn ends, from the same handler.
+
+8. **A docked chat panel is an expanded-panel surface.** Its
    collapse/expand follows `expanded-panel.md` — the same mounted
    component in every mode, so the input draft and scroll
    position survive toggling.
@@ -82,7 +98,13 @@ and the AI Elements registry.
   renderer — install the registry components.
 - Don't manage chat scroll with a `useEffect` on `messages`.
 - Don't render a message as a single string — iterate `parts`
-  and switch on type; unknown types render nothing.
+  and look each one up in the card map; unknown types render
+  nothing.
+- Don't add a `part.type ===` branch to the transcript, or a
+  handler named after a card to the surface, for a new part
+  type — add a card folder and a map line.
+- Don't watch `messages` in a `useEffect` to react to a part's
+  arrival — react in `onData` or the stream reducer.
 - Don't leave send active while streaming — swap it for `stop()`.
 - Don't route a chat error to the route boundary — it renders
   inline in the conversation with a retry.
@@ -93,8 +115,15 @@ and the AI Elements registry.
 
 - [ ] Conversation, message, input, and response rendering come
       from the registry components, not hand-rolled markup.
-- [ ] Messages render through a `parts` switch; unknown part
-      types are ignored safely.
+- [ ] Messages render through the card map; the transcript has
+      no `part.type ===` branch past three types; unknown part
+      types render nothing.
+- [ ] Every `data-*` type has one folder under `ui/cards/` and
+      one map line; `satisfies Record<…>` fails on a missing one.
+- [ ] Adding a card touched one folder and the map, and no other
+      file.
+- [ ] No `useEffect` reads `messages`; parts are applied in
+      `onData` or the stream reducer.
 - [ ] `status` is wired: loader while streaming, stop button
       live, send disabled; `error` surfaces inline with retry.
 - [ ] No scroll effects; `Conversation` owns scrolling.

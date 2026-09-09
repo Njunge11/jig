@@ -44,6 +44,9 @@ features/<feature>/
     <part>.tsx               ← one file per anatomy part
     columns.tsx              ← data-table columns (if the feature has a table)
     search-params.ts         ← the route's shared nuqs parsers module
+    cards/                   ← chat surfaces only: one folder per streamed part type
+      index.ts               ← the part-type → card map; the only file that names every card
+      <card>/                ← the card's component, apply, handlers, fixture
     __tests__/
       <part>.test.tsx        ← behavior tests
 db/schema/

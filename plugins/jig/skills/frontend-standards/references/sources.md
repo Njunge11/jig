@@ -116,6 +116,29 @@ these pages on 2026-09-01.
   and [AI Elements: Usage/Setup docs](https://elements.ai-sdk.dev/docs/usage)
   (install via `npx ai-elements@latest`, default target
   `components/ai-elements/`). Verified 2026-09-02.
+  The card map (steps 3, 6 and 7):
+  [Fowler: Registry](https://martinfowler.com/eaaCatalog/registry.html)
+  ("A well-known object that other objects can use to find
+  common objects and services"),
+  [Martin: The Open Closed Principle](https://blog.cleancoder.com/uncle-bob/2014/05/12/TheOpenClosedPrinciple.html)
+  ("You should be able to extend the behavior of a system
+  without having to modify that system"; "all dependencies
+  inside the plugin point at the system; and nothing in the
+  system points out towards the plugins"),
+  [MUI X Chat: Tool approval and renderers](https://mui.com/x/react-chat/core/examples/tool-approval-and-renderers/)
+  (a `ChatPartRendererMap` keyed by part type, looked up with
+  `useChatPartRenderer(part.type)`),
+  [assistant-ui: Toolkits](https://www.assistant-ui.com/docs/api-reference/tools/toolkits)
+  ("A Toolkit is a named map of model-facing tool definitions"
+  with a `render` per entry),
+  [CopilotKit: useRenderToolCall](https://docs.showcase.copilotkit.ai/reference/v2/hooks/useRenderToolCall)
+  ("looks up the matching render configuration by tool name"),
+  [AI SDK v6: Chatbot](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot)
+  (`onData`: "Called whenever a data part is received"), and
+  [React: You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect).
+  Project incident: a chat transcript grew a seventeen-branch
+  switch and its session twelve handlers and four effects
+  watching `messages`, one set per card. Verified 2026-09-10.
 - recipes/rich-text.md —
   [Lexical: Getting started with React](https://lexical.dev/docs/getting-started/react)
   (LexicalComposer `initialConfig` with namespace/theme/onError;
