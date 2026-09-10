@@ -24,10 +24,12 @@ A feature is a folder. The schema is central.
 features/<feature>/
   checklist.md               ← the feature's build checklist
   api/
-    <feature>.router.ts      ← entry: tRPC
+    <feature>.router.ts      ← entry: tRPC. The resource → router map; the only file that names every resource router
+    <resource>.router.ts     ← one resource's procedures, with their input schemas and their composition (deps)
     <feature>.service.ts
+    __fixtures__/            ← shared test setup and scripted fakes (only if two test files share them)
     __tests__/
-      <feature>.router.test.ts
+      <resource>.router.test.ts
       <feature>.service.test.ts
   db/
     <feature>.repo.ts
@@ -89,6 +91,14 @@ evals/
    because eve registers that directory and names the tool after
    the file. The service the tool calls stays in its feature's
    `api/`; the tool file only composes it.
-7. **Check before you finish.** Walk every file you created or
+7. **A router is a map of resource routers.** `<feature>.router.ts`
+   merges one `<resource>.router.ts` per resource the feature
+   serves (draft, questions, settings, …) and names nothing else,
+   the same way `ui/cards/index.ts` maps part types to cards. A
+   procedure, its input schema and its composition live in the
+   resource's file. Merge with `t.mergeRouters` so the client's
+   procedure paths do not change. A feature with one resource has
+   one resource router; the map file still exists.
+8. **Check before you finish.** Walk every file you created or
    moved against the tree. Fix a misplaced file now — do not
    record it for later.

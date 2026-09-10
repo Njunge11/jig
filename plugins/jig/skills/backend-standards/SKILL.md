@@ -341,3 +341,4 @@ Reject the change if any item is true. Items 5–7 need `references/workflow-ent
 27. An eve tool has no eval in `evals/tools/<tool_name>.eval.ts` that runs it through the compiled agent, or the project's check target does not run the evals.
 28. An entry hands a failure to a client that the server does not log with the procedure or tool name, the ids and the message.
 29. An entry-point call has no statement-budget test, or the diff raises a call's statement count without the behavior that needs the extra statement named in the task.
+30. A feature router holds the procedures of more than one resource, or holds input schemas or composition, instead of merging one `<resource>.router.ts` per resource as the `structure` skill lays out.
