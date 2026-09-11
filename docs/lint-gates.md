@@ -214,3 +214,48 @@ message.
 1. Where does the config live for a second repo? jig has no initializer skill and no `assets/` under any standards skill. Options: an `assets/eslint.jig.mjs` file each skill tells the builder to import, or a published config package. Not decided here.
 2. The `install` rows need `eslint-plugin-better-tailwindcss` and `eslint-plugin-testing-library`. Both are free. Not in this pass.
 3. Rows 23, 24, 25 of backend-standards may report many places in the pilot. S3 shows the count before S4 decides.
+
+## 6. Batch 2: the custom rules
+
+Date: 2026-09-11. Same pilot, same executor model as §3: one agent on a branch, `pnpm lint` in `apps/dashboard` is the delivery. Facts below were verified on main at dbc86376.
+
+Plumbing, the same for every rule:
+
+- One rule per file at `apps/dashboard/eslint-rules/<name>.mjs`, default export `{ meta: { type, docs: { description }, messages }, create(context) }`. The message text starts with the skill row it gates, like the messages in `eslint.config.mjs`.
+- One test per rule at `apps/dashboard/eslint-rules/__tests__/<name>.test.ts`, with `RuleTester` from `eslint`. Set `RuleTester.describe = describe`, `RuleTester.it = it`, `RuleTester.itOnly = it.only` from vitest before the first `run` (`node_modules/eslint/lib/rule-tester/rule-tester.js:491-549`). The vitest `node` project already includes `**/*.test.ts` (`vitest.config.ts:43`). Fixtures that need TS or JSX parse with `@typescript-eslint/parser`; add it as a devDependency at 8.59.0, the version `eslint-config-next` already puts in the store. A rule that reads the file system is tested against a tree the test builds with `mkdtempSync` under `os.tmpdir()` and hands in through the case's `filename`.
+- Write the test first from the row's wording: one valid case that obeys the row, one invalid case per report kind. Red, then the rule, then green. One commit per rule, test and rule together.
+- Wire every rule in `eslint.config.mjs` through one inline plugin, `plugins: { jig: { rules } }`, rule ids `jig/<name>`, at `error`, on the v2 trees only (`v2Glob`), each rule on the files its row names below.
+
+### 6.1 Rule definitions
+
+| Row | Rule id | Files | Reports |
+| --- | --- | --- | --- |
+| backend-standards 5 | `jig/workflow-deterministic` | `features/**/workflows/**/*.ts` (the `structure` tree's workflow home) | Inside a Program or a function whose body starts with the `"use workflow"` directive: `new Date()` with no argument, `Date.now()`, `Math.random()`, `crypto.randomUUID()`, `fetch()`; and an import whose source ends in `.service`, `.repo` or `.repository`, or is `@ajiri/db/client`, `drizzle-orm` or `@trpc/server`. |
+| backend-standards 27, eval clause | `jig/tool-has-eval` | `agent/tools/*.ts` | The Program holds a `defineTool(` call and `evals/tools/<basename>.eval.ts` does not exist under `context.cwd`. The check-script clause stays judgment. |
+| backend-tests 10 | `jig/test-named-after-source` | v2 `**/__tests__/*.test.ts` and `*.test.tsx` | Neither `../<name>.ts` nor `../<name>.tsx` exists beside the `__tests__` folder, where `<name>` is the basename without `.test.ts` or `.test.tsx`. |
+| frontend-standards 16 | `jig/responsive-md-step` | v2 `**/*.tsx` | A string literal or template quasi whose whitespace-split classes hold one that starts with `lg:` and none that starts with `sm:` or `md:`. An object key such as `lg:` in a `cva` size map is an identifier, not a literal, and is not read. |
+| frontend-standards 50 and 54 | `jig/segment-has-loading-and-error` | `app/(app-v2)/**/page.tsx` | The page fetches, and `loading.tsx` (row 50) or `error.tsx` (row 54) is missing from the page's directory; one message per missing file. A page fetches when it calls `prefetch`, or holds an `await` whose argument is a call expression. `await params` has an identifier argument and does not count. |
+| eve-agent 5 | `jig/default-tools-disabled` | `agent/agent.ts` | For each of `agent`, `ask_question`, `bash`, `read_file`, `todo`, `web_fetch`, `web_search`, `write_file`: `agent/tools/<slug>.ts` does not exist, or its text does not contain `export default disableTool()`. One message per slug. |
+
+Sites on main at dbc86376, counted by hand before the rules exist, so the run in C3 has a number to match:
+
+- `jig/workflow-deterministic`: 0 files in scope. Every `"use workflow"` file sits under `app/workflows/`, which the S4 decision keeps out of scope. The rule ships for the next workflow a feature adds.
+- `jig/tool-has-eval`: 0. The four tools `draft`, `jd`, `job`, `questions` each have their eval file.
+- `jig/test-named-after-source`: 23. `trpc/__tests__/coverage.test.ts` and `pep.test.ts`; `agent/lib/ari/__tests__/statement-total.test.ts` and the four `*.budget.service.test.ts`; 15 behavior-named files under `features/ari-chat/ui/__tests__/`; `features/interview-availability/ui/__tests__/availability-screen.test.tsx`.
+- `jig/responsive-md-step`: 7 literals. `_components/jobs/job-row.tsx:39,63`, `_components/jobs/chat-thread-row.tsx:32,60`, `_components/job/candidate-list.tsx:48,64`, `features/ari-chat/ui/chat-session.tsx:794`.
+- `jig/segment-has-loading-and-error`: 0. Only `chat/page.tsx` fetches, and it has both files.
+- `jig/default-tools-disabled`: 0. All eight files exist with `export default disableTool()`.
+
+### 6.2 Steps
+
+- [ ] C1 For each rule in 6.1, in table order: write the test, see it fail, write the rule, see it pass, commit. Proof: six commits, each with the green test run pasted.
+- [ ] C2 Wire the six rules in `eslint.config.mjs` as the plumbing says. Proof: `pnpm lint` runs with no config error.
+- [ ] C3 Run `pnpm lint` in `apps/dashboard`. Record the count per rule in 6.3. It must match the by-hand count above; a mismatch is a rule bug, fix the rule before you go on.
+- [ ] C4 Stop and report the counts. The developer decides per rule with a count: fix in this PR, `warn` for a later PR, or narrow the files. Record the decision in 6.3.
+- [ ] C5 Apply the decisions, one commit per rule. Proof: `pnpm lint` exits 0, `pnpm typecheck` clean, `pnpm vitest run` green.
+- [ ] C6 Open the PR. Then add `Gate: pnpm lint, rule jig/<name>` to the six skill rows (a jig edit, the developer's session).
+
+### 6.3 Counts and decisions
+
+| Rule | Count | Decision |
+| --- | --- | --- |
