@@ -308,36 +308,42 @@ type GetUser = inferRouterOutputs<AppRouter>["user"]["get"];
 - Extract shared logic when the repetition is real (a general guide: the third copy) — do not extract before that.
 - Never duplicate business logic, queries, validation, or utilities.
 
+## Gates
+
+Run before a commit. Paste the output in the proof.
+
+1. `pnpm lint` exits `0` in the app root. It proves every Review item that ends with `Gate:`; walk the other items by hand.
+
 ## Review checklist
 
 Reject the change if any item is true. Items 5–7 need `references/workflow-entry.md`; items 8–9 need `references/mcp-entry.md`; items 26–27 need `references/eve-entry.md` — load each file before you judge its items, and skip those items when the diff has no workflow, no MCP tool or no eve tool.
 
 1. A file is outside the feature tree, or the schema is outside its correct home (`db/schema/`; in a monorepo: the workspace db package for shared tables, the prefixed app-local `db/schema/` for private ones).
-2. A service or a repo is a class or a module singleton, or a layer below the entry point imports the db client.
-3. An entry point (router, MCP tool, eve tool, or workflow) accesses the DB or contains business logic.
+2. A service or a repo is a class or a module singleton, or a layer below the entry point imports the db client. Gate for the class clause and the db-client import: `pnpm lint`, rule `no-restricted-syntax (backend-standards 2)` and `no-restricted-imports (backend-standards 2)`; walk the rest by hand.
+3. An entry point (router, MCP tool, eve tool, or workflow) accesses the DB or contains business logic. Gate for the query-import clause: `pnpm lint`, rule `no-restricted-imports (backend-standards 3)`; walk the rest by hand.
 4. An auth check is written by hand inside a procedure body instead of in a composed base procedure.
 5. A workflow function (`"use workflow"`) does I/O, calls a service, or reads the clock or randomness.
 6. A workflow step performs a side effect and does not check that the effect is still needed, or the orchestrator branches on data other than the step returns and the input.
 7. A step's failure modes are not classified (`FatalError` vs `RetryableError`) where they differ.
 8. An MCP tool has no annotations, throws a domain error instead of a return with `isError: true`, or returns `structuredContent` without the text fallback.
 9. A mutating MCP tool is registered outside the idempotency wrapper, or accepts an idempotency key as input.
-10. A service contains HTTP/tRPC concerns or SQL/ORM queries.
-11. A repository contains business logic or validation, or starts a transaction.
-12. The code bypasses a layer boundary.
+10. A service contains HTTP/tRPC concerns or SQL/ORM queries. Gate: `pnpm lint`, rule `no-restricted-imports (backend-standards 10)`.
+11. A repository contains business logic or validation, or starts a transaction. Gate for the transaction clause: `pnpm lint`, rule `no-restricted-syntax (backend-standards 11)`; walk the rest by hand.
+12. The code bypasses a layer boundary. Gate: `pnpm lint`, the rules of items 2, 3 and 10.
 13. Atomicity is required, but no transaction wraps the writes.
-14. N+1 queries, queries in a loop, or duplicate queries.
+14. N+1 queries, queries in a loop, or duplicate queries. Gate for the loop clause: `pnpm lint`, rule `no-await-in-loop`; walk the rest by hand.
 15. Independent `await`s run in sequence instead of through `Promise.all`.
-16. `SELECT *`, or raw SQL where Drizzle has an equivalent.
+16. `SELECT *`, or raw SQL where Drizzle has an equivalent. Gate for the `SELECT *` clause: `pnpm lint`, rule `no-restricted-syntax (backend-standards 16)`; walk the rest by hand.
 17. A list endpoint has no pagination, or a hot column has no index.
 18. A migration file was written by hand, or an applied migration was edited.
-19. Repeated `try/catch`, or an error is discarded instead of propagated.
+19. Repeated `try/catch`, or an error is discarded instead of propagated. Gate for the empty-catch case: `pnpm lint`, rule `no-empty`; walk the rest by hand.
 20. Duplicated business logic, query, or validation.
 21. A type is declared by hand where Drizzle/tRPC inference exists, or a parallel `interface` duplicates an API payload.
 22. A helper takes the rest of a method as a callback in order to share a prologue, instead of returning a value that the caller checks.
-23. A function returns a function to bind a dependency that could be a parameter, or a factory wraps something that is not a service or a repository.
-24. A factory writes a method body inside the object it returns, instead of returning a list of named functions.
-25. A call takes a function of more than one line, or an object literal of more than a few lines, as an inline argument — instead of a named function or a named constant declared above the call.
-26. An eve tool's `execute` is declared inside a function body or wrapped in a factory, instead of a named function at module scope in `agent/tools/<tool_name>.ts`; or the tool throws an expected failure instead of returning it.
+23. A function returns a function to bind a dependency that could be a parameter, or a factory wraps something that is not a service or a repository. Gate: `pnpm lint`, rule `no-restricted-syntax (backend-standards 23)`.
+24. A factory writes a method body inside the object it returns, instead of returning a list of named functions. Gate: `pnpm lint`, rule `no-restricted-syntax (backend-standards 24)`.
+25. A call takes a function of more than one line, or an object literal of more than a few lines, as an inline argument — instead of a named function or a named constant declared above the call. Gate for the inline-function clause: `pnpm lint`, rule `no-restricted-syntax (backend-standards 25)`; walk the rest by hand.
+26. An eve tool's `execute` is declared inside a function body or wrapped in a factory, instead of a named function at module scope in `agent/tools/<tool_name>.ts`; or the tool throws an expected failure instead of returning it. Gate for the `execute` clause: `pnpm lint`, rule `no-restricted-syntax (backend-standards 26)`; walk the rest by hand.
 27. An eve tool has no eval in `evals/tools/<tool_name>.eval.ts` that runs it through the compiled agent, or the project's check target does not run the evals.
 28. An entry hands a failure to a client that the server does not log with the procedure or tool name, the ids and the message.
 29. An entry-point call has no statement-budget test, or the diff raises a call's statement count without the behavior that needs the extra statement named in the task.

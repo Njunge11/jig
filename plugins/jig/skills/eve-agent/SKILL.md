@@ -25,6 +25,7 @@ Each rule names its doc page under `node_modules/eve/docs/`. `references/sources
 ### Tools
 
 - **The body shape is the eve entry of `backend-standards`.** One file per tool under `agent/tools/`, the file name is the tool name, `execute` is a named function at module scope, expected failures are return values. Source for the name rule: `tools/overview.mdx` § "Define a tool".
+- **Declare `outputSchema` on a tool whose raw output a client, a hook or a mapping reads.** eve types the `execute` return from it, so the tool cannot return a shape the readers do not parse, and a mapping that narrows the result at runtime reads the same schema instead of a chain of `if` checks. Source: `tools/overview.mdx` § "Define a tool", the paragraph on `outputSchema`.
 - **Project the result for the model with `toModelOutput`.** A result that a client renders holds options, prefilled values or long text. The model needs the status, the ids and the field names. Return `{ type: "json", value }` with only those. Hooks and the client still receive the full result on `action.result`. Source: `tools/overview.mdx` § "Shape what the model sees with `toModelOutput`".
 
   ```ts
@@ -113,6 +114,7 @@ Run all of these before a commit that touches `agent/`, `evals/` or a `useEveAge
 2. The project's eval script (mock model, `--exclude-tag live`) exits `0`.
 3. The project's live eval script exits `0`. It loads its own keys (Evals); a run skipped for a missing key is a failed gate, never a note in the handoff.
 4. For a lane change, `pnpm exec eve traces` of one real turn, with the count of model calls equal to the lane's budget.
+5. `pnpm lint` exits `0` in the app root. It proves every Review item that ends with `Gate:`; walk the other items by hand.
 
 ## Review checklist
 
@@ -126,6 +128,7 @@ Reject the change if any item is true. Walk it against every changed file under 
 6. A hook blocks, injects context, or has an unguarded body.
 7. A value the agent must remember across turns rides `clientContext` instead of `defineState`.
 8. A lane has no eval that asserts its tool order and its call budget, or the eval is not tagged for the model it needs.
-9. A `useEveAgent` client resumes a thread without `initialSession` and `resume: true`, or reuses one store across threads.
+9. A `useEveAgent` client resumes a thread without `initialSession` and `resume: true`, or reuses one store across threads. Gate for the `resume: true` clause: `pnpm lint`, rule `no-restricted-syntax (eve-agent 9)`; walk the rest by hand.
 10. A gate in the Gates section was not run, or its output is not in the proof.
 11. A judge assertion's `on` lacks a fact its criteria name, or a threshold the spec states rides `.atLeast` instead of `.gate`.
+12. A tool whose raw output a client, a hook or a mapping reads has no `outputSchema`. Gate: `pnpm lint`, rule `no-restricted-syntax (eve-agent new)`.

@@ -9,15 +9,21 @@ description: The quality checklist for frontend tests — what an ideal UI behav
 
 **One harness.** The setup in `references/test-setup.md` is the only UI test harness. When existing tests run on a different one, those tests are wrong — write new tests on this harness, raise the migration as a step checklist, and never imitate an existing setup because it happens to pass.
 
+## Gates
+
+Run before a commit. Paste the output in the proof.
+
+1. `pnpm lint` exits `0` in the app root. It proves every Review item that ends with `Gate:`; walk the other items by hand.
+
 ## Review checklist
 
 Reject the test if any item is true. This list judges each test's quality, not the suite's breadth — coverage is the implementation checklist's job: its Behavior items state which behaviors need tests.
 
 1. The test asserts **React state, hooks, or refs** instead of what is on screen.
-2. The test asserts **a handler was called** (`toHaveBeenCalled`) instead of the on-screen outcome of the action.
-3. The test asserts **CSS classes** the user cannot perceive.
-4. The test **mocks the component's own hooks** (`useTRPC`, `useQuery`), its child components, or business logic — the only mock boundaries are the network edge (MSW) and the seeded cache.
-5. The test queries by **test id** where an accessible query (`getByRole`, `getByLabelText`, `getByText`) exists.
+2. The test asserts **a handler was called** (`toHaveBeenCalled`) instead of the on-screen outcome of the action. Gate: `pnpm lint`, rule `no-restricted-syntax (backend-tests 1)`.
+3. The test asserts **CSS classes** the user cannot perceive. Gate: `pnpm lint`, rule `no-restricted-syntax (frontend-tests 3)`.
+4. The test **mocks the component's own hooks** (`useTRPC`, `useQuery`), its child components, or business logic — the only mock boundaries are the network edge (MSW) and the seeded cache. Gate: `pnpm lint`, rule `no-restricted-syntax (backend-tests 6)`.
+5. The test queries by **test id** where an accessible query (`getByRole`, `getByLabelText`, `getByText`) exists. Gate: `pnpm lint`, rule `no-restricted-syntax (frontend-tests 5)`.
 6. The test asserts **async UI without `findBy*`** (which waits), or asserts absence without `queryBy*`.
 7. A **jsdom test asserts a visual or responsive outcome** — those are Visual items, browser-checked, never jsdom tests.
 8. The test fails the **litmus test**: rewriting the component's internals (state lib, data lib, markup) with behavior unchanged would break it.

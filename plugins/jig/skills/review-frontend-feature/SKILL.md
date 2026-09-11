@@ -13,7 +13,7 @@ An independent second walk of the frontend rubric against a feature's diff. This
 
 ## The work
 
-1. Read the feature's checklist and the full diff.
+1. Read the feature's checklist and the full diff. Run `pnpm lint` in the app root and record its exit status: an item whose text ends with `Gate:` takes its verdict from that run, `pass` on exit `0`, else the report line.
 2. **Load the recipes.** Match the changed surfaces against the frontend-standards catalog and load every matching recipe file. Record which recipes you loaded — their Verify lists join the rubric.
 3. Walk the frontend-standards `## Rules` list **item by item against the changed files** — every rule, no skipping, no grep proxies: open the files and look. **Gate:** every rule has a recorded verdict before you go to step 4.
 4. Walk **each loaded recipe's Verify list** item by item against the surface it covers. **Gate:** every item has a recorded verdict before you go to step 5.

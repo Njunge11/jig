@@ -17,6 +17,7 @@ Each observation was made on a Next.js app with one eve agent, in September 2026
 | Hooks: observe only; a blocking screen wraps the model | A scope screen was first attempted in a hook. Hooks cannot refuse a turn. The screen moved to AI SDK middleware on the model. |
 | Hooks vs channel events | A channel's `events` handlers did not receive `message.received`. A hook did. Anything that must see user text server-side is a hook. |
 | Instructions: never chain tools | The instructions told the model to call three tools in a row after every typed answer. Each was a durable step with its own model call. |
+| Tools: `outputSchema` | No tool declared the shape it returned. The card mapping narrowed untyped JSON with one `if` chain per tool result, and a tool could change its result without a type error at the mapping. |
 | Tools: `toModelOutput` | No tool projected its result. The model read every option list, prefilled value and JD body. |
 | Execution: count the steps | eve re-enters the model after every tool result. A lane that ends on a card still pays a closing model call. |
 | Evals: `live` tag | Evals that need a real model failed without credentials in the shell; the test runner does not load `.env`. |

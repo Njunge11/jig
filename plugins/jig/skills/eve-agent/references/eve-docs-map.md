@@ -7,7 +7,7 @@ Load this file to find the doc page for the slot you change. Every path is under
 | Agent config, model, reasoning, limits | `agent-config.md` | "Set the model", "Reasoning effort", "Runtime limits" |
 | Instructions | `instructions.mdx` | "Author instructions", "System and user roles", "Instructions vs skills" |
 | What the model sees, and where each kind of context goes | `concepts/context-control.md` | "Recommended context layout" |
-| Tool definition, `toModelOutput`, throws, `ctx` | `tools/overview.mdx` | "Define a tool", "The `ctx` parameter", "When a tool throws", "Shape what the model sees with `toModelOutput`" |
+| Tool definition, `outputSchema`, `toModelOutput`, throws, `ctx` | `tools/overview.mdx` | "Define a tool", "The `ctx` parameter", "When a tool throws", "Shape what the model sees with `toModelOutput`" |
 | Approval, `ask_question`, pause and resume | `tools/human-in-the-loop.md` | "Approvals", "Questions", "How pause and resume works" |
 | Default tools, override, disable | `concepts/built-in-tools.md` | "Default tools", "Override a default", "Disable a default" |
 | Hooks | `guides/hooks.md` | "Define a hook", "Persist events to your own database", "Execution order", "What happens when a hook throws" |

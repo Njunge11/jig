@@ -60,7 +60,7 @@ not restate them. This list is also the review checklist.
 3. One primitive library: Radix. Do not introduce a second (Base
    UI, Headless UI, React Aria). A registry component that ships
    on another library gets rebuilt on the kit's own primitives —
-   a combobox is `Popover` + `Command`.
+   a combobox is `Popover` + `Command`. Gate: `pnpm lint`, rule `no-restricted-imports (frontend-standards 3)`.
 4. Decompose the UI into a tree of shadcn parts by responsibility
    and repetition — not one monolith. A "card list" is `Card` +
    `CardHeader`/`CardTitle`/`CardContent` plus a row component.
@@ -105,7 +105,7 @@ not restate them. This list is also the review checklist.
    The child is a single, non-Fragment element that spreads
    props. Mind HTML nesting validity: a button cannot contain a
    button — put interactive controls beside a trigger, not inside
-   it.
+   it. Gate: `pnpm lint`, rule `no-restricted-syntax (frontend-standards 9)`.
 10. Preserve copy verbatim. Do not invent labels, headings, or
     placeholder text that were not described; ask only when
     genuinely ambiguous.
@@ -130,7 +130,7 @@ not restate them. This list is also the review checklist.
     value goes through a CSS variable:
     `className="bg-[var(--tone)]"`. A feature component with
     several visual permutations defines them with CVA, outside
-    the component body.
+    the component body. Gate: `pnpm lint`, rule `no-restricted-syntax (frontend-standards 14)`.
 
 ### Responsive — every form factor, breakpoint utilities only
 
@@ -158,9 +158,10 @@ the small breakpoint and up," never "on mobile."
 20. `useEffect` synchronizes with an external system
     (subscription, DOM API, analytics) — nothing else. Every
     effect must be able to name its external system, or it gets
-    rewritten.
+    rewritten. Gate: `pnpm lint`, rule `react-hooks/set-state-in-effect`.
 21. Derive values during render. Never store what props/state can
-    compute, and never sync state in an effect:
+    compute, and never sync state in an effect (Gate: `pnpm lint`,
+    rule `react-hooks/no-deriving-state-in-effects`):
 
 ```tsx
 // Wrong: redundant state + effect
@@ -176,13 +177,13 @@ const fullName = first + " " + last;
     it.
 23. Effect dependencies are primitives (`[user.id]`), not objects
     (`[user]`) — objects re-run the effect on every unrelated
-    change.
+    change. Gate: `pnpm lint`, rule `react-hooks/exhaustive-deps`.
 24. `useMemo`/`useCallback` are performance tools for measured,
     expensive work or referential stability a consumer requires.
     Wrapping a small object literal or a trivial computation is
     noise — the default is no memoization.
 25. No derived state in `useState`. State holds what the user
-    did, not what can be computed from it.
+    did, not what can be computed from it. Gate: `pnpm lint`, rule `react-hooks/no-deriving-state-in-effects`.
 
 ### Accessibility — do not undo what Radix gives
 
@@ -190,8 +191,8 @@ const fullName = first + " " + last;
     keep semantic elements; never strip `aria-*` or roles from
     shadcn parts.
 27. Icon-only buttons carry an accessible name (`aria-label`,
-    icon `aria-hidden`).
-28. Inputs get `<label>`s, not placeholders-as-labels.
+    icon `aria-hidden`). Gate: `pnpm lint`, rule `jsx-a11y/control-has-associated-label`.
+28. Inputs get `<label>`s, not placeholders-as-labels. Gate: `pnpm lint`, rule `jsx-a11y/label-has-associated-control`.
 29. Do not convey meaning by color alone; keep the
     `:focus-visible` ring.
 30. Touch targets are at least 44×44px — pad small icon buttons
@@ -230,7 +231,7 @@ export default async function Page() {
     input is a cache miss and a refetch.
 34. The wiring (`@trpc/tanstack-react-query`, not the legacy
     `createHydrationHelpers`) is a one-time install — see
-    `references/wiring.md`. Everything here assumes it.
+    `references/wiring.md`. Everything here assumes it. Gate: `pnpm lint`, rule `no-restricted-imports (frontend-standards 34)`.
 
 ### Choosing the read primitive
 
@@ -383,6 +384,12 @@ export default async function Page() {
     `mousedown` handler runs, the closing layer has detached its
     node — check `!target.isConnected`. A boolean ref cannot
     bridge that event ordering.
+
+## Gates
+
+Run before a commit. Paste the output in the proof.
+
+1. `pnpm lint` exits `0` in the app root. It proves every rule that ends with `Gate:`; walk the other items by hand.
 
 ## Review
 

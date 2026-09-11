@@ -13,7 +13,7 @@ An independent second walk of the backend Review checklists against a feature's 
 
 ## The work
 
-1. Read the feature's checklist and the full diff.
+1. Read the feature's checklist and the full diff. Run `pnpm lint` in the app root and record its exit status: an item whose text ends with `Gate:` takes its verdict from that run, `pass` on exit `0`, else the report line.
 2. Walk the `backend-standards` Review checklist **item by item against the changed files** — every item, no skipping, no grep proxies: open the files and look. **Gate:** every item has a recorded verdict before you go to step 3.
 3. Walk the `backend-tests` Review checklist **item by item against every new or changed test**. **Gate:** every item has a recorded verdict before you go to step 4.
 4. Walk the `eve-agent` Review checklist **item by item** when the diff touches `agent/`, `evals/`, or a file that imports `eve/react`, and run its Gates. When the diff touches none of them, record `skipped — no agent files` and go on. **Gate:** every item has a recorded verdict, and the Gates' output is in the verdict, before you go to step 5.
