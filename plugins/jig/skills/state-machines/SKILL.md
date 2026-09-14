@@ -24,28 +24,28 @@ machine/<name>/
 
 ```
 Machine module:  setup → states → machine                      pure; no I/O, no framework import
-Backend:         entry → service → transition(machine, resolveState(row.snapshot), event)
+Backend:         entry → service → transition(machine, machine.resolveState(row.snapshot), event)
                                  → repo stores the next snapshot → service runs the returned actions
 Frontend:        page reads the snapshot → useMachine(machine.provide(impl), { snapshot })
                                  → useSelector(getMeta | hasTag | matches) → view
 ```
 
-Each layer calls only the next. The stored snapshot is the only record of a stage. A condition on the stage is a guard. A fact about a stage is `meta` or a tag. No status field, enum or string-keyed table carries the stage beside the machine.
+Each layer calls only the next. The stored snapshot is the only record of a stage. No status field, enum or string-keyed table carries the stage beside the machine.
 
 ## Primitives
 
 | Primitive | Use it for | Never for |
 | --- | --- | --- |
 | finite state | one behavior; different behavior is a different state | data that varies inside one behavior |
-| context | the machine's data, changed by `assign` | a value that decides behavior |
-| event | a thing that happened; the only way in | a command that names a target |
+| context | the extended state: the machine's data, changed by `assign` | a difference in behavior; that is a finite state |
+| event | a signal, trigger or message that causes a transition | naming the target; the transition does |
 | transition | event to target, with a guard and actions | branching in code outside the machine |
 | guard | a pure boolean on context and params | a side effect or async work |
 | action | a fire-and-forget side effect | async work whose result the machine needs |
 | invoked actor | async work tied to one state, a known set | a dynamic set |
 | spawned actor | a dynamic set of children | one known effect |
 | `meta` | static data about a state a reader shows or offers | data that changes at runtime |
-| tag | a group of states one check answers | one state |
+| tag | a group of states one check answers, such as `loading` | — |
 | `description` | why the state exists | a rule the code needs |
 | delay | a named timing in `setup` | a timer inside an action |
 | `input` | starting data | data that arrives later |
@@ -64,7 +64,7 @@ Each layer calls only the next. The stored snapshot is the only record of a stag
 ## Before you change anything
 
 1. **Open the doc page for the slot you change, from the docs map.** A rule the docs do not state is not a rule. The v4 API (`Machine`, `interpret`, `withConfig`, `cond`, `send`, `state.meta`) is gone.
-2. **Check the installed version against the feature's "Since XState version" line.** Pure `transition` needs 5.19, `createStateConfig` 5.21, type-bound helpers 5.22, `setup.extend` 5.24, `getNextTransitions` 5.26, `mapState` 5.31. Run `pnpm ls xstate @xstate/react` in the app.
+2. **Check the installed version against the feature's "Since XState version" line.** `createStateConfig` needs 5.21, type-bound helpers 5.22, `setup.extend` 5.24, `getNextTransitions` 5.26, `mapState` 5.31. Run `pnpm ls xstate @xstate/react` in the app.
 3. **TypeScript 5.0 or newer, with `strictNullChecks` on.**
 
 ## Part A. Shared: the machine module
@@ -74,7 +74,6 @@ The machine module holds the states and the transitions. Implementations are the
 ### Model the states
 
 - **Start flat and small.** Add a finite state only when the logic behaves differently in it. Nest only when states share outgoing transitions or entry and exit actions. Keep the hierarchy shallow.
-- **Different behavior is a different state. Same behavior is the same state.**
 - **Name a state in domain words.** `signedOut`, `signingIn`, `authenticationFailed`, never `state1` or `error`.
 - **Model the workflow, with its loading and error states.**
 - **A parallel state is for independent regions.** Never transition from one region into another.
@@ -205,6 +204,11 @@ The machine module holds the states and the transitions. Implementations are the
     return <DraftForm kind={meta?.form} disabled={!editable} onCreated={(draftId) => send({ type: "draft.created", draftId })} />;
   }
   ```
+
+## Common failures
+
+- **`actor.send('start')` fails to type-check.** An event is an object: `actor.send({ type: 'start' })`.
+- **A subscriber added after `start()` sees nothing until the next event.** Subscribing does not emit the current snapshot. Read `actor.getSnapshot()` first.
 
 ## Gates
 

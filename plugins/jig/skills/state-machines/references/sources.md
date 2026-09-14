@@ -8,6 +8,9 @@ The docs were read in full on 2026-09-14 against `xstate` 5.33.0 and the `@xstat
 
 | Rule | Page | Quote |
 | --- | --- | --- |
+| Finite state and context make up the state | `finite-states` | "You can combine finite states with context, which make up the overall state of a machine". |
+| An event causes a transition; a transition names the target | `transitions` | "An **event** is a signal, trigger, or message that causes a transition." "A **transition** is a change from one finite state to another, triggered by an event." |
+| A tag groups states, such as `loading` | `tags` | "you can signify which state nodes represent states in which data is being loaded by using a 'loading' tag". |
 | Start flat and small | `finite-states` | "Start simple and shallow": "Begin with minimal states: Don't create multiple finite states until it becomes apparent that the behavior of your logic differs depending on some finite state it can be in." "Prefer flat structures initially". |
 | Nest only for shared transitions | `parent-states` | "Start Flat, Then Nest": "Begin with a flat state structure and only introduce parent states when patterns emerge". "Common Patterns for Parent States": "Shared Transitions", "Common Entry/Exit: If multiple states share entry or exit actions, they might belong in the same parent state". "Keep the hierarchy as shallow as possible". |
 | Different behavior is a different state | `finite-states` | "Different behavior = different state: Create separate states when the application behaves differently in response to the same event." "Same behavior = same state: If multiple 'states' handle events identically, they should probably be a single state." |
@@ -31,6 +34,7 @@ The docs were read in full on 2026-09-14 against `xstate` 5.33.0 and the `@xstat
 | Guards are pure and synchronous | `guards` | "Guards should be pure, synchronous functions that return either true or false." `and`, `or`, `not` under "Higher-level guards". "stateIn... is most useful for parallel states". |
 | Targetless transition to run actions | `transitions` | "A common mistake is using target: 'process' on a parent state transition when you only want to execute actions. This will re-resolve child states to their initial state. To preserve child states, omit target entirely." "Re-entering": "Re-entering (target + reenter: true)... Re-executed... Restarted". |
 | Context is immutable, `assign` changes it | `context` | "The context object is immutable, so you cannot directly modify it. Instead... you can use the assign(...) action to update context." |
+| Context is serializable | `persistence` | "Caveats": "the state must be serializable, which means that it must be JSON-serializable". |
 | `input` over a factory function | `input` | "Use-cases": "Replaces the old way of writing a factory function for machines". |
 | Built-in actions return objects | `actions` | "Built-in actions, such as assign(…), sendTo(…), and raise(…), are not imperative; they return a special action object... Do not call built-in action in custom action functions." "Imperative built-in actions are available in enqueueActions(…)". |
 | `always` needs guard or target | `eventless-transitions` | "Eventless transitions with no target nor guard will cause an infinite loop." "Observability and transient states": a state entered and left in one step never appears in `subscribe()`, `waitFor()`, `matches()`, `hasTag()`; use `after: { 0: '...' }` when it must be observed. |
