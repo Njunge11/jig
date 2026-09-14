@@ -1,10 +1,55 @@
 # Sources
 
-Provenance for the rules in `SKILL.md`. The agent-facing text cites doc pages only; this file records where each rule came from and what was observed.
+Provenance for the rules in `SKILL.md`: the doc page and section behind each rule, and what was observed.
 
 ## Primary source
 
-- eve `0.47.6`, the docs shipped in the package at `node_modules/eve/docs/`. Every rule in `SKILL.md` names its page and section there. The map in `eve-docs-map.md` lists the pages read.
+- eve `0.47.6`, the docs shipped in the package at `node_modules/eve/docs/`. The map in `eve-docs-map.md` lists the pages read.
+
+## Rule to source
+
+Page paths are under `node_modules/eve/docs/`.
+
+| Rule | Page and section |
+| ---- | ---------------- |
+| The body shape is the eve entry of `backend-standards` (the name rule) | `tools/overview.mdx` § "Define a tool" |
+| Run `pnpm exec eve info` from the app root that installs `eve` | `reference/cli.md` § "eve info" |
+| Find the project's eval script | `evals/running.mdx` § "Exit codes" |
+| `agent/instructions.md` holds identity and standing rules, and nothing else | `instructions.mdx` § "Author instructions" and § "Instructions vs skills" |
+| A model call is a decision | `concepts/execution-model-and-durability.mdx` § "Sessions, turns, and steps" |
+| Declare `outputSchema` on a tool whose raw output a client, a hook or a mapping reads | `tools/overview.mdx` § "Define a tool", the paragraph on `outputSchema` |
+| Project the result for the model with `toModelOutput` | `tools/overview.mdx` § "Shape what the model sees with `toModelOutput`" |
+| Return JSON only | `tools/overview.mdx`, the paragraph after `toModelOutput` |
+| Gate an irreversible or external side effect with `approval` | `tools/human-in-the-loop.md` § "Approvals" |
+| Make every write safe to run twice | `tools/overview.mdx` § "When a tool throws" |
+| A thrown error is a tool error the model reads | `tools/overview.mdx` § "When a tool throws" |
+| Pass `ctx.abortSignal` to work that can be cancelled | `tools/overview.mdx` § "The `ctx` parameter" |
+| Disable every default the agent must not have | `concepts/built-in-tools.md` § "Default tools" and § "Disable a default" |
+| A hook observes. It never blocks and never adds context | `guides/hooks.md` § "Define a hook" and § "Execution order" |
+| A screen that must block sits on the model, not in a hook | `agent-config.md` § "Set the model"; `guides/hooks.md` § "Define a hook" ("Handlers are observe-only") |
+| Wrap a hook body in `try`/`catch` | `guides/hooks.md` § "What happens when a hook throws" |
+| A hook runs at least once per event | `guides/hooks.md` § "Persist events to your own database" |
+| Time a turn from the events | `concepts/sessions-runs-and-streaming.md` § "The event envelope"; `guides/hooks.md` § "Define a hook" |
+| What the agent must remember lives in `defineState` | `concepts/state.md` |
+| `clientContext` lasts one model call | `guides/frontend/overview.mdx` § "Attach page context per turn" |
+| State never reaches a subagent | `concepts/state.md` § "State is never shared with subagents" |
+| Count the steps of a lane | `concepts/execution-model-and-durability.mdx` § "Sessions, turns, and steps" |
+| A subagent costs a session and a sandbox | `subagents/index.mdx` § "When to split" |
+| `approval` and `ask_question` park the turn the same way | `tools/human-in-the-loop.md` § "How pause and resume works" |
+| The client reads the request from the part | `guides/frontend/overview.mdx` § "Human-in-the-loop prompts" |
+| `useEveAgent` from `eve/react` is the client | `guides/frontend/overview.mdx` § "Basic chat (React)" |
+| Resume a thread with `resume: true` and `initialSession` | `guides/frontend/overview.mdx` § "Resumable sessions" |
+| `evals/evals.config.ts` exists, and one `.eval.ts` file is one case | `evals/overview.mdx` § "`evals.config.ts`"; `evals/cases.mdx` |
+| One eval per tool runs on the compiled build | `evals/overview.mdx` § "Deterministic fixture models"; `backend-standards` Review item 27 |
+| A lane eval asserts the exact tool list, in order, and the budget | `evals/assertions.mdx` § "Scoped assertions" |
+| Tag the evals that need a real model `live`, and exclude the tag in the default script | `evals/running.mdx` |
+| A judge sees the criteria and `on`, nothing else | `evals/judge.mdx` § "The graders" |
+| A bar is `.gate(n)` | `evals/judge.mdx` § "Soft scoring and thresholds" |
+| A live seed ensures reference rows and never deletes them | `evals/running.mdx`, the opening paragraph ("runs the evals concurrently") |
+| Read the turn from its trace | `reference/cli.md` § "eve traces" |
+| The trace counts model steps and tool calls, not statements | `reference/cli.md` § "eve traces" — span rows carry token counts, gateway cost and the tool name of `execute_tool` spans; no span carries a statement count |
+| `eve info` says no eve project contains the directory, or reports a version the app does not install | `reference/cli.md`, the opening paragraph ("from the application root or any directory beneath it") |
+| `eve eval` reports a dev server already running | `reference/cli.md` § "eve dev", the paragraph on `dev-server-state.v1.json` |
 
 ## Observations that motivated a rule
 

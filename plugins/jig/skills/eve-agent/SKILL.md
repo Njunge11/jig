@@ -1,32 +1,32 @@
 ---
 name: eve-agent
-description: The rules for an eve agent — the files under agent/ (instructions, tools, hooks, state, agent config), the evals under evals/, and the useEveAgent client. Every rule cites the eve docs installed in node_modules, and every gate is an eve command. Use when you add or change an eve agent tool under agent/tools, the agent's instructions.md, an agent hook under agent/hooks, defineState session state, a scope screen on the agent's model, an eve eval under evals/, or a chat UI built on useEveAgent, or when you review a diff that touches agent/ or evals/.
+description: The rules for an eve agent — the files under agent/ (instructions, tools, hooks, state, agent config), the evals under evals/, and the useEveAgent client. Every gate is an eve command. Use when you add or change an eve agent tool under agent/tools, the agent's instructions.md, an agent hook under agent/hooks, defineState session state, a scope screen on the agent's model, an eve eval under evals/, or a chat UI built on useEveAgent, or when you review a diff that touches agent/ or evals/.
 ---
 
 # eve agent
 
-eve is a framework with its own compiler, durable runtime and eval runner. A rule about eve has one source, the docs the installed version ships, and one proof, an eve command. This skill holds the rules for the agent as a whole. The body of one tool file is the eve entry of the `backend-standards` skill (`references/eve-entry.md`, Review items 26–27); this skill does not restate it.
+This skill holds the rules for the agent as a whole. The body of one tool file is the eve entry of the `backend-standards` skill (`references/eve-entry.md`, Review items 26–27); this skill does not restate it.
 
 ## Before you change anything under `agent/`
 
 1. **Open the doc page for the slot you change.** The docs ship with the package at `node_modules/eve/docs/`. `references/eve-docs-map.md` maps each slot to its page and section. Read the page for the installed version, not a memory of eve. A rule that the installed docs do not state is not a rule.
-2. **Run `pnpm exec eve info` from the app root that installs `eve`.** It prints the discovered surface and the diagnostics. Never use `npx eve`: when the working directory has no `eve` installed, `npx` downloads the newest release and runs that version against the app. Fix every diagnostic before you write code. Source: `reference/cli.md` § "eve info".
-3. **Find the project's eval script** in `package.json`. Every change below ends with that script green. Source: `evals/running.mdx` § "Exit codes".
+2. **Run `pnpm exec eve info` from the app root that installs `eve`.** It prints the discovered surface and the diagnostics. Never use `npx eve`: when the working directory has no `eve` installed, `npx` downloads the newest release and runs that version against the app. Fix every diagnostic before you write code.
+3. **Find the project's eval script** in `package.json`. Every change below ends with that script green.
 
 ## Rules
 
-Each rule names its doc page under `node_modules/eve/docs/`. `references/sources.md` records the observation behind each rule; load it only when a rule's ground is questioned.
+`references/sources.md` records the doc page and the observation behind each rule; load it only when a rule's ground is questioned.
 
 ### Instructions
 
-- **`agent/instructions.md` holds identity and standing rules, and nothing else.** System-role instructions ride every model call, so keep them short and stable. A procedure the model needs only sometimes is a skill under `agent/skills/`. Static instructions never run code. Source: `instructions.mdx` § "Author instructions" and § "Instructions vs skills".
-- **A model call is a decision.** A step is one model call and the tool calls it makes, and every call resends the conversation. Put the model only where the next step is a choice. Three shapes are not choices: a button that always opens the same card, a tool that always follows another tool, and a fixed sentence after a card. The client draws the card, the two tools are one tool whose result carries what the turn shows, and the client shows the line. Before you add a tool, write down the decision the model makes by calling it. Source: `concepts/execution-model-and-durability.mdx` § "Sessions, turns, and steps".
+- **`agent/instructions.md` holds identity and standing rules, and nothing else.** System-role instructions ride every model call, so keep them short and stable. A procedure the model needs only sometimes is a skill under `agent/skills/`. Static instructions never run code.
+- **A model call is a decision.** A step is one model call and the tool calls it makes, and every call resends the conversation. Put the model only where the next step is a choice. Three shapes are not choices: a button that always opens the same card, a tool that always follows another tool, and a fixed sentence after a card. The client draws the card, the two tools are one tool whose result carries what the turn shows, and the client shows the line. Before you add a tool, write down the decision the model makes by calling it.
 
 ### Tools
 
-- **The body shape is the eve entry of `backend-standards`.** One file per tool under `agent/tools/`, the file name is the tool name, `execute` is a named function at module scope, expected failures are return values. Source for the name rule: `tools/overview.mdx` § "Define a tool".
-- **Declare `outputSchema` on a tool whose raw output a client, a hook or a mapping reads.** eve types the `execute` return from it, so the tool cannot return a shape the readers do not parse, and a mapping that narrows the result at runtime reads the same schema instead of a chain of `if` checks. Source: `tools/overview.mdx` § "Define a tool", the paragraph on `outputSchema`.
-- **Project the result for the model with `toModelOutput`.** A result that a client renders holds options, prefilled values or long text. The model needs the status, the ids and the field names. Return `{ type: "json", value }` with only those. Hooks and the client still receive the full result on `action.result`. Source: `tools/overview.mdx` § "Shape what the model sees with `toModelOutput`".
+- **The body shape is the eve entry of `backend-standards`.** One file per tool under `agent/tools/`, the file name is the tool name, `execute` is a named function at module scope, expected failures are return values.
+- **Declare `outputSchema` on a tool whose raw output a client, a hook or a mapping reads.** eve types the `execute` return from it, so the tool cannot return a shape the readers do not parse, and a mapping that narrows the result at runtime reads the same schema instead of a chain of `if` checks.
+- **Project the result for the model with `toModelOutput`.** A result that a client renders holds options, prefilled values or long text. The model needs the status, the ids and the field names. Return `{ type: "json", value }` with only those. Hooks and the client still receive the full result on `action.result`.
 
   ```ts
   // agent/tools/update_job_draft.ts — the client renders `output`; the model reads the projection
@@ -34,15 +34,15 @@ Each rule names its doc page under `node_modules/eve/docs/`. `references/sources
     return { type: "json", value: { status: output.status, draft_id: output.draftId, missing: output.missing.map((f) => f.name) } };
   },
   ```
-- **Return JSON only.** Convert `Date`, `Map`, `Set` and cyclic objects before you return them. Source: `tools/overview.mdx`, the paragraph after `toModelOutput`.
-- **Gate an irreversible or external side effect with `approval`.** Import `always()` or `once()` from `eve/tools/approval`. An omitted `approval` is `never()`. Source: `tools/human-in-the-loop.md` § "Approvals".
-- **Make every write safe to run twice.** An interrupted step re-runs, so a tool can execute again after its first request reached the service. Use an idempotency key, or a recorded operation the tool checks, or approval. Source: `tools/overview.mdx` § "When a tool throws".
-- **A thrown error is a tool error the model reads.** eve does not retry a thrown tool. Throw only for a broken call. Source: `tools/overview.mdx` § "When a tool throws".
-- **Pass `ctx.abortSignal` to work that can be cancelled.** Source: `tools/overview.mdx` § "The `ctx` parameter".
+- **Return JSON only.** Convert `Date`, `Map`, `Set` and cyclic objects before you return them.
+- **Gate an irreversible or external side effect with `approval`.** Import `always()` or `once()` from `eve/tools/approval`. An omitted `approval` is `never()`.
+- **Make every write safe to run twice.** An interrupted step re-runs, so a tool can execute again after its first request reached the service. Use an idempotency key, or a recorded operation the tool checks, or approval.
+- **A thrown error is a tool error the model reads.** eve does not retry a thrown tool. Throw only for a broken call.
+- **Pass `ctx.abortSignal` to work that can be cancelled.**
 
 ### Built-in tools
 
-- **Disable every default the agent must not have.** eve gives every agent `bash`, `read_file`, `write_file`, `web_fetch`, `web_search`, `todo`, `ask_question` and `agent`. Export `disableTool()` from `agent/tools/<slug>.ts` for each one the agent does not need. A slug that matches no built-in fails the build. Do this before the first run on a real model. Source: `concepts/built-in-tools.md` § "Default tools" and § "Disable a default".
+- **Disable every default the agent must not have.** eve gives every agent `bash`, `read_file`, `write_file`, `web_fetch`, `web_search`, `todo`, `ask_question` and `agent`. Export `disableTool()` from `agent/tools/<slug>.ts` for each one the agent does not need. A slug that matches no built-in fails the build. Do this before the first run on a real model.
 
   ```ts
   // agent/tools/bash.ts — one file per default the agent must not have
@@ -52,60 +52,54 @@ Each rule names its doc page under `node_modules/eve/docs/`. `references/sources
 
 ### Hooks
 
-- **A hook observes. It never blocks and never adds context.** A hook runs after the event is durably written. Source: `guides/hooks.md` § "Define a hook" and § "Execution order".
-- **A screen that must block sits on the model, not in a hook.** `defineAgent.model` accepts a provider-authored `LanguageModel`, so a wrapped model with middleware is the seam that can refuse a turn before the model runs. Source: `agent-config.md` § "Set the model"; `guides/hooks.md` § "Define a hook" ("Handlers are observe-only").
-- **Wrap a hook body in `try`/`catch`.** A thrown hook fails the turn. Source: `guides/hooks.md` § "What happens when a hook throws".
-- **A hook runs at least once per event.** Key a once-per-turn side effect on `turnId`, `stepIndex` and `sequence`. Key stored content on `meta.id`. Source: `guides/hooks.md` § "Persist events to your own database".
-- **Time a turn from the events.** Every event carries `meta.at`. A hook on `step.started`, `step.completed`, `actions.requested`, `action.result` and `turn.completed` gives the model time, the tool time and the total per turn. Source: `concepts/sessions-runs-and-streaming.md` § "The event envelope"; `guides/hooks.md` § "Define a hook".
+- **A hook observes. It never blocks and never adds context.** A hook runs after the event is durably written.
+- **A screen that must block sits on the model, not in a hook.** `defineAgent.model` accepts a provider-authored `LanguageModel`, so a wrapped model with middleware is the seam that can refuse a turn before the model runs.
+- **Wrap a hook body in `try`/`catch`.** A thrown hook fails the turn.
+- **A hook runs at least once per event.** Key a once-per-turn side effect on `turnId`, `stepIndex` and `sequence`. Key stored content on `meta.id`.
+- **Time a turn from the events.** Every event carries `meta.at`. A hook on `step.started`, `step.completed`, `actions.requested`, `action.result` and `turn.completed` gives the model time, the tool time and the total per turn.
 
 ### State and context
 
-- **What the agent must remember lives in `defineState`.** Declare the handle once at module scope, from `eve/context`, and import it in tools and hooks. `get()` and `update()` work only inside eve-managed code. Source: `concepts/state.md`.
-- **`clientContext` lasts one model call.** It never enters durable history. Send an id through it, then store it in state from the first tool that reads it. Source: `guides/frontend/overview.mdx` § "Attach page context per turn".
-- **State never reaches a subagent.** Source: `concepts/state.md` § "State is never shared with subagents".
+- **What the agent must remember lives in `defineState`.** Declare the handle once at module scope, from `eve/context`, and import it in tools and hooks. `get()` and `update()` work only inside eve-managed code.
+- **`clientContext` lasts one model call.** It never enters durable history. Send an id through it, then store it in state from the first tool that reads it.
+- **State never reaches a subagent.**
 - **The conversation's stage is an XState machine, not a field in `defineState`.** The `state-machines` skill owns the machine, the server that moves it, and the client that renders it.
 
 ### Execution
 
-- **Count the steps of a lane.** A step is one model call and the tool calls it makes. Every turn ends with a model step. A lane's exact tool list, in order, and its step count are the budget its eval asserts. Source: `concepts/execution-model-and-durability.mdx` § "Sessions, turns, and steps".
-- **A subagent costs a session and a sandbox.** Split one out only for a different prompt or a narrower tool surface. Source: `subagents/index.mdx` § "When to split".
+- **Count the steps of a lane.** A step is one model call and the tool calls it makes. Every turn ends with a model step. A lane's exact tool list, in order, and its step count are the budget its eval asserts.
+- **A subagent costs a session and a sandbox.** Split one out only for a different prompt or a narrower tool surface.
 
 ### Human in the loop
 
-- **`approval` and `ask_question` park the turn the same way.** Both emit `input.requested`. The client answers through `respond()` with the `requestId`. Source: `tools/human-in-the-loop.md` § "How pause and resume works".
-- **The client reads the request from the part.** The pending request sits at `part.toolMetadata.eve.inputRequest` on a `dynamic-tool` part. Scan every message. Source: `guides/frontend/overview.mdx` § "Human-in-the-loop prompts".
+- **`approval` and `ask_question` park the turn the same way.** Both emit `input.requested`. The client answers through `respond()` with the `requestId`.
+- **The client reads the request from the part.** The pending request sits at `part.toolMetadata.eve.inputRequest` on a `dynamic-tool` part. Scan every message.
 
 ### Client
 
-- **`useEveAgent` from `eve/react` is the client.** Render `data.messages`, steer on `status`, send with `send()`. Source: `guides/frontend/overview.mdx` § "Basic chat (React)".
-- **Resume a thread with `resume: true` and `initialSession`.** Persist the cursor from `onSessionChange`. Remount the chat on a thread switch with a `key`. Source: `guides/frontend/overview.mdx` § "Resumable sessions".
+- **`useEveAgent` from `eve/react` is the client.** Render `data.messages`, steer on `status`, send with `send()`.
+- **Resume a thread with `resume: true` and `initialSession`.** Persist the cursor from `onSessionChange`. Remount the chat on a thread switch with a `key`.
 
 ### Evals
 
-- **`evals/evals.config.ts` exists, and one `.eval.ts` file is one case.** Source: `evals/overview.mdx` § "`evals.config.ts`"; `evals/cases.mdx`.
-- **One eval per tool runs on the compiled build.** A scripted `mockModel` turns one message into the one tool call. This is the only test that sees what the eve compiler breaks. Source: `evals/overview.mdx` § "Deterministic fixture models"; `backend-standards` Review item 27.
-- **A lane eval asserts the exact tool list, in order, and the budget.** Use `t.toolOrder([...])` and `t.maxToolCalls(n)`, so a chain that grows by one tool fails. Source: `evals/assertions.mdx` § "Scoped assertions".
-- **Tag the evals that need a real model `live`, and exclude the tag in the default script.** A `--tag` that matches nothing is a configuration error. The live script loads its own keys (`dotenv -e .env -- eve eval --tag live`), so the builder runs it alone. Source: `evals/running.mdx`.
-- **A judge sees the criteria and `on`, nothing else.** Every fact the criteria name (the JD, the brief, the reference) goes inside the `on` value; the reply carries none of it. Source: `evals/judge.mdx` § "The graders".
-- **A bar is `.gate(n)`.** `.atLeast(n)` is soft: a missed score marks the case `scored` and the run still exits `0`. Source: `evals/judge.mdx` § "Soft scoring and thresholds".
-- **A live seed ensures reference rows and never deletes them.** Cases run concurrently against one database, so a seed inserts a unique row with `onConflictDoNothing` and its cleanup removes only the rows the case owns. Source: `evals/running.mdx`, the opening paragraph ("runs the evals concurrently").
+- **`evals/evals.config.ts` exists, and one `.eval.ts` file is one case.**
+- **One eval per tool runs on the compiled build.** A scripted `mockModel` turns one message into the one tool call. This is the only test that sees what the eve compiler breaks.
+- **A lane eval asserts the exact tool list, in order, and the budget.** Use `t.toolOrder([...])` and `t.maxToolCalls(n)`, so a chain that grows by one tool fails.
+- **Tag the evals that need a real model `live`, and exclude the tag in the default script.** A `--tag` that matches nothing is a configuration error. The live script loads its own keys (`dotenv -e .env -- eve eval --tag live`), so the builder runs it alone.
+- **A judge sees the criteria and `on`, nothing else.** Every fact the criteria name (the JD, the brief, the reference) goes inside the `on` value; the reply carries none of it.
+- **A bar is `.gate(n)`.** `.atLeast(n)` is soft: a missed score marks the case `scored` and the run still exits `0`.
+- **A live seed ensures reference rows and never deletes them.** Cases run concurrently against one database, so a seed inserts a unique row with `onConflictDoNothing` and its cleanup removes only the rows the case owns.
 - **A client stream fixture copies a real trace.** The `frontend-tests` Review checklist owns that rule. Capture the trace with `eve traces` (below).
 
 ### Measure
 
-- **Read the turn from its trace.** `pnpm exec eve traces` prints the span tree of the last turn: each model step with its tokens, each `execute_tool` span with its tool name and duration. Set `EVE_TRACES_CONTENT=on` in `.env.local` to capture prompts and tool payloads. Source: `reference/cli.md` § "eve traces".
-- **The trace counts model steps and tool calls, not statements.** A tool's statements are its service's statement budget, asserted by the budget test `backend-standards` § "Queries & performance" demands. A lane is within budget when both hold: the trace's tool list and step count, and each tool's statement count. Source: `reference/cli.md` § "eve traces" — span rows carry token counts, gateway cost and the tool name of `execute_tool` spans; no span carries a statement count.
+- **Read the turn from its trace.** `pnpm exec eve traces` prints the span tree of the last turn: each model step with its tokens, each `execute_tool` span with its tool name and duration. Set `EVE_TRACES_CONTENT=on` in `.env.local` to capture prompts and tool payloads.
+- **The trace counts model steps and tool calls, not statements.** A tool's statements are its service's statement budget, asserted by the budget test `backend-standards` § "Queries & performance" demands. A lane is within budget when both hold: the trace's tool list and step count, and each tool's statement count.
 
 ## Common failures
 
-- **`eve info` says no eve project contains the directory, or reports a version the app does not install.** The command ran outside the app root, or through `npx`. Run `pnpm exec eve info` from the app root. Source: `reference/cli.md`, the opening paragraph ("from the application root or any directory beneath it").
-
-- **`eve eval` reports a dev server already running.** The record in `.eve/dev-server-state.v1.json` points at the project's dev server. Move the file aside for the eval run and put it back. Never stop that server; it belongs to whoever runs `dev`. Source: `reference/cli.md` § "eve dev", the paragraph on `dev-server-state.v1.json`.
-- **A tool compiles and throws `ReferenceError` on its first call.** Its `execute` sits inside a function body. Move it to module scope. See `backend-standards` `references/eve-entry.md`.
+- **`eve eval` reports a dev server already running.** The record in `.eve/dev-server-state.v1.json` points at the project's dev server. Move the file aside for the eval run and put it back. Never stop that server; it belongs to whoever runs `dev`.
 - **A tool throws `ERR_INVALID_THIS` on the compiled build only.** A method was passed bare (`uuid: crypto.randomUUID`) and lost its `this`; the unit tests inject a fake and never see it. Wrap it: `uuid: () => crypto.randomUUID()`.
-- **A model runs `bash` or reads the environment unprompted.** A default tool is still on. Disable it (Built-in tools).
-- **The model repeats ids or option lists back.** The tool has no `toModelOutput` (Tools).
-- **Every typed answer costs three model calls.** A model call sits on a step the instructions fix (Instructions).
 
 ## Gates
 

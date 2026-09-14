@@ -9,8 +9,6 @@ description: The rules for XState v5 state machines, in three parts. Shared, how
 
 ## Who reads what
 
-One machine module serves two sides.
-
 | You are | Read |
 | --- | --- |
 | The author or reviewer of a machine file | Part A |
@@ -25,7 +23,7 @@ One machine module serves two sides.
 
 ## Part A. Shared: the machine module
 
-The machine module holds the logic: the states and the transitions. Implementations are the language-specific code the logic names: actions, actors, guards and delays. Their defaults live in `setup`, and a caller overrides them with `machine.provide`.
+The machine module holds the states and the transitions. Implementations are the code they name: actions, actors, guards and delays.
 
 ### Model the states
 
@@ -38,7 +36,7 @@ The machine module holds the logic: the states and the transitions. Implementati
 
 ### Set up the machine
 
-- **Create every machine with `setup({ types, actions, guards, actors, delays }).createMachine(...)`.** Put `context`, `events`, `input`, `output`, `tags` and `emitted` types in `types`. Named sources are guaranteed to exist.
+- **Create every machine with `setup({ types, actions, guards, actors, delays }).createMachine(...)`.** Put `context`, `events`, `input`, `output`, `tags` and `emitted` types in `types`.
 - **Reference actions and guards as objects, `{ type, params }`, not as inline functions.** Inline functions are for prototyping. The default implementation lives in `setup`; a caller overrides it with `machine.provide` (Part B, Part C).
 - **Read `params`, not `event`, inside an action or guard.** Reach for `assertEvent` only when params are infeasible.
 - **Write the full transition object.** `'feedback.good': { target: 'thanks' }`, never the string shorthand.
@@ -116,12 +114,9 @@ The machine module holds the logic: the states and the transitions. Implementati
 
 ## Part B. Backend: move and persist the machine
 
-Pure transition functions compute the next state and actions without a live actor and without side effects, for server-side applications.
-
 - **Compute the next state with `initialTransition(machine, input?)` and `transition(machine, state, event)`.** They return `[nextState, actions]`, create no live actor, and execute no side effect. `getNextSnapshot` and `getInitialSnapshot` will be deprecated.
 - **The returned actions are yours to run.** Custom actions come back as `{ type, params }`. Run each one through the backend's implementation after the transition is stored.
 - **Persist the snapshot, restore it with `resolveState`.** `JSON.stringify(state)` on the way out, `machine.resolveState(JSON.parse(stored))` on the way in, then `transition(machine, restored, event)`. To persist only the value, store `{ value, context }` and resolve that.
-- **Persist the snapshot to the database.** A persisted snapshot restores with the `snapshot` option (Part C).
 - **When a live actor is needed, restore it with `createActor(machine, { snapshot }).start()`.** Actions do not run again on restore; invocations restart; spawned actors restore recursively.
 - **A snapshot is JSON.** No functions, classes or other non-serializable values. A restored snapshot can be incompatible after the machine changes. When actions must replay, persist the events from `inspect` and replay them.
 - **Use `getMicrosteps` when one event crosses several states.** It returns every intermediate `[snapshot, actions]`.
@@ -136,15 +131,7 @@ Pure transition functions compute the next state and actions without a live acto
   return { snapshot: after };
   ```
 
-### Backend failures
-
-- **A route computes the state with `getNextSnapshot`.** It will be deprecated. Use `transition`.
-- **`JSON.stringify` drops a context field.** A function or class sits in context. Keep context serializable.
-- **A restored actor did not send its email.** Actions do not re-run on restore. Persist and replay events instead.
-
 ## Part C. Frontend: restore and render the machine
-
-With the `snapshot` option, the state is initially the persisted state, not the machine's initial state.
 
 - **`@xstate/react` is the client.** `useActorRef` gives a stable ref that does not rerender. `useSelector(actorRef, selector, compare?)` rerenders only when the selected value changes. Define selectors outside the component. Pass `shallowEqual` when a selector returns an object. `createActorContext` provides one actor to a tree.
 - **Restore a persisted snapshot with the `snapshot` option.** `useMachine(machine, { snapshot })` starts at that state.
@@ -173,19 +160,6 @@ With the `snapshot` option, the state is initially the persisted state, not the 
   }
   ```
 
-### Frontend failures
-
-- **A component rerenders on every snapshot.** Its selector returns a new object each time. Return a primitive, or pass `shallowEqual`.
-- **`actor.send('start')` throws a type error.** Events are objects: `actor.send({ type: 'start' })`.
-- **A subscriber added after `start()` saw nothing.** Subscribing does not emit the current snapshot. Read `actor.getSnapshot()`.
-
-## Shared failures
-
-- **`assign` inside a custom action changes nothing.** It returned an action object no one interpreted. Move it to `actions: [assign(...)]` or `enqueueActions`.
-- **A parent's transition reset its children.** The transition has `target: 'parent'`. Remove the target.
-- **`hasTag` or `matches` is never true for a state the machine passed through.** The state is transient. Use `after: { 0 }` or the microstep inspector.
-- **`getShortestPaths` runs over an infinite state space.** The context is dynamic. Add `stopWhen` or `limit`.
-
 ## Gates
 
 Run the gates for your side before a commit. Paste the output in the proof.
@@ -201,10 +175,10 @@ Reject the change if any item is true. Walk the shared items against every chang
 ### Shared
 
 1. A rule or an API in the diff is not on the XState docs page for its slot, or needs a version newer than the installed `xstate`.
-2. A machine is created without `setup`, or its implementations ride the second argument of `createMachine`, against the docs' recommendation.
+2. A machine is created without `setup`, or its implementations ride the second argument of `createMachine`.
 3. An implementation is neither a default in `setup` nor an override through `machine.provide`.
 4. Static data about a state, such as what a UI shows for it, lives outside that state's `meta` and `tags`, or code reads it other than through `getMeta`, `hasTag`, `matches`, `mapState` or `getNextTransitions`.
-5. An action or guard is an inline function outside a prototype, or reads `event` where `params` serve, against the docs' recommendation.
+5. An action or guard is an inline function outside a prototype, or reads `event` where `params` serve.
 6. A transition uses the string shorthand, or carries a `target` to its own parent state to run actions only.
 7. Async work whose result the machine needs runs in an action instead of an invoked or spawned actor.
 8. A built-in action creator is called inside a custom action function.
@@ -216,7 +190,7 @@ Reject the change if any item is true. Walk the shared items against every chang
 
 12. A server computes the next state with `getNextSnapshot` or `getInitialSnapshot`, or creates a live actor to compute a transition.
 13. A server persists a snapshot with a non-serializable value, or restores one without `resolveState` or the `snapshot` option.
-14. The actions returned by `transition` are not handled; the docs hand the caller "full control over when and how to handle them".
+14. The actions returned by `transition` are not handled.
 
 ### Frontend
 
