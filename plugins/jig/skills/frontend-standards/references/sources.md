@@ -21,7 +21,11 @@ these pages on 2026-09-01.
   context." And [react.dev/learn/thinking-in-react](https://react.dev/learn/thinking-in-react)
   step 1: "a component should ideally only be concerned with one
   thing. If it ends up growing, it should be decomposed into
-  smaller subcomponents." Verified 2026-09-14.
+  smaller subcomponents." Step 4, on where state lives: "Identify
+  every component that renders something based on that state",
+  "Find their closest common parent component", "Often, you can
+  put the state directly into their common parent." Verified
+  2026-09-14.
 - Rules 6–7 —
   [components.build/composition](https://www.components.build/composition):
   the part-naming vocabulary (Trigger/Content/Header/Body/Footer/

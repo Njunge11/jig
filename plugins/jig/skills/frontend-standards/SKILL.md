@@ -69,10 +69,12 @@ not restate them. This list is also the review checklist.
    says. Every other concern becomes a cooperating component that
    owns its own data and state; a Root holds only the state the
    parts share, through context or props. Props are not the only
-   sign: concerns hidden in hooks and handlers count the same. A
-   "card list" is `Card` + `CardHeader`/`CardTitle`/`CardContent`
-   plus a row component; a session is a Root plus one part per
-   concern.
+   sign: concerns hidden in hooks and handlers count the same.
+   Rendering named parts does not pass the test; owning one
+   concern does. State has the same test: for each piece of
+   state, find every component that renders it and put the state
+   in their closest common parent. State that one child renders
+   belongs in that child, not in the Root.
 5. Use the component's own API: `variant`/`size` for
    permutations, compound parts as intended. Do not recreate what
    a prop already does. The inverse holds too: never fight the
