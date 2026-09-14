@@ -297,3 +297,9 @@ these pages on 2026-09-01.
   desired type" — the escape the rule closes. `never` is
   assignable to every type, so `as never` is the same escape in
   one step. Verified 2026-09-14.
+
+- Rule 65 —
+  [XState docs: @xstate/react § Matching states](https://stately.ai/docs/xstate-react#matching-states):
+  "use the `state.matches(...)` method"; [Tags](https://stately.ai/docs/tags):
+  "`snapshot.hasTag(tag)`"; [Finite states § Meta](https://stately.ai/docs/finite-states#meta):
+  "`snapshot.getMeta()`". Verified 2026-09-14.

@@ -142,6 +142,8 @@ A tool is a router for the app's own eve agent. eve owns the conversation, the l
 **Does:** all the business logic. It coordinates the repositories and the external services. It owns the transaction boundaries. It transforms the domain objects. It throws the domain errors.
 **Never:** HTTP/tRPC concerns, status codes, SQL, or ORM queries. Never validate again the input that the entry point already validated.
 
+- **A stage the service moves is an XState machine.** The service restores the stored snapshot, calls `transition(machine, state, event)`, stores the next snapshot through the repo, and runs the returned actions. Never an `if` chain on a status field. The `state-machines` skill owns the machine and this call.
+
 ### Repository — `db/*.repo.ts`
 
 **Does:** it reads and writes the DB. It composes the Drizzle queries. It maps the rows to domain shapes. It accepts an injected `db`/`tx` handle.
@@ -351,3 +353,4 @@ Reject the change if any item is true. Items 5–7 need `references/workflow-ent
 29. An entry-point call has no statement-budget test, or the diff raises a call's statement count without the behavior that needs the extra statement named in the task.
 30. A feature router holds the procedures of more than one resource, or holds input schemas or composition, instead of merging one `<resource>.router.ts` per resource as the `structure` skill lays out.
 31. A non-test file forces a type with `as never` or a double assertion (`as any as T`, `as unknown as T`). Gate: `pnpm lint`, rule `no-restricted-syntax (backend-standards 31)`.
+32. A service moves a stage or status with hand-written conditions on a field, instead of `transition` on the machine and its stored snapshot (`state-machines`).

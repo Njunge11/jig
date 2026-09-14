@@ -424,6 +424,13 @@ export default async function Page() {
     typed fake, a schema parse, a narrowed union. Gate: `pnpm lint`,
     rule `no-restricted-syntax (frontend-standards 64)`.
 
+### State machines
+
+65. A view that depends on a stage reads the machine's snapshot
+    through `matches`, `hasTag` or `getMeta`, never a status string
+    or a table keyed by it. The `state-machines` skill owns the
+    machine, its restore with `snapshot`, and the selectors.
+
 ## Gates
 
 Run before a commit. Paste the output in the proof.
@@ -432,6 +439,6 @@ Run before a commit. Paste the output in the proof.
 
 ## Review
 
-Rules 1–64, plus the Verify list of every recipe whose catalog
+Rules 1–65, plus the Verify list of every recipe whose catalog
 row matches the build, are this skill's review checklist — run by
 the `review-frontend-feature` skill.

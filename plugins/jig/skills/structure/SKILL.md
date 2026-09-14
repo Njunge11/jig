@@ -41,6 +41,7 @@ features/<feature>/
     <name>/
       index.ts               ← workflow function
       steps.ts               ← step functions
+  machine/<name>/             ← the feature's XState machine (only if the feature has one); the state-machines skill says what
   ui/
     <feature>-page.tsx       ← the composed page tree
     <part>.tsx               ← one file per anatomy part
@@ -86,12 +87,15 @@ evals/
    factories) follow `backend-standards`; the `ui/` branch
    follows the `frontend-standards` skill. This skill owns only where
    things live.
-6. **eve fixes the tool path.** An eve tool lives at
+6. **A machine lives in its feature.** `features/<feature>/machine/<name>/`,
+   never beside a tool, a router or a view. The service and the
+   view import it; the `state-machines` skill owns its files.
+7. **eve fixes the tool path.** An eve tool lives at
    `agent/tools/<tool_name>.ts`, never in the feature folder,
    because eve registers that directory and names the tool after
    the file. The service the tool calls stays in its feature's
    `api/`; the tool file only composes it.
-7. **A router is a map of resource routers.** `<feature>.router.ts`
+8. **A router is a map of resource routers.** `<feature>.router.ts`
    merges one `<resource>.router.ts` per resource the feature
    serves (draft, questions, settings, …) and names nothing else,
    the same way `ui/cards/index.ts` maps part types to cards. A
@@ -99,6 +103,6 @@ evals/
    resource's file. Merge with `t.mergeRouters` so the client's
    procedure paths do not change. A feature with one resource has
    one resource router; the map file still exists.
-8. **Check before you finish.** Walk every file you created or
+9. **Check before you finish.** Walk every file you created or
    moved against the tree. Fix a misplaced file now — do not
    record it for later.

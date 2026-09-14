@@ -7,6 +7,52 @@ description: The rules for XState v5 state machines, in three parts. Shared, how
 
 `references/xstate-docs-map.md` maps each slot of a machine to its XState v5 docs page and side; open it in step 1. `references/sources.md` quotes the doc line behind each rule; load it only when a rule's ground is questioned.
 
+## Structure
+
+One machine is one folder. The `structure` skill places it.
+
+```
+machine/<name>/
+  <name>.setup.ts            ← setup({ types, actions, guards, actors, delays }); imports xstate only
+  <name>.states.ts           ← one createStateConfig per state: meta, tags, description, transitions
+  <name>.machine.ts          ← setup.createMachine({ id, initial, context, states })
+  __tests__/
+    <name>.machine.test.ts   ← every state reachable; every transition asserted
+```
+
+## Layers
+
+```
+Machine module:  setup → states → machine                      pure; no I/O, no framework import
+Backend:         entry → service → transition(machine, resolveState(row.snapshot), event)
+                                 → repo stores the next snapshot → service runs the returned actions
+Frontend:        page reads the snapshot → useMachine(machine.provide(impl), { snapshot })
+                                 → useSelector(getMeta | hasTag | matches) → view
+```
+
+Each layer calls only the next. The stored snapshot is the only record of a stage. A condition on the stage is a guard. A fact about a stage is `meta` or a tag. No status field, enum or string-keyed table carries the stage beside the machine.
+
+## Primitives
+
+| Primitive | Use it for | Never for |
+| --- | --- | --- |
+| finite state | one behavior; different behavior is a different state | data that varies inside one behavior |
+| context | the machine's data, changed by `assign` | a value that decides behavior |
+| event | a thing that happened; the only way in | a command that names a target |
+| transition | event to target, with a guard and actions | branching in code outside the machine |
+| guard | a pure boolean on context and params | a side effect or async work |
+| action | a fire-and-forget side effect | async work whose result the machine needs |
+| invoked actor | async work tied to one state, a known set | a dynamic set |
+| spawned actor | a dynamic set of children | one known effect |
+| `meta` | static data about a state a reader shows or offers | data that changes at runtime |
+| tag | a group of states one check answers | one state |
+| `description` | why the state exists | a rule the code needs |
+| delay | a named timing in `setup` | a timer inside an action |
+| `input` | starting data | data that arrives later |
+| `output` | the result of a top-level final state | a mid-run value |
+| `emit` | a handler outside the machine | another actor |
+| snapshot | the persisted state | a derived status field |
+
 ## Who reads what
 
 | You are | Read |
