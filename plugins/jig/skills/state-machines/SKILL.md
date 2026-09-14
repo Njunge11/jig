@@ -9,16 +9,20 @@ description: The rules for XState v5 state machines, in three parts. Shared, how
 
 ## Structure
 
-One machine is one folder. The `structure` skill places it.
+One machine is one folder for its setup and root, plus one states file per workflow that plugs in. The `structure` skill places them. If it is not already in your context, invoke it before you place a file.
 
 ```
-machine/<name>/
+machine/<name>/              ← with the owner of the conversation (an agent's machine sits in agent/machine/)
   <name>.setup.ts            ← setup({ types, actions, guards, actors, delays }); imports xstate only
-  <name>.states.ts           ← one createStateConfig per state: meta, tags, description, transitions
-  <name>.machine.ts          ← setup.createMachine({ id, initial, context, states })
+  <name>.machine.ts          ← <last setup>.createMachine({ id, initial, context, states }); imports each workflow
   __tests__/
     <name>.machine.test.ts   ← every state reachable; every transition asserted
+<owner>/machine/<workflow>.setup.ts    ← <base setup>.extend({ guards, actions, delays }) the workflow owns; imports the base setup
+<owner>/machine/<workflow>.states.ts   ← one createStateConfig per state: meta, tags, description, transitions;
+                                          a feature's workflow files live in that feature
 ```
+
+The root machine is created from the last extended setup, so every base and workflow implementation is available to it. A workflow with no guards or actions of its own has no setup file and uses the base setup.
 
 ## Layers
 
@@ -26,11 +30,14 @@ machine/<name>/
 Machine module:  setup → states → machine                      pure; no I/O, no framework import
 Backend:         entry → service → transition(machine, machine.resolveState(row.snapshot), event)
                                  → repo stores the next snapshot → service runs the returned actions
-Frontend:        page reads the snapshot → useMachine(machine.provide(impl), { snapshot })
-                                 → useSelector(getMeta | hasTag | matches) → view
+Screen of a server-owned machine:
+                 router returns the stored snapshot → machine.resolveState(stored)
+                                 → getMeta | hasTag | matches → view; a user action is a request to the server
+Browser-owned machine:
+                 useMachine(machine.provide(impl), { snapshot }) → useSelector(getMeta | hasTag | matches) → view
 ```
 
-Each layer calls only the next. The stored snapshot is the only record of a stage. No status field, enum or string-keyed table carries the stage beside the machine.
+Each layer calls only the next. The stored snapshot is the only record of a stage. No status field, enum or string-keyed table carries the stage beside the machine. One side owns the actor. When the backend moves the machine, no screen starts one, so there is never a second source of truth. The meta a screen reads names the part it draws. The `structure` skill says where that part lives and which module imports it.
 
 ## Primitives
 
@@ -178,30 +185,33 @@ The machine module holds the states and the transitions. Implementations are the
 
 ## Part C. Frontend: restore and render the machine
 
-- **`@xstate/react` is the client.** `useActorRef` gives a stable ref that does not rerender. `useSelector(actorRef, selector, compare?)` rerenders only when the selected value changes. Define selectors outside the component. Pass `shallowEqual` when a selector returns an object. `createActorContext` provides one actor to a tree.
-- **Restore a persisted snapshot with the `snapshot` option.** `useMachine(machine, { snapshot })` starts at that state.
+- **The owner of the actor decides the client.** When the backend moves the machine (Part B), the screen never creates an actor and never sends it an event. It resolves the stored snapshot with `machine.resolveState(stored)` and reads `getMeta`, `hasTag` and `matches` on the result. A user action goes to the server, which answers with the next stored snapshot. One reader module does the resolve and the reads for every screen. The rest of Part C is for a machine the browser owns.
+- **`@xstate/react` is the client of a browser-owned machine.** `useActorRef` gives a stable ref that does not rerender. `useSelector(actorRef, selector, compare?)` rerenders only when the selected value changes. Define selectors outside the component. Pass `shallowEqual` when a selector returns an object. `createActorContext` provides one actor to a tree.
+- **Restore a persisted snapshot with the `snapshot` option.** `useMachine(machine.provide(impl), { snapshot })` starts at that state.
 - **Branch the view on `matches`, and prefer `hasTag` where a group serves.** In a hierarchical or parallel machine the state value is an object, so use `matches` in `if`, `switch (true)` or a ternary.
 - **Provide the client's implementations with `machine.provide(...)` as the hook's first argument.** The hook keeps them up to date. No lazy machine creator, no implementations in the second argument.
 - **New data reaches a running actor as an event.** A changed `input` does not restart it.
 - **An optional actor is `createEmptyActor()`.** `useSelector(props.actor ?? emptyActor, ...)` answers `undefined` until the actor exists.
 - **A UI test asserts what is on screen, never `snapshot.value`.** The `frontend-tests` skill owns the test rules.
 
+  A browser-owned machine, a wizard whose snapshot the browser keeps (the page reads it from its own store and passes it in):
+
   ```tsx
   import { useMachine, useSelector, shallowEqual } from "@xstate/react";
   import type { Snapshot, SnapshotFrom } from "xstate";
-  import { postingMachine } from "./posting.machine";
+  import { wizardMachine } from "./wizard.machine";
 
-  const selectMeta = (s: SnapshotFrom<typeof postingMachine>) => s.getMeta()[`posting.${s.value}`];
-  const selectEditable = (s: SnapshotFrom<typeof postingMachine>) => s.hasTag("editable");
+  const selectMeta = (s: SnapshotFrom<typeof wizardMachine>) => s.getMeta()[`wizard.${s.value}`];
+  const selectEditable = (s: SnapshotFrom<typeof wizardMachine>) => s.hasTag("editable");
 
-  function Thread({ snapshot, notify }: { snapshot: Snapshot<unknown>; notify: (draftId: string) => void }) {
+  function Wizard({ snapshot, notify }: { snapshot: Snapshot<unknown> | undefined; notify: (step: string) => void }) {
     const [, send, actorRef] = useMachine(
-      postingMachine.provide({ actions: { notifyPublished: (_, params) => notify(params.draftId) } }),
+      wizardMachine.provide({ actions: { notifyStepDone: (_, params) => notify(params.step) } }),
       { snapshot },
     );
     const meta = useSelector(actorRef, selectMeta, shallowEqual);
     const editable = useSelector(actorRef, selectEditable);
-    return <DraftForm kind={meta?.form} disabled={!editable} onCreated={(draftId) => send({ type: "draft.created", draftId })} />;
+    return <StepForm kind={meta?.form} disabled={!editable} onDone={(values) => send({ type: "step.done", values })} />;
   }
   ```
 
@@ -220,14 +230,14 @@ Run the gates for your side before a commit. Paste the output in the proof.
 
 ## Review checklist
 
-Reject the change if any item is true. Walk the shared items against every changed file that imports `xstate`, and the items of your side against your side's files.
+Reject the change if any item is true. Walk the Shared items against every changed file that imports `xstate` and every file under a `machine/` folder. Walk the items of your side against your side's files. Then run the Gates of your side; a gate not run, or whose output is not in the proof, rejects the change.
 
 ### Shared
 
-1. A rule or an API in the diff is not on the XState docs page for its slot, or needs a version newer than the installed `xstate`.
+1. A rule or an API in the diff is not on the XState docs page for its slot. Or it needs a version newer than the installed `xstate`.
 2. A machine is created without `setup`, or its implementations ride the second argument of `createMachine`.
 3. An implementation is neither a default in `setup` nor an override through `machine.provide`.
-4. Static data about a state, such as what a UI shows for it, lives outside that state's `meta` and `tags`, or code reads it other than through `getMeta`, `hasTag`, `matches`, `mapState` or `getNextTransitions`.
+4. Static data about a state, such as what a UI shows for it, lives outside that state's `meta` and `tags`. Or code reads it other than through `getMeta`, `hasTag`, `matches`, `mapState` or `getNextTransitions`.
 5. An action or guard is an inline function outside a prototype, or reads `event` where `params` serve.
 6. A transition uses the string shorthand, or carries a `target` to its own parent state to run actions only.
 7. Async work whose result the machine needs runs in an action instead of an invoked or spawned actor.
@@ -235,20 +245,18 @@ Reject the change if any item is true. Walk the shared items against every chang
 9. An `always` transition has neither `guard` nor `target`, or a test waits for a transient state through the snapshot.
 10. A path test over a machine with dynamic context has no `stopWhen` and no `limit`, or a test imports `@xstate/test`.
 11. A parallel region targets a state in another region.
+12. A machine's files are not laid out as the Structure section shows. The setup and the root machine sit in `machine/<name>/` with the owner of the conversation. Each workflow's states file sits in the folder of the feature that owns it. It gets a `<workflow>.setup.ts` extension only when the workflow owns guards, actions or delays. No states file holds two workflows.
 
 ### Backend
 
-12. A server computes the next state with `getNextSnapshot` or `getInitialSnapshot`, or creates a live actor to compute a transition.
-13. A server persists a snapshot with a non-serializable value, or restores one without `resolveState` or the `snapshot` option.
-14. The actions returned by `transition` are not handled.
+13. A server computes the next state with `getNextSnapshot` or `getInitialSnapshot`, or creates a live actor to compute a transition.
+14. A server persists a snapshot with a non-serializable value, or restores one without `resolveState` or the `snapshot` option.
+15. The actions returned by `transition` are not handled.
 
 ### Frontend
 
-15. A React component branches on the raw `value` of a hierarchical or parallel machine instead of `matches`.
-16. A React component starts the machine without the backend's snapshot, provides implementations through the hook's second argument, or passes new data through `input` instead of an event.
-17. A selector returns a new object without `shallowEqual`, or is defined inside the component.
-18. A UI test asserts `snapshot.value` or context instead of what is on screen.
-
-### Every side
-
-19. A gate in the Gates section was not run for this side, or its output is not in the proof.
+16. A React component branches on the raw `value` of a hierarchical or parallel machine instead of `matches`.
+17. A screen of a server-owned machine creates an actor (`useMachine`, `useActorRef`, `createActor`) or sends an event to one. It must resolve the stored snapshot with `resolveState` and read it.
+18. A browser-owned machine starts without its persisted snapshot when one exists. Or it provides implementations through the hook's second argument, or passes new data through `input` instead of an event.
+19. A selector returns a new object without `shallowEqual`, or is defined inside the component.
+20. A UI test asserts `snapshot.value` or context instead of what is on screen.

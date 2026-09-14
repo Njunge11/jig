@@ -1,13 +1,13 @@
 ---
 name: review-backend-feature
-description: Use to review a feature's BACKEND after it is built and its PR is open — walks the backend-standards and backend-tests Review checklists against the feature's diff, fixes violations in place, pushes so the PR updates, and reports a per-item verdict.
+description: Use to review a feature's BACKEND after it is built and its PR is open — walks the backend-standards, backend-tests, eve-agent and state-machines Review checklists and the structure tree against the feature's diff, fixes violations in place, pushes so the PR updates, and reports a per-item verdict.
 context: fork
 agent: jig:backend-feature-reviewer
 ---
 
 # Feature Review — Backend
 
-An independent second walk of the backend Review checklists against a feature's diff. This runs in a forked subagent with the `backend-tests` and `backend-standards` skills preloaded — their `## Review checklist` sections are the rubric; this skill restates none of their rules.
+An independent second walk of the backend Review checklists against a feature's diff. This runs in a forked subagent with the `backend-tests`, `backend-standards`, `eve-agent`, `state-machines` and `structure` skills preloaded — their `## Review checklist` sections and the structure tree are the rubric; this skill restates none of their rules.
 
 **Scope:** `$ARGUMENTS` — the implementation checklist path (`docs/<project>/checklists/NN-<slug>.md`) and/or a branch. The diff under review is `git diff main` (or the given branch against main).
 
@@ -18,8 +18,9 @@ An independent second walk of the backend Review checklists against a feature's 
 3. Walk the `backend-tests` Review checklist **item by item against every new or changed test**. **Gate:** every item has a recorded verdict before you go to step 4.
 4. Walk the `eve-agent` Review checklist **item by item** when the diff touches `agent/`, `evals/`, or a file that imports `eve/react`, and run its Gates. When the diff touches none of them, record `skipped — no agent files` and go on. **Gate:** every item has a recorded verdict, and the Gates' output is in the verdict, before you go to step 5.
 5. Walk the `state-machines` Review checklist **item by item**, the Shared and Backend items, when the diff touches a file that imports `xstate`, and run its Gates for Part A and Part B. When it touches none, record `skipped — no machine files` and go on. **Gate:** every item has a recorded verdict, and the Gates' output is in the verdict, before you go to step 6.
-6. Fix every violation in place. **Gate:** `vitest --project backend` is green after the fixes, and the `eve-agent` Gates pass again when step 4 ran, and the `state-machines` Gates when step 5 ran. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
-7. **Return the verdict**: one line per checklist item — `pass`, or `fixed` with `file:line` and the item number — plus the green `vitest --project backend` run, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
+6. Walk the `structure` tree and its Placement rules over **every file the diff adds or moves**: is it in its defined place? A file that is not moves now. **Gate:** every added or moved file has a recorded verdict before you go to step 7.
+7. Fix every violation in place. **Gate:** `vitest --project backend` is green after the fixes, and the `eve-agent` Gates pass again when step 4 ran, and the `state-machines` Gates when step 5 ran. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
+8. **Return the verdict**: one line per checklist item — `pass`, or `fixed` with `file:line` and the item number — and one line per added or moved file, plus the green `vitest --project backend` run, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
 
 ### Verdict format
 
@@ -45,6 +46,10 @@ state-machines
  4 fixed — features/threads/api/thread.machine.ts:12 (the buttons moved from a table into meta)
  ... one line per Shared and Backend item, first to last — or: skipped — no machine files
  gates <paste the typecheck and backend test runs>
+
+structure
+ features/invites/api/invites.service.ts pass
+ agent/lib/posting.states.ts fixed — moved to features/job-posting/machine/job-posting.states.ts
 ```
 
 ### When a step fails

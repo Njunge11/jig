@@ -7,7 +7,7 @@ agent: jig:frontend-feature-reviewer
 
 # Feature Review — Frontend
 
-An independent second walk of the frontend rubric against a feature's diff. This runs in a forked subagent with the `frontend-standards`, `frontend-tests`, and `structure` skills preloaded — the frontend-standards `## Rules` list, the matching recipes' Verify lists, and the frontend-tests `## Review checklist` are the rubric; this skill restates none of their rules. A `## Design facts` section in the feature's checklist joins the rubric.
+An independent second walk of the frontend rubric against a feature's diff. This runs in a forked subagent with the `frontend-standards`, `frontend-tests`, `eve-agent`, `state-machines` and `structure` skills preloaded — the frontend-standards `## Rules` list, the matching recipes' Verify lists, the frontend-tests, eve-agent and state-machines `## Review checklist` sections and the structure tree are the rubric; this skill restates none of their rules. A `## Design facts` section in the feature's checklist joins the rubric.
 
 **Scope:** `$ARGUMENTS` — the implementation checklist path (`docs/<project>/checklists/NN-<slug>.md` or `features/<name>/checklist.md`) and/or a branch. The diff under review is `git diff main` (or the given branch against main).
 
@@ -20,7 +20,7 @@ An independent second walk of the frontend rubric against a feature's diff. This
 5. Walk the frontend-tests `## Review checklist` **item by item against every new or changed test**. **Gate:** every item has a recorded verdict before you go to step 6.
 6. Walk the `eve-agent` Review checklist **item by item** when the diff touches a client that imports `eve/react`, and run its Gates. When it touches none, record `skipped — no eve client` and go on. **Gate:** every item has a recorded verdict, and the Gates' output is in the verdict, before you go to step 7.
 7. Walk the `state-machines` Review checklist **item by item**, the Shared and Frontend items, when the diff touches a file that imports `xstate` or `@xstate/react`, and run its Gates for Part A and Part C. When it touches none, record `skipped — no machine files` and go on. **Gate:** every item has a recorded verdict, and the Gates' output is in the verdict, before you go to step 8.
-8. Walk the `structure` tree over **every file the diff adds or moves**: is it in its defined place? **Gate:** every added or moved file has a recorded verdict before you go to step 9.
+8. Walk the `structure` tree and its Placement rules over **every file the diff adds or moves**: is it in its defined place? A file that is not moves now. **Gate:** every added or moved file has a recorded verdict before you go to step 9.
 9. Walk the checklist's `## Design facts` section, when it has one, **item by item against the changed files** — open the files and check each `D<n>` statement. **Gate:** every fact has a recorded verdict before you go to step 10.
 10. Fix every violation in place. **Gate:** `vitest` is green after the fixes, and the `state-machines` Gates pass again when step 7 ran. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
 11. **Return the verdict**: one line per item of every rubric list — `pass`, `fixed` with `file:line`, or `browser-check` — plus the green `vitest` run, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
@@ -55,7 +55,7 @@ design-facts
  ... one line per fact, when the checklist has a ## Design facts section
 
 state-machines
- 15 fixed — features/threads/ui/thread-view.tsx:30 (renders from hasTag, not a stage table)
+ 4 fixed — features/threads/ui/thread-view.tsx:30 (renders from hasTag, not a stage table)
  ... one line per Shared and Frontend item, first to last — or: skipped — no machine files
  gates <paste the typecheck and frontend test runs>
 
