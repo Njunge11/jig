@@ -61,9 +61,18 @@ not restate them. This list is also the review checklist.
    UI, Headless UI, React Aria). A registry component that ships
    on another library gets rebuilt on the kit's own primitives —
    a combobox is `Popover` + `Command`. Gate: `pnpm lint`, rule `no-restricted-imports (frontend-standards 3)`.
-4. Decompose the UI into a tree of shadcn parts by responsibility
-   and repetition — not one monolith. A "card list" is `Card` +
-   `CardHeader`/`CardTitle`/`CardContent` plus a row component.
+4. Composition distributes responsibility across cooperating
+   components. A component that handles data, state and rendering
+   for more than one concern is a monolith. The test, on every
+   component: list the concerns it owns — each data source,
+   mutation, and interaction. It keeps one, the one its name
+   says. Every other concern becomes a cooperating component that
+   owns its own data and state; a Root holds only the state the
+   parts share, through context or props. Props are not the only
+   sign: concerns hidden in hooks and handlers count the same. A
+   "card list" is `Card` + `CardHeader`/`CardTitle`/`CardContent`
+   plus a row component; a session is a Root plus one part per
+   concern.
 5. Use the component's own API: `variant`/`size` for
    permutations, compound parts as intended. Do not recreate what
    a prop already does. The inverse holds too: never fight the
@@ -79,7 +88,8 @@ not restate them. This list is also the review checklist.
    `Header`/`Body`/`Footer` (structure), `Title`/`Description`
    (text).
 7. Composition over configuration. Compose with `children`/slots;
-   a component collecting boolean/config props is a monolith
+   a component collecting boolean/config props, or collecting
+   hooks and handlers for concerns beyond its name, is a monolith
    forming — give the call site parts instead:
 
 ```tsx

@@ -10,6 +10,18 @@ these pages on 2026-09-01.
   [components.build](https://components.build): /composition,
   /types, /as-child, /polymorphism, /state, /definitions,
   /principles.
+- Rule 4 —
+  [components.build/composition](https://www.components.build/composition):
+  "Instead of cramming all functionality into a single component
+  with dozens of props, composition distributes responsibility
+  across multiple cooperating components"; a component that handles
+  container rendering, state management and data processing is the
+  page's monolith example; "Root: The main container that wraps all
+  other sub-components. Typically manages shared state and
+  context." And [react.dev/learn/thinking-in-react](https://react.dev/learn/thinking-in-react)
+  step 1: "a component should ideally only be concerned with one
+  thing. If it ends up growing, it should be decomposed into
+  smaller subcomponents." Verified 2026-09-14.
 - Rules 6–7 —
   [components.build/composition](https://www.components.build/composition):
   the part-naming vocabulary (Trigger/Content/Header/Body/Footer/
