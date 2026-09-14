@@ -230,7 +230,7 @@ Plumbing, the same for every rule:
 
 | Row | Rule id | Files | Reports |
 | --- | --- | --- | --- |
-| backend-standards 5 | `jig/workflow-deterministic` | `features/**/workflows/**/*.ts` (the `structure` tree's workflow home) | Inside a Program or a function whose body starts with the `"use workflow"` directive: `new Date()` with no argument, `Date.now()`, `Math.random()`, `crypto.randomUUID()`, `fetch()`; and an import whose source ends in `.service`, `.repo` or `.repository`, or is `@ajiri/db/client`, `drizzle-orm` or `@trpc/server`. |
+| backend-standards 5 | `jig/workflow-deterministic` | `features/**/workflows/**/*.ts` (the `structure` tree's workflow home) | Inside a Program or a function whose body starts with the `"use workflow"` directive: `new Date()` with no argument, `Date.now()`, `Math.random()`, `crypto.randomUUID()`, `fetch()`; and an import whose source ends in `.service`, `.repo` or `.repository`, or is `@ajiri/db/client`, `drizzle-orm` or `@trpc/server`. The directive may sit at Program level or on one function's own body — the repo's real workflows use the function-level form — and the import clause reads the whole file in both cases, not only the scope the directive marks. |
 | backend-standards 27, eval clause | `jig/tool-has-eval` | `agent/tools/*.ts` | The Program holds a `defineTool(` call and `evals/tools/<basename>.eval.ts` does not exist under `context.cwd`. The check-script clause stays judgment. |
 | backend-tests 10 | `jig/test-named-after-source` | v2 `**/__tests__/*.test.ts` and `*.test.tsx` | Neither `../<name>.ts` nor `../<name>.tsx` exists beside the `__tests__` folder, where `<name>` is the basename without `.test.ts` or `.test.tsx`. |
 | frontend-standards 16 | `jig/responsive-md-step` | v2 `**/*.tsx` | A string literal or template quasi whose whitespace-split classes hold one that starts with `lg:` and none that starts with `sm:` or `md:`. An object key such as `lg:` in a `cva` size map is an identifier, not a literal, and is not read. |
@@ -241,21 +241,27 @@ Sites on main at dbc86376, counted by hand before the rules exist, so the run in
 
 - `jig/workflow-deterministic`: 0 files in scope. Every `"use workflow"` file sits under `app/workflows/`, which the S4 decision keeps out of scope. The rule ships for the next workflow a feature adds.
 - `jig/tool-has-eval`: 0. The four tools `draft`, `jd`, `job`, `questions` each have their eval file.
-- `jig/test-named-after-source`: 23. `trpc/__tests__/coverage.test.ts` and `pep.test.ts`; `agent/lib/ari/__tests__/statement-total.test.ts` and the four `*.budget.service.test.ts`; 15 behavior-named files under `features/ari-chat/ui/__tests__/`; `features/interview-availability/ui/__tests__/availability-screen.test.tsx`.
-- `jig/responsive-md-step`: 7 literals. `_components/jobs/job-row.tsx:39,63`, `_components/jobs/chat-thread-row.tsx:32,60`, `_components/job/candidate-list.tsx:48,64`, `features/ari-chat/ui/chat-session.tsx:794`.
+- `jig/test-named-after-source`: 22. `trpc/__tests__/coverage.test.ts` and `pep.test.ts`; `agent/lib/ari/__tests__/statement-total.test.ts` and the three `*.budget.service.test.ts`; 15 behavior-named files under `features/ari-chat/ui/__tests__/`; `features/interview-availability/ui/__tests__/availability-screen.test.tsx`.
+- `jig/responsive-md-step`: 14 literals. `_components/jobs/job-row.tsx:39,63`, `_components/jobs/chat-thread-row.tsx:32,60`, `_components/job/candidate-list.tsx:48,64`, `features/ari-chat/ui/chat-session.tsx:794`, `_components/home/candidate-row.tsx:24,36`, `_components/home/home-view.tsx:87,92`, `_components/job/job-detail-view.tsx:171,191,196`.
 - `jig/segment-has-loading-and-error`: 0. Only `chat/page.tsx` fetches, and it has both files.
 - `jig/default-tools-disabled`: 0. All eight files exist with `export default disableTool()`.
 
 ### 6.2 Steps
 
-- [ ] C1 For each rule in 6.1, in table order: write the test, see it fail, write the rule, see it pass, commit. Proof: six commits, each with the green test run pasted.
-- [ ] C2 Wire the six rules in `eslint.config.mjs` as the plumbing says. Proof: `pnpm lint` runs with no config error.
-- [ ] C3 Run `pnpm lint` in `apps/dashboard`. Record the count per rule in 6.3. It must match the by-hand count above; a mismatch is a rule bug, fix the rule before you go on.
-- [ ] C4 Stop and report the counts. The developer decides per rule with a count: fix in this PR, `warn` for a later PR, or narrow the files. Record the decision in 6.3.
-- [ ] C5 Apply the decisions, one commit per rule. Proof: `pnpm lint` exits 0, `pnpm typecheck` clean, `pnpm vitest run` green.
+- [x] C1 For each rule in 6.1, in table order: write the test, see it fail, write the rule, see it pass, commit. Proof: six commits, each pairing the rule with its `RuleTester` test — `d738dac9` (`jig/workflow-deterministic`), `eceb7d70` (`jig/tool-has-eval`), `7a2f3f7b` (`jig/test-named-after-source`), `23aede6b` (`jig/responsive-md-step`), `62ef203c` (`jig/segment-has-loading-and-error`), `b010b441` (`jig/default-tools-disabled`).
+- [x] C2 Wire the six rules in `eslint.config.mjs` as the plumbing says. Proof: `61845286` wires all six; `pnpm lint` in `apps/dashboard` runs with no config error.
+- [x] C3 Run `pnpm lint` in `apps/dashboard`. Record the count per rule in 6.3. It must match the by-hand count above; a mismatch is a rule bug, fix the rule before you go on. Proof: counts in 6.3 match the by-hand counts in 6.1.
+- [x] C4 Stop and report the counts. The developer decides per rule with a count: fix in this PR, `warn` for a later PR, or narrow the files. Record the decision in 6.3. Proof: developer decision — no narrowing; both `jig/test-named-after-source` and `jig/responsive-md-step` keep full scope, every site conforms.
+- [x] C5 Apply the decisions, one commit per rule. Proof: `pnpm lint` exits 0, `pnpm typecheck` clean, `pnpm vitest run` green. Proof: `0a973f81` (`jig/test-named-after-source`, 22 files renamed/merged, same 2160-test total before and after) and `340a9cb2` (`jig/responsive-md-step`, 15 sites — the 14 planned plus one the fix itself introduced); `pnpm lint` 0 problems, `pnpm typecheck` clean, `pnpm vitest run` Test Files 230 passed | 1 skipped (231), Tests 2159 passed | 1 skipped (2160).
 - [ ] C6 Open the PR. Then add `Gate: pnpm lint, rule jig/<name>` to the six skill rows (a jig edit, the developer's session).
 
 ### 6.3 Counts and decisions
 
 | Rule | Count | Decision |
 | --- | --- | --- |
+| `jig/workflow-deterministic` | 0 | none in scope |
+| `jig/tool-has-eval` | 0 | none in scope |
+| `jig/test-named-after-source` | 22 | full scope; fixed — `0a973f81` (22 files) |
+| `jig/responsive-md-step` | 14 | full scope; fixed — `340a9cb2` (15 sites: 14 planned plus one the fix introduced) |
+| `jig/segment-has-loading-and-error` | 0 | none in scope |
+| `jig/default-tools-disabled` | 0 | none in scope |
