@@ -288,3 +288,12 @@ these pages on 2026-09-01.
   suspense sources above, and a project lesson: dashboard tab
   badge counts drifted from tab contents until both read one
   procedure's definitions. Verified 2026-09-01.
+- Rule 64 —
+  [TypeScript Handbook: Everyday Types § Type Assertions](https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions):
+  "TypeScript only allows type assertions which convert to a
+  *more specific* or *less specific* version of a type. This rule
+  prevents 'impossible' coercions" and "you can use two
+  assertions, first to `any` (or `unknown`...), then to the
+  desired type" — the escape the rule closes. `never` is
+  assignable to every type, so `as never` is the same escape in
+  one step. Verified 2026-09-14.

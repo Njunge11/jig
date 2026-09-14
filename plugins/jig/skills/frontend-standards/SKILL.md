@@ -414,6 +414,16 @@ export default async function Page() {
     node — check `!target.isConnected`. A boolean ref cannot
     bridge that event ordering.
 
+### Types
+
+64. Never force a type. No `as never`, and no double assertion
+    (`as any as T`, `as unknown as T`). TypeScript allows an
+    assertion only "to a *more specific* or *less specific*
+    version of a type"; each of these forms defeats that rule and
+    hides a value that does not fit. Type it at its source: a
+    typed fake, a schema parse, a narrowed union. Gate: `pnpm lint`,
+    rule `no-restricted-syntax (frontend-standards 64)`.
+
 ## Gates
 
 Run before a commit. Paste the output in the proof.
@@ -422,6 +432,6 @@ Run before a commit. Paste the output in the proof.
 
 ## Review
 
-Rules 1–63, plus the Verify list of every recipe whose catalog
+Rules 1–64, plus the Verify list of every recipe whose catalog
 row matches the build, are this skill's review checklist — run by
 the `review-frontend-feature` skill.

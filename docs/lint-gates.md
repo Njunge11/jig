@@ -54,6 +54,7 @@ Selectors marked `probed` fired on a bad fixture and stayed silent on a good one
 | 27 | Tool without an eval file; check target skips evals | custom | file existence | |
 | 28 | Failure not logged with name, ids, message | judgment | | |
 | 29 | No statement-budget test; count raised without a named behavior | judgment | | |
+| 31 | `as never` or a double assertion in a non-test file | lint now | `TSAsExpression[typeAnnotation.type="TSNeverKeyword"]`; `TSAsExpression[expression.type="TSAsExpression"][expression.typeAnnotation.type=/^TS(Any\|Unknown)Keyword$/]` | v2 `**/*.ts`, `**/*.tsx`, tests ignored |
 
 ### 1.2 backend-tests (14 items)
 
@@ -74,7 +75,7 @@ Selectors marked `probed` fired on a bad fixture and stayed silent on a good one
 | 13 | Asserts behavior that lives in the fake | judgment | | |
 | 14 | Budget test on a fake; `toBeLessThan`; count read off the implementation | lint now, part | selector `CallExpression[callee.property.name=/^toBeLessThan/]` | `**/*.test.ts` |
 
-### 1.3 frontend-standards (63 rules; the Review is rules 1–63 plus recipe Verify lists)
+### 1.3 frontend-standards (64 rules; the Review is rules 1–64 plus recipe Verify lists)
 
 | # | Rule, short | Verdict | Rule | Files |
 | --- | --- | --- | --- | --- |
@@ -117,6 +118,7 @@ Selectors marked `probed` fired on a bad fixture and stayed silent on a good one
 | 51–53 | Skeleton derived; one per boundary; no runtime data in `layout.tsx` | judgment | | |
 | 54 | Every fetching segment has `error.tsx` | custom | file existence | |
 | 55–63 | Error isolation; optimism; panels; `next/dynamic`; outside-click; dismissal | judgment | | |
+| 64 | `as never` or a double assertion in a non-test file | lint now | same selectors as backend-standards 31 | v2 `**/*.ts`, `**/*.tsx`, tests ignored |
 
 ### 1.4 frontend-tests (9 items)
 

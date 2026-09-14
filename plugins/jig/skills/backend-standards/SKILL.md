@@ -302,6 +302,8 @@ export type User = typeof users.$inferSelect;            // not: type User = { i
 type GetUser = inferRouterOutputs<AppRouter>["user"]["get"];
 ```
 
+**Never force a type.** No `as never`, and no double assertion (`as any as T`, `as unknown as T`). TypeScript allows an assertion only "to a *more specific* or *less specific* version of a type"; each of these forms defeats that rule and hides a type that does not fit. Type the value at its source instead: a `$type<>()` on the column, a typed fake, a schema parse, or a narrowed union. Gate: `pnpm lint`, rule `no-restricted-syntax (backend-standards 31)`.
+
 **Reuse.**
 
 - Reuse existing code only if it already follows these standards. If it does not, refactor it — do not copy it.
@@ -348,3 +350,4 @@ Reject the change if any item is true. Items 5–7 need `references/workflow-ent
 28. An entry hands a failure to a client that the server does not log with the procedure or tool name, the ids and the message.
 29. An entry-point call has no statement-budget test, or the diff raises a call's statement count without the behavior that needs the extra statement named in the task.
 30. A feature router holds the procedures of more than one resource, or holds input schemas or composition, instead of merging one `<resource>.router.ts` per resource as the `structure` skill lays out.
+31. A non-test file forces a type with `as never` or a double assertion (`as any as T`, `as unknown as T`). Gate: `pnpm lint`, rule `no-restricted-syntax (backend-standards 31)`.
