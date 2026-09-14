@@ -63,6 +63,7 @@ Each rule names its doc page under `node_modules/eve/docs/`. `references/sources
 - **What the agent must remember lives in `defineState`.** Declare the handle once at module scope, from `eve/context`, and import it in tools and hooks. `get()` and `update()` work only inside eve-managed code. Source: `concepts/state.md`.
 - **`clientContext` lasts one model call.** It never enters durable history. Send an id through it, then store it in state from the first tool that reads it. Source: `guides/frontend/overview.mdx` § "Attach page context per turn".
 - **State never reaches a subagent.** Source: `concepts/state.md` § "State is never shared with subagents".
+- **The conversation's stage is an XState machine, not a field in `defineState`.** The `state-machines` skill owns the machine, the server that moves it, and the client that renders it.
 
 ### Execution
 

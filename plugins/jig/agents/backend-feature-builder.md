@@ -5,6 +5,7 @@ skills:
   - backend-tests
   - backend-standards
   - structure
+  - state-machines
   - eve-agent
   - open-feature-pr
 ---

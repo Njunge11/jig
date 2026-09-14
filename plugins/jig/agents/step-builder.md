@@ -5,6 +5,7 @@ skills:
   - backend-standards
   - frontend-standards
   - structure
+  - state-machines
   - open-feature-pr
 ---
 

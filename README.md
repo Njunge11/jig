@@ -27,6 +27,7 @@ Every skill loads on its own with `/jig:<skill>`. This table shows which ones ca
 | `backend-tests` | Partly — the test-quality rules are structure-free; the harness setup expects tests in `features/**/{api,db}/__tests__/`. |
 | `frontend-tests` | Partly — the test-quality rules are structure-free; the harness setup expects tests in `features/**/ui/__tests__/`. |
 | `open-feature-pr` | No — branch, title, and body conventions only. |
+| `state-machines` | No — XState rules for the machine module, the server that moves it, and the React client that renders it. |
 | `skill-audit` | No — it audits skills, not your code. |
 
 ## Human in the loop — on purpose
