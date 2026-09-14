@@ -167,10 +167,27 @@ the small breakpoint and up," never "on mobile."
 
 ### Hooks discipline — the default is none
 
-20. `useEffect` synchronizes with an external system
-    (subscription, DOM API, analytics) — nothing else. Every
-    effect must be able to name its external system, or it gets
-    rewritten. Gate: `pnpm lint`, rule `react-hooks/set-state-in-effect`.
+20. `useEffect` runs only code that "should run *because* the
+    component was displayed to the user", to synchronize with an
+    external system (subscription, DOM API, analytics). Naming
+    the server as the external system does not pass. Walk every
+    effect in the diff through three tests; one hit rewrites it:
+    a. It reaches the network for data the tree renders (a
+       record, an id, a session, a thread). React: frameworks
+       "provide more efficient built-in data fetching mechanisms
+       than writing Effects directly". Here that mechanism is
+       rules 31–35: the server produces the data before render
+       and the client reads it with `useSuspenseQuery`. An
+       effect never requests what the screen needs to start.
+    b. It calls a callback prop with data or state ("Avoid:
+       Passing data to the parent in an Effect"; "Avoid: The
+       onChange handler runs too late"). The parent fetches and
+       passes the data down, or the update runs in the event
+       handler that caused it.
+    c. It sets state from a value props or state already hold
+       (rules 21 and 25).
+    Gate: `pnpm lint`, rule `react-hooks/set-state-in-effect`,
+    for c only; a and b are walked by hand.
 21. Derive values during render. Never store what props/state can
     compute, and never sync state in an effect (Gate: `pnpm lint`,
     rule `react-hooks/no-deriving-state-in-effects`):

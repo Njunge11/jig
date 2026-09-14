@@ -59,7 +59,20 @@ these pages on 2026-09-01.
   breakpoint and above"; single-range targeting via `md:max-lg:`.
 - Rule 19 — project incident (chat prototype
   horizontal-overflow bug, 2026-08-31).
-- Rules 20–22, 25 —
+- Rule 20 —
+  [React: You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect):
+  "Use Effects only for code that should run *because* the
+  component was displayed to the user." Test a, § "Fetching
+  data": "modern frameworks provide more efficient built-in data
+  fetching mechanisms than writing Effects directly in your
+  components." Test b, § "Passing data to the parent": "🔴 Avoid:
+  Passing data to the parent in an Effect" and "let the parent
+  component fetch that data, and pass it down to the child
+  instead"; § "Notifying parent components about state changes":
+  "🔴 Avoid: The onChange handler runs too late" and "update the
+  state of both components within the same event handler".
+  Verified 2026-09-14.
+- Rules 21–22, 25 —
   [React: You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)
   and [Removing Effect Dependencies](https://react.dev/learn/removing-effect-dependencies)
   (via the absorbed Vercel rules `rerender-derived-state-no-effect`,
