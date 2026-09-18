@@ -11,8 +11,8 @@ How to write a TDD implementation checklist for frontend work that changes what 
 - When you write a `## Design facts` section, add this item to `## Done`: `- [ ] One verdict per D item pasted: pass, fixed with file:line, or browser-check.` It makes the builder's fact walk visible to the /goal watcher.
 - Write each `F<n>` task so its tests can pass the Review checklist of the `frontend-tests` skill (invoked in Step 4): one observable behavior, expected values from the spec, driven through what the user sees and does.
 - Each failure path and each empty state the spec states is a behavior: give it its own `F<n>` task. The task list is the feature's coverage contract — a behavior with no task gets no test.
-- Write no `## Backend` section. Backend work gets its own checklist. The builder adds a `## Backend` section only for a gap it discovers while integrating.
-- `## Done` holds only what the builder can prove with output it can paste: a test run, a command, or the diff. A spec-stated check that only a human can perform goes under `## Manual verification` — the developer runs it, not the builder.
+- When the slice needs backend work, its `## Backend` section, written per the backend reference, comes first in the same file, and the file ends with one `## Manual verification` and one `## Done` that merge both templates' items. The builder adds `## Backend` items only for a gap it discovers while integrating.
+- `## Done` holds only what the builder can prove with output it can paste: a test run, a command, or the diff. A spec-stated check that only a human can perform goes under `## Manual verification` — the developer runs it, not the builder. `## Manual verification` is never empty: at least one step a person performs on the running app, because the checklist is a slice.
 - A check the repo runs from a script is the builder's, even when it needs a key. When the script does not load its keys, the checklist's first task makes it (`dotenv -e .env -- …`), and the check is a Done item. Only a check with no script (a browser, a device, a person) is manual.
 
 ## Template

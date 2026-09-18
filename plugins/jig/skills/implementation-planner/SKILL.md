@@ -30,13 +30,13 @@ Every resolution you write into the spec carries a `Developer said:` line that q
 
 ### Step 4: Split the work into implementation checklists
 
-Split the spec's work into implementation checklists. One implementation checklist is one PR: the smallest unit of work a builder can implement and test on its own. Smaller units make testing and review easier. Order the checklists so that each one depends only on earlier ones.
+Split the spec's work into implementation checklists. One implementation checklist is one PR, and one PR is one slice: the smallest change a person can verify on the running app. A slice carries everything that outcome needs — the backend, the frontend, and any migration, agent tool, eval, machine, hook or seed on the path between them. A backend change nobody can see on a screen is not a slice: it belongs inside the slice that makes it visible. Order the checklists so that each one depends only on earlier ones.
 
 A builder is the agent that executes one implementation checklist, task by task, in a run the developer starts with the checklist's /goal command.
 
 Write each implementation checklist as `docs/<project>/checklists/NN-<slug>.md`. One question decides which checklist to write: **does the work change what the software does?**
 
-- Yes: write a TDD implementation checklist for each domain the work touches — backend work per `references/tdd-backend-implementation-checklist.md`, frontend work per `references/tdd-frontend-implementation-checklist.md`. Work that touches both domains gets one checklist per domain, backend ordered first. Before you write the first checklist of a domain, invoke that domain's tests skill (`backend-tests` or `frontend-tests`). Its Review checklist defines the tests the builder writes — write every task so its tests can pass that checklist.
+- Yes: write one TDD implementation checklist for the slice. Its `## Backend` section follows `references/tdd-backend-implementation-checklist.md` and its `## Frontend + Integration` section follows `references/tdd-frontend-implementation-checklist.md`; a slice that touches both domains holds both sections in the one file, backend first. Every TDD checklist has a `## Manual verification` section with at least one step a person performs on the running app; a checklist that cannot name one is not a slice — merge its work into the slice that makes it visible. Before you write the first section of a domain, invoke that domain's tests skill (`backend-tests` or `frontend-tests`). Its Review checklist defines the tests the builder writes — write every task so its tests can pass that checklist.
 - No — the work only changes the code's structure: write a step implementation checklist, per `references/step-implementation-checklist.md`. Its `Domain` line names the domain.
 - Work that changes both behavior and structure: split it into a TDD checklist and a step checklist. If the answer is unclear, ask the developer.
 
@@ -46,13 +46,19 @@ Also give each implementation checklist its Conventional Commits type (`feat`, `
 
 Then write the tracker as `docs/<project>/tracker.md` — fill `assets/tracker-template.md`. The tracker carries each implementation checklist's /goal run command:
 
-For a backend TDD implementation checklist:
+For a TDD implementation checklist with both a `## Backend` and a `## Frontend + Integration` section:
+
+```
+/goal the implement-backend skill was run on docs/<project>/checklists/NN-<slug>.md for its Backend section, then the implement-frontend skill was run on the same checklist for its Frontend + Integration section, and every item in its Done section is shown satisfied in the transcript
+```
+
+For a TDD implementation checklist with only a `## Backend` section:
 
 ```
 /goal the implement-backend skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript
 ```
 
-For a frontend TDD implementation checklist:
+For a TDD implementation checklist with only a `## Frontend + Integration` section:
 
 ```
 /goal the implement-frontend skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript
@@ -72,13 +78,14 @@ Check every file you wrote. Fix every miss, then check again.
 2. List the files in `checklists/`. Every file must appear in the tracker table. An implementation checklist missing from the tracker is never built.
 3. Read each /goal run command. The path in it must equal the real path of the implementation checklist it runs. With a wrong path, the checklist can never pass its /goal check.
 4. Checklist numbers must agree across the tracker table, the filenames, and the run-command labels. No two implementation checklists share a number.
-5. Each /goal command must match its template in Step 4: the TDD command of the checklist's domain for a TDD implementation checklist, the step command for a step implementation checklist.
+5. Each /goal command must match its template in Step 4: the TDD command that matches the sections the checklist holds, the step command for a step implementation checklist.
 6. Every task checkbox in every implementation checklist must be `[ ]`. The builder ticks boxes, not you.
 7. Every implementation checklist this run created must have Status `Not started` in the tracker. A checklist that was already in the tracker before this run keeps its Status.
 8. Every section heading and label in every implementation checklist must come from its template. A label copied from an older document in the repo does not belong — the template decides the format, not the documents already there.
 9. When mockup images came with the spec, each frontend TDD implementation checklist must have a `## Design facts` section, and every `D<n>` number a `V<n>` item cites must exist in that section.
 10. Every resolution this run wrote into the spec has a `Developer said:` line quoting the developer's own message from this session. A resolution without one is deleted, and its gap is reported as open in the run's final report.
 11. No `## Manual verification` item names a script the repo can run. One that does moves to `## Done`, with the task that makes the script load its own keys when it needs them.
+12. Every TDD implementation checklist has a `## Manual verification` section with at least one step a person performs on the running app. One without it is not a slice: merge its work into the checklist that makes it visible, and renumber nothing that was already in the tracker.
 
 When every check passes, you are done.
 
