@@ -1,3 +1,9 @@
+---
+name: recipe-expanded-panel
+description: The frontend recipe for a fullscreen or expanded mode for a panel. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+user-invocable: false
+---
+
 # Recipe: Expanded and fullscreen panels
 
 Use this recipe when a panel offers a maximize/expand mode — an
@@ -51,7 +57,7 @@ overlay-vs-page event problems that rules 62–63 exist for.
 4. **Extract the shell once.** The first expandable panel becomes
    the app's one compound component
    (`Panel`/`PanelHeader`/`PanelExpandToggle`/`PanelBody`, per
-   `references/authoring-custom.md`); the second surface reuses
+   `references/authoring-custom.md` of the `frontend-standards` skill); the second surface reuses
    it. Never a second implementation.
 
 5. **Responsive:** below `lg`, the docked mode usually cannot

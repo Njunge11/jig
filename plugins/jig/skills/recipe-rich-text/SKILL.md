@@ -1,3 +1,9 @@
+---
+name: recipe-rich-text
+description: The frontend recipe for rich text editing with Lexical. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+user-invocable: false
+---
+
 # Recipe: Rich text editing (Lexical)
 
 Use this recipe for any rich text surface — a description editor,

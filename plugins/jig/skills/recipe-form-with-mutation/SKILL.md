@@ -1,8 +1,14 @@
+---
+name: recipe-form-with-mutation
+description: The frontend recipe for a form that submits a mutation — validation, field errors. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+user-invocable: false
+---
+
 # Recipe: Form with a mutation
 
 Use this recipe when the user enters data and submits it — a
 create or edit form, from one field to a full page. The rules in
-SKILL.md apply throughout. Libraries: `react-hook-form`,
+the `frontend-standards` skill apply throughout. Libraries: `react-hook-form`,
 `@hookform/resolvers/zod`, and the kit's `Field` family
 (`Field`, `FieldLabel`, `FieldDescription`, `FieldError`,
 `FieldGroup`, `FieldSet`) — install any that are missing.
@@ -14,7 +20,7 @@ SKILL.md apply throughout. Libraries: `react-hook-form`,
    it as the client resolver too. Client validation then mirrors
    the server for free; the server still re-validates — it is the
    authority. No procedure for the submit is a backend gap: apply
-   SKILL.md's "Backend gaps" section.
+   the `frontend-standards` skill's "Backend gaps" section.
 
 2. **Form state.** `useForm` with the shared schema and a
    `defaultValues` entry for every field. An edit form takes its

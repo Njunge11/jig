@@ -1,7 +1,13 @@
+---
+name: recipe-page-with-data
+description: The frontend recipe for a page that reads and renders queries — a dashboard, a details page, a list page. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+user-invocable: false
+---
+
 # Recipe: Page with data
 
 Use this recipe for a route that reads queries and renders them —
-a dashboard, a details page, a list page. The rules in SKILL.md
+a dashboard, a details page, a list page. The rules in the `frontend-standards` skill
 apply throughout; this recipe gives the build order and this page
 type's specifics.
 
@@ -11,7 +17,7 @@ type's specifics.
    `features/<name>/api`: its procedures and their input/output
    types. Wire against that actual shape — never invent it. A
    value the UI needs that no procedure returns is a backend gap:
-   apply SKILL.md's "Backend gaps" section.
+   apply the `frontend-standards` skill's "Backend gaps" section.
 
 2. **Write the anatomy** — the named part tree, before any code:
 

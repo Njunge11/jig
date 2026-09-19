@@ -1,8 +1,14 @@
+---
+name: recipe-data-table
+description: The frontend recipe for a data table — columns, sorting, pagination, row actions. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+user-invocable: false
+---
+
 # Recipe: Data table
 
 Use this recipe for a table of rows with columns, sorting,
 pagination, and row actions. A data table rides on
-`page-with-data.md` and `search-and-filters.md` — the URL owns
+the `recipe-page-with-data` skill and the `recipe-search-and-filters` skill — the URL owns
 `page`/`sort`/filters and the server narrows the rows; this
 recipe adds only the table layer.
 
@@ -51,7 +57,7 @@ with no v8 call sites there is nothing to migrate.
    `setParams({ sort: field, page: 1 })`; its arrow reads the
    current `sort` from the same URL state. `JobRowActions` is a
    `DropdownMenu`; its items run mutations per
-   `form-with-mutation.md` / the mutation-feedback recipe.
+   the `recipe-form-with-mutation` skill / the mutation-feedback recipe.
 
 3. **Table instance in manual mode.** The data is already
    paginated, sorted, and filtered by the server — tell the table
@@ -105,7 +111,7 @@ with no v8 call sites there is nothing to migrate.
    ```
 
    Zero rows renders the two empty states from
-   `search-and-filters.md` step 7, not a bare table.
+   the `recipe-search-and-filters` skill step 7, not a bare table.
 
 5. **Pagination**: the kit's ONE `Pagination` component, bound to
    `setParams({ page })`, with the page count derived from

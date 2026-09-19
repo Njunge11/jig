@@ -16,22 +16,27 @@ it before you place a file.
 
 ## The catalog — building X → recipe
 
-Load every row that matches. No row matches? Build from the
-rules below and tell the developer which recipe is missing.
+Each recipe is a skill of its own. The frontend builder and
+reviewer agents preload every recipe, so every recipe is already
+in their context: a recipe applies when its row matches, and
+nothing is left to load. In any other session, invoke the recipe
+skill of every row that matches before you write code. No row
+matches? Build from the rules below and tell the developer which
+recipe is missing.
 
-| Building | Recipe |
+| Building | Recipe skill |
 |---|---|
-| A page that reads and renders queries — dashboard, details, list | [`references/recipes/page-with-data.md`](references/recipes/page-with-data.md) |
-| Search, filters, or sort over a list (debounce, URL state) | [`references/recipes/search-and-filters.md`](references/recipes/search-and-filters.md) |
-| A data table — columns, sorting, pagination, row actions | [`references/recipes/data-table.md`](references/recipes/data-table.md) |
-| Tabs or segmented views (URL-backed, prefetched) | [`references/recipes/tabs.md`](references/recipes/tabs.md) |
-| A form that submits a mutation (validation, field errors) | [`references/recipes/form-with-mutation.md`](references/recipes/form-with-mutation.md) |
-| Mutation feedback — toasts, optimistic updates, undo | [`references/recipes/mutation-feedback.md`](references/recipes/mutation-feedback.md) |
-| An edit surface — dialog, sheet, inline edit, or picking which | [`references/recipes/edit-surfaces.md`](references/recipes/edit-surfaces.md) |
-| A fullscreen / expanded mode for a panel | [`references/recipes/expanded-panel.md`](references/recipes/expanded-panel.md) |
-| A live preview of rendered output beside an editor | [`references/recipes/page-preview.md`](references/recipes/page-preview.md) |
-| Rich text editing (Lexical) | [`references/recipes/rich-text.md`](references/recipes/rich-text.md) |
-| A chat surface (AI SDK + AI Elements) | [`references/recipes/chat.md`](references/recipes/chat.md) |
+| A page that reads and renders queries — dashboard, details, list | `recipe-page-with-data` |
+| Search, filters, or sort over a list (debounce, URL state) | `recipe-search-and-filters` |
+| A data table — columns, sorting, pagination, row actions | `recipe-data-table` |
+| Tabs or segmented views (URL-backed, prefetched) | `recipe-tabs` |
+| A form that submits a mutation (validation, field errors) | `recipe-form-with-mutation` |
+| Mutation feedback — toasts, optimistic updates, undo | `recipe-mutation-feedback` |
+| An edit surface — dialog, sheet, inline edit, or picking which | `recipe-edit-surfaces` |
+| A fullscreen / expanded mode for a panel | `recipe-expanded-panel` |
+| A live preview of rendered output beside an editor | `recipe-page-preview` |
+| Rich text editing (Lexical) | `recipe-rich-text` |
+| A chat surface (AI SDK + AI Elements) | `recipe-chat` |
 
 Authoring a genuinely new compound component (own state, keyboard
 map, `asChild`)? Load
@@ -385,7 +390,7 @@ export default async function Page() {
     the change immediately, and always in this order: cancel,
     snapshot, set, rollback on error, invalidate in `onSettled`.
     The worked pattern with the v5 signatures lives in
-    `references/recipes/mutation-feedback.md`, step 6.
+    the `recipe-mutation-feedback` skill, step 6.
 
 ### Secondary surfaces
 
@@ -439,6 +444,7 @@ Run before a commit. Paste the output in the proof.
 
 ## Review
 
-Rules 1–65, plus the Verify list of every recipe whose catalog
-row matches the build, are this skill's review checklist — run by
-the `review-frontend-feature` skill.
+Rules 1–65, plus the Verify list of every recipe skill, are this
+skill's review checklist — run by the `review-frontend-feature`
+skill. A recipe whose catalog row does not match the build gets
+the recorded verdict `does not apply`; no recipe is skipped.

@@ -1,7 +1,13 @@
+---
+name: recipe-search-and-filters
+description: The frontend recipe for search, filters, sort or pagination over a list — the server narrows the rows, the URL owns the state, the search input debounces. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+user-invocable: false
+---
+
 # Recipe: Search, filters, and sort over a list
 
 Use this recipe when the user narrows a list: a search box, filter
-selects, a sort control, pagination. The rules in SKILL.md apply
+selects, a sort control, pagination. The rules in the `frontend-standards` skill apply
 throughout; this recipe gives the build order and the
 list-narrowing mechanics. Libraries: `nuqs` for URL state and
 `use-debounce` — install either if missing.
@@ -13,7 +19,7 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
    the work server-side — `WHERE`, `ORDER BY`, `LIMIT` — and
    returns the rows plus the total count. A procedure that
    returns the full list for the client to `.filter()` is a
-   backend gap: apply SKILL.md's "Backend gaps" section.
+   backend gap: apply the `frontend-standards` skill's "Backend gaps" section.
 
 2. **Define the URL state once, shared by both sides.** The URL
    owns every committed narrowing param. One parsers module:

@@ -1,9 +1,15 @@
+---
+name: recipe-edit-surfaces
+description: The frontend recipe for an edit surface — inline edit, dialog, sheet or page, and the choice between them. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+user-invocable: false
+---
+
 # Recipe: Edit surfaces — inline, dialog, sheet, page
 
 Use this recipe when the user changes data outside a dedicated
 form page, and to pick which surface an edit lives in. The form
-inside comes from `form-with-mutation.md`; the write's feedback
-from `mutation-feedback.md`. This recipe owns the surface choice
+inside comes from the `recipe-form-with-mutation` skill; the write's feedback
+from the `recipe-mutation-feedback` skill. This recipe owns the surface choice
 and the surface mechanics.
 
 ## Pick the surface
@@ -26,7 +32,7 @@ and the surface mechanics.
    on the trigger's hover/focus; heavy dialog content loads with
    `next/dynamic`.
 
-2. **Controlled dialog, form inside** per `form-with-mutation.md`.
+2. **Controlled dialog, form inside** per the `recipe-form-with-mutation` skill.
    Success closes the dialog after the mutation settles — never
    before:
 
@@ -81,7 +87,7 @@ and the surface mechanics.
    prefetches on the row's hover/focus and reads through the same
    `queryOptions` as everything else.
 2. Direct actions inside it (change status, assign) follow
-   `mutation-feedback.md`.
+   the `recipe-mutation-feedback` skill.
 3. The moment a form grows inside a sheet, move it — dialog for
    short, page for long.
 
@@ -98,7 +104,7 @@ and the surface mechanics.
   was prefetchable on the trigger.
 - Don't hand-roll a fullscreen takeover for an edit — the
   surfaces above cover edits; a maximize mode is
-  `expanded-panel.md`.
+  the `recipe-expanded-panel` skill.
 - Don't let closing an overlay disturb the page beneath it. The
   classic bug: closing a dialog (by button OR backdrop) collapses
   collapsibles under it, because a page-level outside-click

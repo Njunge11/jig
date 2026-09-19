@@ -1,8 +1,14 @@
+---
+name: recipe-tabs
+description: The frontend recipe for tabs or segmented views — URL-backed and prefetched. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+user-invocable: false
+---
+
 # Recipe: Tabs and segmented views
 
 Use this recipe when one route shows alternate views the user
 switches between — tabs over a list, segmented detail sections.
-Tabs live inside a page, so load `page-with-data.md` too — this
+Tabs live inside a page, so the `recipe-page-with-data` skill applies too — this
 recipe only changes what tabs change. Libraries: shadcn `Tabs`
 (Radix) and `nuqs` — install either if missing.
 
@@ -12,7 +18,7 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
    aggregating counts procedure, and its definitions must be the
    same predicates the tab contents query — a count computed one
    way and a list filtered another way drift apart. A mismatch is
-   a backend gap: apply SKILL.md's "Backend gaps" section.
+   a backend gap: apply the `frontend-standards` skill's "Backend gaps" section.
 
 2. **The URL owns the active tab.** Add `tab` to the route's
    shared parsers module, next to its search/filter params:

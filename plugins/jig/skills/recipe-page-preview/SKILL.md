@@ -1,3 +1,9 @@
+---
+name: recipe-page-preview
+description: The frontend recipe for a live preview of rendered output beside an editor. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+user-invocable: false
+---
+
 # Recipe: Live page preview
 
 Use this recipe when the UI shows a live preview of rendered

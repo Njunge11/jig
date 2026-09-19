@@ -1,3 +1,9 @@
+---
+name: recipe-chat
+description: The frontend recipe for a chat or AI surface — AI SDK + AI Elements. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+user-invocable: false
+---
+
 # Recipe: Chat and AI surfaces (AI SDK + AI Elements)
 
 Use this recipe for a chat panel, an assistant surface, or any
@@ -72,7 +78,7 @@ and the AI Elements registry.
    imports from the surface (its state type, its hooks); nothing
    in the surface imports a card except the map. A new card is
    one folder and one map line, and no existing file changes.
-   A form inside a card follows `form-with-mutation.md`; streamed
+   A form inside a card follows the `recipe-form-with-mutation` skill; streamed
    markdown renders through `Response`, never through a
    hand-parsed accumulator (the rich-text recipe's streaming
    rule). Handlers a card needs from the surface (send, open a
@@ -93,7 +99,7 @@ and the AI Elements registry.
    branch, not in `onData`.
 
 8. **A docked chat panel is an expanded-panel surface.** Its
-   collapse/expand follows `expanded-panel.md` — the same mounted
+   collapse/expand follows the `recipe-expanded-panel` skill — the same mounted
    component in every mode, so the input draft and scroll
    position survive toggling.
 

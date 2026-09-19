@@ -116,7 +116,18 @@ these pages on 2026-09-01.
 
 ## Recipes
 
-- recipes/search-and-filters.md —
+- Each recipe is a skill, preloaded by the frontend agents —
+  [Claude Code: Subagents](https://code.claude.com/docs/en/sub-agents)
+  (the `skills` field: "The full skill content is injected, not
+  only the description.") and
+  [Claude Code: Skills](https://code.claude.com/docs/en/skills)
+  (supporting files let "Claude access detailed reference
+  material only when needed"; "Keep `SKILL.md` under 500 lines";
+  `user-invocable: false` is "for background knowledge users
+  shouldn't invoke directly"). A supporting file is read only when
+  the model chooses to read it, so a recipe's Don't list and
+  Verify list live in an injected `SKILL.md`. Verified 2026-09-19.
+- the `recipe-search-and-filters` skill —
   [nuqs: Basic usage](https://nuqs.dev/docs/basic-usage) (parsers,
   `.withDefault()`, "the default value is also returned if the
   value is invalid"; `setValue(null)` clears),
@@ -131,7 +142,7 @@ these pages on 2026-09-01.
   your updates that change the QueryKey into startTransition").
   Verified 2026-09-01. `nuqs` and `use-debounce` confirmed in
   apps/dashboard/package.json.
-- recipes/chat.md —
+- the `recipe-chat` skill —
   [AI SDK v6: Chatbot](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot)
   (`useChat` + `DefaultChatTransport`; `UIMessage.parts` rendered
   by `part.type`; status values submitted/streaming/ready/error;
@@ -168,7 +179,7 @@ these pages on 2026-09-01.
   Project incident: a chat transcript grew a seventeen-branch
   switch and its session twelve handlers and four effects
   watching `messages`, one set per card. Verified 2026-09-10.
-- recipes/rich-text.md —
+- the `recipe-rich-text` skill —
   [Lexical: Getting started with React](https://lexical.dev/docs/getting-started/react)
   (LexicalComposer `initialConfig` with namespace/theme/onError;
   plugin composition; `registerUpdateListener`/OnChange for
@@ -193,7 +204,7 @@ these pages on 2026-09-01.
   sticky-toolbar hang; per-keystroke export rule from the audited
   jd-editor `handleChange` (runs `$convertToMarkdownString` on
   every change).
-- recipes/page-preview.md — grounded in project evidence and CSS
+- the `recipe-page-preview` skill — grounded in project evidence and CSS
   fundamentals: the slow-preview incident (the origin dashboard's
   job-board preview boots the whole public app in an iframe and
   syncs via postMessage — preview-panel.tsx audited 2026-09-02);
@@ -214,7 +225,7 @@ these pages on 2026-09-01.
   navigations — no iframe prefetch exists, hence mount-early).
   Sandboxed `srcDoc` for untrusted HTML is standard platform
   guidance (iframe `sandbox` attribute).
-- recipes/expanded-panel.md — grounded in project evidence, not
+- the `recipe-expanded-panel` skill — grounded in project evidence, not
   external docs (none authoritative exists for in-app panel
   expansion): the four divergent dashboard implementations
   (email-body-editor `fullscreen` prop; jobs/new wizard reducer +
@@ -225,7 +236,7 @@ these pages on 2026-09-01.
   overlays or portals — apps/dashboard/docs/jobs-v2/
   jobs-v2-chat-design.md §8). Rules 62–63 supply the
   overlay-event rationale.
-- recipes/edit-surfaces.md — verified 2026-09-02 against four
+- the `recipe-edit-surfaces` skill — verified 2026-09-02 against four
   design-system pages:
   [Primer: Dialog guidelines](https://primer.style/product/components/dialog/guidelines/)
   ("Avoid creating a whole page inside a Dialog"; backdrop
@@ -247,7 +258,7 @@ these pages on 2026-09-01.
   [Primer: Saving patterns](https://primer.style/product/ui-patterns/saving/)
   ("Automatic saving should be used when the user expects instant
   feedback").
-- recipes/mutation-feedback.md —
+- the `recipe-mutation-feedback` skill —
   [TanStack Query: Optimistic Updates](https://tanstack.com/query/v5/docs/framework/react/guides/optimistic-updates)
   (the v5 signatures: `context.client`, `onMutateResult`; the
   variables-only pattern; the cancel → snapshot → set → rollback
@@ -256,7 +267,7 @@ these pages on 2026-09-01.
   primary button, clicking it will close the toast and run the
   callback passed via `onClick`"). Verified 2026-09-02. Kit ships
   the sonner toaster (`_ui/sonner.tsx`).
-- recipes/data-table.md — committed to TanStack Table **v9**:
+- the `recipe-data-table` skill — committed to TanStack Table **v9**:
   npm `latest` is 9.2.4 (checked 2026-09-02), and the repo's
   `@tanstack/react-table@^8.21.3` has zero call sites, so the
   upgrade migrates nothing.
@@ -270,7 +281,7 @@ these pages on 2026-09-01.
   `<table.FlexRender />`; structure: columns module, row-actions
   display column, one extracted pagination component). Verified
   2026-09-02.
-- recipes/form-with-mutation.md —
+- the `recipe-form-with-mutation` skill —
   [shadcn/ui: React Hook Form](https://ui.shadcn.com/docs/forms/react-hook-form)
   (the CURRENT pattern: RHF `Controller` + the `Field` family —
   the old `Form`/`FormField` wrapper anatomy is superseded;
@@ -281,7 +292,7 @@ these pages on 2026-09-01.
   confirmed in apps/dashboard/package.json. Server re-validation
   before side effects is a project lesson (the job publish
   VALIDATION contract).
-- recipes/tabs.md —
+- the `recipe-tabs` skill —
   [Radix Primitives: Tabs](https://www.radix-ui.com/primitives/docs/components/tabs)
   (controlled `value`/`onValueChange`, `forceMount` on Content,
   arrow-key/Home/End keyboard map), the nuqs and TanStack

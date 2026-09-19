@@ -1,8 +1,14 @@
+---
+name: recipe-mutation-feedback
+description: The frontend recipe for mutation feedback — toasts, optimistic updates, undo. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+user-invocable: false
+---
+
 # Recipe: Mutation feedback
 
 Use this recipe for what the user sees when a write runs —
 pending, success, failure, optimistic UI, undo. Form submits get
-their wiring from `form-with-mutation.md`; this recipe covers the
+their wiring from the `recipe-form-with-mutation` skill; this recipe covers the
 feedback contract for every mutation, form or not (row actions,
 toggles, inline buttons). Library: `sonner` via the kit's toaster.
 
