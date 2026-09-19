@@ -29,6 +29,7 @@ Every skill loads on its own with `/jig:<skill>`. This table shows which ones ca
 | `open-feature-pr` | No — branch, title, and body conventions only. |
 | `state-machines` | No — XState rules for the machine module, the server that moves it, and the React client that renders it. |
 | `skill-audit` | No — it audits skills, not your code. |
+| `frontend-wiring`, `frontend-authoring-custom` | No — the one-time tRPC wiring and the custom-component rules. The frontend lanes preload both, so they are not in the `/` menu. |
 | `recipe-*` (11 skills) | No — each holds the build order and the Verify list of one frontend surface. The frontend lanes preload all of them, so they are not in the `/` menu. |
 
 ## Human in the loop — on purpose
