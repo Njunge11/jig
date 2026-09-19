@@ -4,7 +4,7 @@ Provenance for the rules in `SKILL.md`: the doc page and section behind each rul
 
 ## Primary source
 
-- eve `0.47.6`, the docs shipped in the package at `node_modules/eve/docs/`. The map in `eve-docs-map.md` lists the pages read.
+- eve `0.47.6`, the docs shipped in the package at `node_modules/eve/docs/`. The **eve docs map** section of `SKILL.md` lists the pages read.
 
 ## Rule to source
 
