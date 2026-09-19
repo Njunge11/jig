@@ -68,7 +68,7 @@ When a fix for one item breaks another item, and the two cannot both pass, stop 
 
 ### Body
 
-6. Progressive disclosure holds: the body carries only the instructions every run needs. Material consulted only sometimes lives in `references/`, and the body link says what the file contains and when to load it. Body under 5,000 words.
+6. Progressive disclosure holds for help, never for rules. A supporting file loads only when the agent chooses to read it, and an agent-frontmatter preload injects only `SKILL.md`. So every rule — a Never, a Don't, a must, a Review or Verify item, a build order the agent must follow — lives in a `SKILL.md` body. `references/` holds only material that no run must obey, such as the sources behind a rule, and the body link says what the file contains and when to load it. Reject a body line that says "load `references/<file>` before you write": that file holds rules. Body under 500 lines and under 5,000 words; when the rules do not fit, split them into a skill of their own, never into `references/`.
 7. The critical instructions sit at the top, not buried mid-file.
 8. Every instruction is specific and actionable — a command to run, a condition to check, an output to expect. No "validate things properly" language an agent can read two ways.
 9. The body is concise: numbered steps and bullets, one home per rule, no restated content.
@@ -83,5 +83,5 @@ When a fix for one item breaks another item, and the two cannot both pass, stop 
 
 ### Loading
 
-15. Every consumer has a real loading path: user invocation (`/name`), the description's triggers, an agent-frontmatter preload, or an explicit instruction to invoke the skill. A skill name mentioned in prose loads nothing.
+15. Every consumer has a real loading path: user invocation (`/name`), the description's triggers, an agent-frontmatter preload, or an explicit instruction to invoke the skill. A skill name mentioned in prose loads nothing. A skill that an agent must obey on every run of a lane is in the `skills:` list of that lane's agent — a skill split off from a preloaded parent joins every `skills:` list that names the parent.
 16. The description triggers on the obvious task and on paraphrases of it, and does not trigger on unrelated topics. Judge this by reading the description against 3 sample requests of each kind.
