@@ -58,20 +58,28 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
    }
    ```
 
-4. **Client list: URL state in, one suspense query out.**
-   `placeholderData` does not exist for suspense queries — wrap
-   the updates that change the query input in a transition, so
-   the old list stays on screen instead of the fallback, and use
-   `isPending` as the busy cue:
+4. **Client list: URL state in, a deferred input to one suspense
+   query.** `placeholderData` does not exist for suspense queries,
+   and nuqs sets the new state at once, outside any transition —
+   its `startTransition` option wraps only the URL write, for
+   `shallow: false` server re-renders. So a query keyed on the
+   fresh state suspends with nothing to hold the old list, and
+   the route's `loading.tsx` replaces the page. Key the query on
+   `useDeferredValue` of the state: React keeps the revealed list
+   on screen until the narrowed one arrives. The busy cue is
+   "the state and the deferred state differ":
 
    ```tsx
-   const [isPending, startTransition] = useTransition();
-   const [filters, setFilters] = useQueryStates(jobsListParams, {
-     startTransition,
-   });
-   const { data } = useSuspenseQuery(trpc.jobs.list.queryOptions(filters));
-   // render the list; dim it with isPending while the next page loads
+   const [filters, setFilters] = useQueryStates(jobsListParams);
+   const shown = useDeferredValue(filters);
+   const isStale = shown !== filters;
+   const { data } = useSuspenseQuery(trpc.jobs.list.queryOptions(shown));
+   // render the list; dim it while isStale
    ```
+
+   `useDeferredValue` holds only content that is already revealed.
+   Keep the list under the Suspense boundary that showed it first;
+   a boundary that mounts with the new input shows its fallback.
 
 5. **The search input holds a draft; the URL gets the commit,
    debounced.** nuqs state updates instantly, and the query fires
@@ -106,6 +114,9 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
 - Don't keep filters in `useState` and leave the URL untouched —
   reload and share then lose the state.
 - Don't filter or sort a fully-fetched list on the client.
+- Don't pass `startTransition` to `useQueryStates` to hold the old
+  list — nuqs changes the state outside that transition, so the
+  query suspends to the fallback. Defer the query input.
 - Don't key the query on the instant search state — that fetches
   per keystroke; the draft-plus-debounced-commit split exists for
   this.
@@ -125,8 +136,10 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
 - [ ] Typing in the search box fires no query per keystroke; the
       commit is debounced.
 - [ ] Filter, sort, and search changes reset `page` to 1.
-- [ ] Changing filters keeps the old list on screen (transition +
-      `isPending` cue), not the skeleton fallback.
+- [ ] Changing the search or a filter keeps the old list on screen,
+      dimmed (`useDeferredValue` on the query input), not the
+      skeleton fallback — proved by a test that holds the answer
+      back.
 - [ ] A pasted URL with params renders the narrowed list without
       a client refetch; a mangled URL falls back to defaults.
 - [ ] Filtered-empty and truly-empty states are distinct.

@@ -134,13 +134,26 @@ these pages on 2026-09-01.
   [nuqs: Server-side](https://nuqs.dev/docs/server-side)
   (`createLoader` / `createSearchParamsCache`, one parser
   definition shared by both sides),
-  [nuqs: Options](https://nuqs.dev/docs/options) (state updates
-  instantly; URL writes are rate-limited; `startTransition`
-  integration), and
+  [nuqs: Options](https://nuqs.dev/docs/options) ("The returned
+  state is always updated **immediately**"; `startTransition` is
+  for "loading states while the server is re-rendering server
+  components" with `shallow: false`; nuqs 2.8.9 `dist/index.js`
+  emits the state before the throttle queue wraps only
+  `updateUrl` in the transition, and memoizes the state object),
+  [React: useDeferredValue](https://react.dev/reference/react/useDeferredValue)
+  ("Showing stale content while fresh content is loading"; the
+  `query !== deferredQuery` stale cue),
+  [React: useTransition](https://react.dev/reference/react/useTransition)
+  ("Transitions only \"wait\" long enough to avoid hiding *already
+  revealed* content"; a nested `<Suspense>` is not waited for), and
   [TanStack Query: Suspense](https://tanstack.com/query/v5/docs/framework/react/guides/suspense)
   ("`placeholderData` also doesn't exist for this Query"; "wrap
   your updates that change the QueryKey into startTransition").
-  Verified 2026-09-01. `nuqs` and `use-debounce` confirmed in
+  The "wrap in startTransition" line holds for a React state
+  update, not for nuqs state — a build that passed the option to
+  `useQueryStates` fell to the route's `loading.tsx` on each
+  search; `useDeferredValue` fixed it under a red-then-green test.
+  Verified 2026-09-01; step 4 re-verified 2026-09-19. `nuqs` and `use-debounce` confirmed in
   apps/dashboard/package.json.
 - the `recipe-chat` skill —
   [AI SDK v6: Chatbot](https://ai-sdk.dev/docs/ai-sdk-ui/chatbot)
