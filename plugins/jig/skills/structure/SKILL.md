@@ -67,8 +67,8 @@ agent/                       ← only if the app has an eve agent: the agent's o
   channels/<name>.ts         ← one eve channel with its auth walk (wired once); eve names the file (eve, slack, twilio, …)
   hooks/<name>.ts            ← one observer per event
   tools/<tool_name>.ts       ← entry: eve agent tool; composes a feature's api/<name>.tool.ts
-  machine/<name>/            ← the conversation's machine: setup and root
-  lib/
+  lib/                       ← the only folder under agent/ that eve accepts for your own code
+    machine/<name>/          ← the conversation's machine: setup and root
     thread/                  ← the conversation: advance, restore, the reader, the stage's tools, its repos
     <concern>/               ← the parts every tool shares, one folder per concern (model, caller, transcript, auth)
 channels/<name>/             ← one channel's surface (web, whatsapp, …)
@@ -100,7 +100,7 @@ evals/
    things live.
 6. **The agent owns the conversation; a feature owns its workflow.**
    One conversation runs every feature's workflow in turn. So the
-   machine's setup and root live in `agent/machine/<name>/`, and
+   machine's setup and root live in `agent/lib/machine/<name>/`, and
    the code that stores and moves a conversation lives in
    `agent/lib/thread/`. A feature's own states file lives in
    `features/<feature>/machine/<name>.states.ts` and plugs into
@@ -111,7 +111,9 @@ evals/
    the file. The body it runs lives in its feature's
    `api/<name>.tool.ts`, beside the services it calls; the entry
    file only composes it. Eve reads only the named folders under
-   `agent/`; everything else there is plain code under `lib/`.
+   `agent/`; everything else there is plain code under `lib/`. A
+   folder of your own beside them, such as `agent/machine/`, makes
+   `eve info` print an `unsupported-directory` diagnostic.
 8. **A channel receives and draws.** `channels/<name>/` holds one
    channel's routers and screens and nothing that decides a
    stage; every channel calls the same `agent/` code. Its card

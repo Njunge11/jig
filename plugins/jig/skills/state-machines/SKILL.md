@@ -12,7 +12,7 @@ The **XState docs map** section at the end of this skill maps each slot of a mac
 One machine is one folder for its setup and root, plus one states file per workflow that plugs in. The `structure` skill places them. If it is not already in your context, invoke it before you place a file.
 
 ```
-machine/<name>/              ← with the owner of the conversation (an agent's machine sits in agent/machine/)
+machine/<name>/              ← with the owner of the conversation (an eve agent's machine sits in agent/lib/machine/)
   <name>.setup.ts            ← setup({ types, actions, guards, actors, delays }); imports xstate only
   <name>.machine.ts          ← <last setup>.createMachine({ id, initial, context, states }); imports each workflow
   __tests__/
@@ -245,7 +245,7 @@ Reject the change if any item is true. Walk the Shared items against every chang
 9. An `always` transition has neither `guard` nor `target`, or a test waits for a transient state through the snapshot.
 10. A path test over a machine with dynamic context has no `stopWhen` and no `limit`, or a test imports `@xstate/test`.
 11. A parallel region targets a state in another region.
-12. A machine's files are not laid out as the Structure section shows. The setup and the root machine sit in `machine/<name>/` with the owner of the conversation. Each workflow's states file sits in the folder of the feature that owns it. It gets a `<workflow>.setup.ts` extension only when the workflow owns guards, actions or delays. No states file holds two workflows.
+12. A machine's files are not laid out as the Structure section shows. The setup and the root machine sit in `machine/<name>/` with the owner of the conversation; for an eve agent that is `agent/lib/machine/<name>/`, never `agent/machine/`. Each workflow's states file sits in the folder of the feature that owns it. It gets a `<workflow>.setup.ts` extension only when the workflow owns guards, actions or delays. No states file holds two workflows.
 
 ### Backend
 
