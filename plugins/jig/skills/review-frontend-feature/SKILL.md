@@ -1,22 +1,22 @@
 ---
 name: review-frontend-feature
-description: Use to review a feature's FRONTEND after it is built and its PR is open — walks the frontend-standards Rules, the matching recipes' Verify lists, and the frontend-tests Review checklist against the feature's diff, fixes violations in place, pushes so the PR updates, and reports a per-item verdict.
+description: Use to review a feature's FRONTEND after it is built and its PR is open — walks the frontend-standards Rules, every recipe's Verify list, and the frontend-tests Review checklist against the feature's diff, fixes violations in place, pushes so the PR updates, and reports a per-item verdict.
 context: fork
 agent: jig:frontend-feature-reviewer
 ---
 
 # Feature Review — Frontend
 
-An independent second walk of the frontend rubric against a feature's diff. This runs in a forked subagent with the `frontend-standards`, `frontend-tests`, `eve-agent`, `state-machines` and `structure` skills preloaded — the frontend-standards `## Rules` list, the matching recipes' Verify lists, the frontend-tests, eve-agent and state-machines `## Review checklist` sections and the structure tree are the rubric; this skill restates none of their rules. A `## Design facts` section in the feature's checklist joins the rubric.
+An independent second walk of the frontend rubric against a feature's diff. This runs in a forked subagent with the `frontend-standards`, `frontend-tests`, `eve-agent`, `state-machines` and `structure` skills and every `recipe-*` skill preloaded — the frontend-standards `## Rules` list, the Verify list of every recipe, the frontend-tests, eve-agent and state-machines `## Review checklist` sections and the structure tree are the rubric; this skill restates none of their rules. A `## Design facts` section in the feature's checklist joins the rubric.
 
 **Scope:** `$ARGUMENTS` — the implementation checklist path (`docs/<project>/checklists/NN-<slug>.md` or `features/<name>/checklist.md`) and/or a branch. The diff under review is `git diff main` (or the given branch against main).
 
 ## The work
 
 1. Read the feature's checklist and the full diff. Run `pnpm lint` in the app root and record its exit status: an item whose text ends with `Gate:` takes its verdict from that run, `pass` on exit `0`, else the report line.
-2. **Load the recipes.** Match the changed surfaces against the frontend-standards catalog and load every matching recipe file. Record which recipes you loaded — their Verify lists join the rubric.
+2. **Name the recipes that apply.** Every `recipe-*` skill is preloaded, so every recipe is already in your context — you load nothing. Walk the frontend-standards catalog row by row against the changed surfaces, and record one verdict per row: `applies` with the files it covers, or `does not apply`. Decide from the diff, not from the recipes that the checklist or the builder named. **Gate:** every catalog row has a recorded verdict before you go to step 3.
 3. Walk the frontend-standards `## Rules` list **item by item against the changed files** — every rule, no skipping, no grep proxies: open the files and look. **Gate:** every rule has a recorded verdict before you go to step 4.
-4. Walk **each loaded recipe's Verify list** item by item against the surface it covers. **Gate:** every item has a recorded verdict before you go to step 5.
+4. Walk **the Verify list of every recipe that applies** item by item against the surface it covers. **Gate:** every item has a recorded verdict before you go to step 5.
 5. Walk the frontend-tests `## Review checklist` **item by item against every new or changed test**. **Gate:** every item has a recorded verdict before you go to step 6.
 6. Walk the `eve-agent` Review checklist **item by item** when the diff touches a client that imports `eve/react`, and run its Gates. When it touches none, record `skipped — no eve client` and go on. **Gate:** every item has a recorded verdict, and the Gates' output is in the verdict, before you go to step 7.
 7. Walk the `state-machines` Review checklist **item by item**, the Shared and Frontend items, when the diff touches a file that imports `xstate` or `@xstate/react`, and run its Gates for Part A and Part C. When it touches none, record `skipped — no machine files` and go on. **Gate:** every item has a recorded verdict, and the Gates' output is in the verdict, before you go to step 8.
@@ -38,10 +38,16 @@ frontend-standards Rules
  3 fixed — features/invites/ui/member-picker.tsx:12 (Base UI import replaced with the kit's Popover + Command)
  ... one line per rule, first to last
 
-data-table.md Verify
+recipes
+ recipe-page-with-data applies — features/invites/ui/invites-page.tsx
+ recipe-data-table applies — features/invites/ui/columns.tsx
+ recipe-search-and-filters does not apply
+ ... one line per catalog row, first to last
+
+recipe-data-table Verify
  1 pass
  2 fixed — features/invites/ui/columns.tsx:30 (v8 API call replaced)
- ... one line per item, per loaded recipe
+ ... one line per item, per recipe that applies
 
 frontend-tests
  1 pass
