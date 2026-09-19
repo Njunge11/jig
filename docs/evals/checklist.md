@@ -5,7 +5,7 @@ One row is one eval case under `plugins/jig/evals/<id>-<slug>/`. `claude plugin 
 Run the suite from `plugins/jig`:
 
 ```bash
-claude plugin eval . --model sonnet --runs 1 --trust-plugin --no-publish --max-cost-usd 10 -j 6
+claude plugin eval . --model sonnet --judge-model sonnet --runs 1 --trust-plugin --no-publish --max-cost-usd 20 -j 8
 ```
 
 A skill works when its case passes with the plugin. A skill earns its tokens when the same case scores lower with no plugin. A case that scores the same in both arms shows text that the model did not need.
@@ -26,7 +26,7 @@ The case spawns the lane agent as a subagent and tells it to quote from its cont
 
 ## B. Obedience — the agent builds to the rule where a bare model does not
 
-Each case gives the code in the prompt and one task. The prompt tells the agent to invoke the skill first, because the lane agents hold the skill before they start. `Write` and `Edit` are off, so the agent returns the code in its reply. One `llm` grader holds a rubric that quotes the skill; `regex` graders check the key calls; a `tool_used: Skill` grader shows if the skill loaded.
+Each case gives the code in the prompt and one task. The prompt tells the agent to invoke the skill first, because the lane agents hold the skill before they start. `Write` and `Edit` are off, so the agent returns the code in its reply. Each rule clause has its own `llm` grader (`graders/r<n>-<clause>.md`), so a failure names the clause. `regex` graders check the key calls; a `tool_used: Skill` grader shows if the skill loaded. Run with `--judge-model sonnet`: the default small judge gave wrong FAIL votes on correct answers.
 
 | Id | Skill under test | Task | Pass when |
 | --- | --- | --- | --- |
@@ -49,6 +49,15 @@ Each case gives the code in the prompt and one task. The prompt tells the agent 
 | B17 | `implementation-planner` | Plan a spec whose prototype filters a list in the browser | The search narrowing is a `## Backend` task; no F item describes a browser filter; `## Scope` names no single recipe |
 | B18 | `skill-audit` | Audit a skill that keeps a Never rule in `references/` | The audit fails item 6 and moves the rule into `SKILL.md` |
 | B19 | `open-feature-pr` | Write the PR title and body for a finished checklist | Branch, title and body match the convention; no invented sections |
+| B20 | `recipe-edit-surfaces` | Add Rename and Delete actions to a row menu | Dialog, not a sheet; dialog controlled and outside the menu; closes after success; dirty guard; the verb on the confirm; prefetch on the trigger |
+| B21 | `recipe-expanded-panel` | Add a maximize mode to an editor panel | One mounted tree; no portal or fixed layer; one boolean; `aria-expanded` and Escape; below-`lg` stated |
+| B22 | `recipe-page-preview` | Live preview of a page that another app renders | One shared render component; no cross-app iframe; zero network on typing; foreign HTML sandboxed; theme scope |
+| B23 | `recipe-rich-text` | Stream AI markdown into the Lexical editor | Read-only view during the stream; convert once; store JSON; no export in the change listener; one editor |
+| B24 | `recipe-chat` | Build a chat surface with `useChat` and a data part | Registry components; card map; no effect on `messages`; status wired; inline error; no scroll effect |
+| B25 | `frontend-wiring` | Wire tRPC and TanStack Query into a fresh app | Options proxy; one QueryClient factory that dehydrates pending queries; `cache` on the server; `prefetch` with no await; `server-only` |
+| B26 | `frontend-authoring-custom` | Build a custom `Rating` component | Compound parts; exported prop types and `cn`; `value` / `onValueChange` / `defaultValue`; `data-state` and `data-slot`; keyboard map |
+| B27 | `frontend-standards` | Review a component with six faults | Names each fault: tokens, template-literal class, derived state, per-row query, label, icon button name |
+| B28 | `recipe-search-and-filters` | Add a search box over a list that the server caps at 5; the prompt says "keep the change small" | The server searches every row; no browser filter; `q` in the URL; debounce |
 
 ## C. Triggering — the description fires on the task and only on the task
 
