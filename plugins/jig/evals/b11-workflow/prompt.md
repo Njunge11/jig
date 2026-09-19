@@ -9,7 +9,7 @@ allowed_tools: [Read, Glob, Grep, Skill]
 
 If a skill named `backend-standards` is available to you, invoke it with the Skill tool before you answer. If it is not available, answer without it.
 
-The app uses the Workflow DevKit (`"use workflow"` / `"use step"`). `screening.score(applicationId)` calls an LLM and can hit a rate limit. `applications.saveScore(applicationId, score)` and `email.send(...)` exist.
+The app uses the Workflow DevKit (`"use workflow"` / `"use step"`). `screening.score(applicationId)` calls an LLM and can hit a rate limit. An application that was deleted can never be scored. `applications.getScore(applicationId)` (the saved score, or `null`), `applications.saveScore(applicationId, score)`, `notifications.wasSent(key)`, `notifications.markSent(key)` and `email.send(...)` exist.
 
 Add a durable workflow `screen-application`: score the application, save the score, email the recruiter.
 

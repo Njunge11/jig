@@ -9,14 +9,24 @@ allowed_tools: [Read, Glob, Grep, Skill]
 
 If a skill named `skill-audit` is available to you, invoke it with the Skill tool before you answer. If it is not available, answer without it.
 
-Audit this skill folder against the audit checklist and say which items fail.
+Audit this skill. Give a verdict per finding and the change you require.
 
 ```
 deploy-checks/
-  SKILL.md        (180 lines)
-  references/rollback.md
+  SKILL.md              (180 lines)
+  references/rollback.md (45 lines)
 ```
-SKILL.md, line 40: "**Load `references/rollback.md` before you roll back.** It holds the rollback rules."
-references/rollback.md: "- Never roll back a migration that dropped a column. - You must snapshot the database first. - Roll back one release at a time."
+
+`SKILL.md` frontmatter: `name: deploy-checks`, `description: Checks to run before and after a deploy. Use when you deploy or roll back a release.` The agent `release-engineer` lists `deploy-checks` under `skills:`.
+
+`SKILL.md`, line 40: "For a rollback, see [`references/rollback.md`](references/rollback.md)."
+
+`references/rollback.md`, in full:
+"# Rollback
+A rollback returns production to the last good release. The platform keeps ten releases.
+- Never roll back a migration that dropped a column.
+- You must snapshot the database before you roll back.
+- Roll back one release at a time.
+The dashboard shows each release under Deployments."
 
 Do not write any file.
