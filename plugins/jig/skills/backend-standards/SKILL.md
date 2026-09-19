@@ -126,7 +126,8 @@ Use a workflow for multi-step work that must survive crashes and waits — LLM c
 - **`index.ts` — the workflow function**, marked `"use workflow"`. **Does:** it orchestrates the steps and branches on their results. The runtime sandboxes this function and replays it from the event log. Thus the function must be **deterministic**: no I/O, no clock, no randomness, no service calls.
   **Never:** business logic or side effects — put those in steps.
 - **`steps.ts` — step functions**, marked `"use step"`. A step has the full Node runtime. The step is the place that calls the services. The step performs the router's role: it composes the real service and invokes it. Steps retry automatically — 3 attempts by default. Adjust the count per step with `fn.maxRetries = n`. Keep the steps in a file separate from the workflow function — this prevents bundler issues.
-- **Orchestrator state comes only from the step returns and the triggering input** — branch on nothing else. Every side effect lives inside a step. Each step checks whether its work is already complete before it does the work. A retried step executes again from the top, so error classification alone does not make a retry safe.
+- **Orchestrator state comes only from the step returns and the triggering input** — branch on nothing else. Every side effect lives inside a step.
+- **Each step checks if its work is already complete before it does the work.** A retried step executes again from the top, so error classification alone does not make a retry safe. A step that saves reads the saved value first and returns when it is there; a step that sends reads the sent marker first, and writes the marker after the send.
 - **Classify errors inside steps** (`import { FatalError, RetryableError } from "workflow"`). Throw `FatalError` for failures with no recovery (a bad credential) — it stops the retries. Throw `RetryableError` with `retryAfter` (a duration string, ms, or a Date) for rate limits and custom backoff. An error that you do not classify consumes the default retries.
 - **Pause** with `await sleep("30d")` — this suspends the workflow and consumes no resources. Or pause with `createWebhook()` — the workflow resumes on external input. This is the human-approval pattern.
 - **Start** runs from the application code: call `start(workflow, [input])` from `"workflow/api"`. The result is `await run.returnValue`.
@@ -225,6 +226,8 @@ Before you write a query, check these options: one query instead of several, one
 - Use a transaction when multiple writes must succeed together. Also use one when reads and writes must stay consistent (state transitions, money, anything multi-table).
 - The **service** opens the transaction and passes the `tx` handle into the repository calls. Repositories never start one.
 - Do not wrap independent read-only operations in a transaction.
+- **Never call an external service inside an open transaction** — email, an HTTP API, an LLM, a queue. The database can roll back; the call cannot. Commit first, then make the call. "All or none" with an external call never means one transaction around both.
+- When the call must not be lost after the commit, write an outbox row in the same transaction as the business writes. A separate process — a workflow step — sends the row and marks it sent. The send can run twice, so the receiver or the step check makes it idempotent.
 
 ## Error handling
 
@@ -398,3 +401,4 @@ Reject the change if any item is true. Skip items 5–7 when the diff has no wor
 30. A feature router holds the procedures of more than one resource, or holds input schemas or composition, instead of merging one `<resource>.router.ts` per resource as the `structure` skill lays out.
 31. A non-test file forces a type with `as never` or a double assertion (`as any as T`, `as unknown as T`). Gate: `pnpm lint`, rule `no-restricted-syntax (backend-standards 31)`.
 32. A service moves a stage or status with hand-written conditions on a field, instead of `transition` on the machine and its stored snapshot (`state-machines`).
+33. An external call (email, HTTP API, LLM, queue) runs inside an open transaction, or a send that must not be lost has no outbox row written with the business writes.
