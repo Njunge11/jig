@@ -6,7 +6,7 @@ these pages on 2026-09-01.
 
 ## Compose, tokens, responsive, hooks, accessibility (1–30)
 
-- Rules 1–2, 4–5, 9–10, and references/authoring-custom.md —
+- Rules 1–2, 4–5, 9–10, and the `frontend-authoring-custom` skill —
   [components.build](https://components.build): /composition,
   /types, /as-child, /polymorphism, /state, /definitions,
   /principles.

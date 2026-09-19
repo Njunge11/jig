@@ -39,10 +39,10 @@ recipe is missing.
 | A chat surface (AI SDK + AI Elements) | `recipe-chat` |
 
 Authoring a genuinely new compound component (own state, keyboard
-map, `asChild`)? Load
-[`references/authoring-custom.md`](references/authoring-custom.md).
-The one-time tRPC + TanStack wiring lives in
-[`references/wiring.md`](references/wiring.md).
+map, `asChild`)? The `frontend-authoring-custom` skill holds the
+rules. The one-time tRPC + TanStack wiring lives in the
+`frontend-wiring` skill. The agents that preload the recipes
+preload both; in any other session, invoke the one you need.
 [`references/sources.md`](references/sources.md) maps each rule
 to the doc that grounds it — load it only when a rule's ground is
 questioned.
@@ -59,7 +59,7 @@ not restate them. This list is also the review checklist.
    …). Need one that is not installed?
    `npx shadcn@latest add <component>`. Build custom only when
    explicitly instructed — then follow
-   `references/authoring-custom.md`.
+   the `frontend-authoring-custom` skill.
 2. Never hand-edit a primitive's source. Regenerate with
    `npx shadcn@latest add --overwrite`.
 3. One primitive library: Radix. Do not introduce a second (Base
@@ -265,7 +265,7 @@ export default async function Page() {
     input is a cache miss and a refetch.
 34. The wiring (`@trpc/tanstack-react-query`, not the legacy
     `createHydrationHelpers`) is a one-time install — see
-    `references/wiring.md`. Everything here assumes it. Gate: `pnpm lint`, rule `no-restricted-imports (frontend-standards 34)`.
+    the `frontend-wiring` skill. Everything here assumes it. Gate: `pnpm lint`, rule `no-restricted-imports (frontend-standards 34)`.
 
 ### Choosing the read primitive
 

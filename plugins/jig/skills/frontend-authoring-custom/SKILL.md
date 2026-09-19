@@ -1,3 +1,9 @@
+---
+name: frontend-authoring-custom
+description: The rules for a genuinely new compound component — own state, a keyboard map, asChild — the skeleton, the prop types, asChild, state, data attributes, and accessibility. Use when no shadcn component or composition covers the need and you author or review a custom one. The frontend builder and reviewer agents preload this skill; in any other session, invoke it before you write the component.
+user-invocable: false
+---
+
 # Authoring a custom component (rare)
 
 Only when shadcn genuinely lacks the component AND you were told to

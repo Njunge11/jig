@@ -15,6 +15,8 @@ skills:
   - recipe-page-preview
   - recipe-rich-text
   - recipe-chat
+  - frontend-wiring
+  - frontend-authoring-custom
   - structure
   - state-machines
   - open-feature-pr

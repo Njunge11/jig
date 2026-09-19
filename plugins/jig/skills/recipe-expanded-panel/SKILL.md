@@ -57,7 +57,7 @@ overlay-vs-page event problems that rules 62–63 exist for.
 4. **Extract the shell once.** The first expandable panel becomes
    the app's one compound component
    (`Panel`/`PanelHeader`/`PanelExpandToggle`/`PanelBody`, per
-   `references/authoring-custom.md` of the `frontend-standards` skill); the second surface reuses
+   the `frontend-authoring-custom` skill); the second surface reuses
    it. Never a second implementation.
 
 5. **Responsive:** below `lg`, the docked mode usually cannot

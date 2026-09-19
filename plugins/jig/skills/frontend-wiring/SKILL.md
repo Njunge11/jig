@@ -1,3 +1,9 @@
+---
+name: frontend-wiring
+description: The one-time tRPC + TanStack Query v5 wiring for a Next.js App Router app — the query client, the server prefetch and hydration helpers, the browser provider. Use when you create or change the tRPC client or server wiring, or when you diagnose a hydration, prefetch, or shared-cache fault. The frontend builder and reviewer agents preload this skill; in any other session, invoke it before you touch the wiring.
+user-invocable: false
+---
+
 # tRPC + TanStack Query wiring (one-time setup)
 
 The modern integration: `@trpc/tanstack-react-query` (`createTRPCOptionsProxy` + `useTRPC`), **not** the legacy `createHydrationHelpers`. You wire this once per app; per-feature work just calls `prefetch` / `useSuspenseQuery` against it.
