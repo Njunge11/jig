@@ -24,6 +24,8 @@ Two kinds of gap stop the work:
 1. The spec leaves undecided a detail the implementation checklists need.
 2. The audit shows the spec is wrong about the repo.
 
+A detail that a standards skill or a recipe decides is not a gap. Where a search, a filter or a sort runs, where its state lives, which layer owns a query: the skill decides, and the checklist follows it. Do not ask the developer to choose.
+
 In both cases, ask the developer. Write the resolution into the spec doc. Then continue from the amended spec. Do not design the answer yourself.
 
 Every resolution you write into the spec carries a `Developer said:` line that quotes the developer's answer word for word, from this session. A resolution with no such line is one you designed: delete it and report the gap as open. The quote is the audit trail Step 5 checks.
@@ -36,7 +38,7 @@ A builder is the agent that executes one implementation checklist, task by task,
 
 Write each implementation checklist as `docs/<project>/checklists/NN-<slug>.md`. One question decides which checklist to write: **does the work change what the software does?**
 
-- Yes: write one TDD implementation checklist for the slice. Its `## Backend` section follows the **TDD implementation checklist — backend** section of this skill and its `## Frontend + Integration` section follows the **TDD implementation checklist — frontend** section of this skill; a slice that touches both domains holds both sections in the one file, backend first. Every TDD checklist has a `## Manual verification` section with at least one step a person performs on the running app; a checklist that cannot name one is not a slice — merge its work into the slice that makes it visible. Before you write the first section of a domain, invoke that domain's tests skill (`backend-tests` or `frontend-tests`). Its Review checklist defines the tests the builder writes — write every task so its tests can pass that checklist.
+- Yes: write one TDD implementation checklist for the slice. Its `## Backend` section follows the **TDD implementation checklist — backend** section of this skill and its `## Frontend + Integration` section follows the **TDD implementation checklist — frontend** section of this skill; a slice that touches both domains holds both sections in the one file, backend first. Every TDD checklist has a `## Manual verification` section with at least one step a person performs on the running app; a checklist that cannot name one is not a slice — merge its work into the slice that makes it visible. Before you write the first section of a domain, invoke that domain's tests skill (`backend-tests` or `frontend-tests`). Its Review checklist defines the tests the builder writes — write every task so its tests can pass that checklist. Before you write a `## Frontend + Integration` section, also invoke the `frontend-standards` skill, walk its recipe catalog row by row against the slice, and invoke each `recipe-*` skill whose row matches. Do this even when the request asks for one section only. The **How to fill it** list of the frontend format says what the tasks take from the recipes.
 - No — the work only changes the code's structure: write a step implementation checklist, per the **Step implementation checklist** section of this skill. Its `Domain` line names the domain.
 - Work that changes both behavior and structure: split it into a TDD checklist and a step checklist. If the answer is unclear, ask the developer.
 
@@ -86,6 +88,7 @@ Check every file you wrote. Fix every miss, then check again.
 10. Every resolution this run wrote into the spec has a `Developer said:` line quoting the developer's own message from this session. A resolution without one is deleted, and its gap is reported as open in the run's final report.
 11. No `## Manual verification` item names a script the repo can run. One that does moves to `## Done`, with the task that makes the script load its own keys when it needs them.
 12. Every TDD implementation checklist has a `## Manual verification` section with at least one step a person performs on the running app. One without it is not a slice: merge its work into the checklist that makes it visible, and renumber nothing that was already in the tracker.
+13. Every frontend task agrees with each recipe whose catalog row matches the slice. No task has the browser search, filter, sort or page rows that it already fetched; that work is a `## Backend` task on the list procedure.
 
 When every check passes, you are done.
 
