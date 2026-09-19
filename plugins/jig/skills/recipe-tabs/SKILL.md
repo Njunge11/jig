@@ -51,16 +51,16 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
    }
    ```
 
-4. **Client: controlled Tabs bound to the URL state**, switches
-   wrapped in a transition so the current tab stays on screen
-   while the next one loads; each content panel owns its Suspense
-   boundary:
+4. **Client: controlled Tabs bound to the URL state**; each content
+   panel owns its Suspense boundary. Do not pass `startTransition`
+   to `useQueryStates`: nuqs sets the new tab at once, outside that
+   transition, and a transition never waits for a Suspense
+   boundary that mounts with the new panel. A switch to a tab with
+   no cached data shows that panel's skeleton; step 5 is what
+   makes a switch instant:
 
    ```tsx
-   const [isPending, startTransition] = useTransition();
-   const [{ tab }, setParams] = useQueryStates(candidatesParams, {
-     startTransition,
-   });
+   const [{ tab }, setParams] = useQueryStates(candidatesParams);
 
    <Tabs value={tab} onValueChange={(v) => setParams({ tab: v })}>
      <TabsList>
@@ -116,8 +116,9 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
       prefetch on trigger hover/focus.
 - [ ] Badge counts and tab contents share one procedure's
       definitions.
-- [ ] Switching tabs keeps the current view during load
-      (transition + `isPending`), and a first visit shows the
-      panel's skeleton, not a global one.
+- [ ] A switch to a hovered or visited tab shows its content with
+      no skeleton (the prefetch filled the cache); a switch to an
+      uncached tab shows that panel's skeleton, never the route's
+      `loading.tsx`.
 - [ ] A tab switch resets tab-scoped params in the same update.
 - [ ] Arrow keys move between triggers (the primitive is intact).
