@@ -20,6 +20,9 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
    returns the rows plus the total count. A procedure that
    returns the full list for the client to `.filter()` is a
    backend gap: apply the `frontend-standards` skill's "Backend gaps" section.
+   The row count on screen never changes this: a dashboard's
+   "newest 5" with a search box searches every row, so the
+   procedure takes `q`.
 
 2. **Define the URL state once, shared by both sides.** The URL
    owns every committed narrowing param. One parsers module:
@@ -112,8 +115,14 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
 ## Don't — common failures
 
 - Don't keep filters in `useState` and leave the URL untouched —
-  reload and share then lose the state.
-- Don't filter or sort a fully-fetched list on the client.
+  reload and share then lose the state. A dashboard card or a
+  small widget is no exception.
+- Don't search, filter or sort fetched rows on the client — a
+  small list is no exception. A list that shows a cap (the newest
+  5, one page) holds a part of the data: a browser filter searches
+  the rows on screen and never finds a row outside the cap. The
+  search covers every row the user can reach, and only the server
+  has them.
 - Don't pass `startTransition` to `useQueryStates` to hold the old
   list — nuqs changes the state outside that transition, so the
   query suspends to the fallback. Defer the query input.
