@@ -29,6 +29,10 @@ Reject the test if any item is true. This list judges each test's quality, not t
 8. The test fails the **litmus test**: rewriting the component's internals (state lib, data lib, markup) with behavior unchanged would break it.
 9. A **stream or event fixture** takes its event order from what the author assumed instead of from the trace of one real turn (for an eve client, `pnpm exec eve traces`). A fixture that streams the words before the tool result keeps the suite green and hides a client that draws every card wrong.
 
+## A test that fails on and off
+
+Run the test file a maximum of 3 times to confirm it. Never loop a test run (`for i in $(seq 1 15); do vitest run …`): repetition costs minutes and finds no cause. After the third run, stop and report the test's name, the failure text, and how many of the 3 runs failed. The cause is in the test or in the code: state shared between tests, a clock or a random value read directly, or a promise nobody awaits. Find it by reading, with the Review checklist above.
+
 ## What to assert
 
 | Assert on…                          | Good? |                |

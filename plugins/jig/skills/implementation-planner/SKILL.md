@@ -154,7 +154,7 @@ Setup (only when this checklist creates a new app or package):
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
-- [ ] The `review-backend-feature` verdict pasted: one line per item, plus its suite run.
+- [ ] The `review-backend-feature` verdict pasted: one line per item.
 ```
 
 ### TDD implementation checklist — frontend
@@ -221,7 +221,7 @@ Transcribed from the mockup images. The builder builds to these statements, and 
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
-- [ ] The `review-frontend-feature` verdict pasted: one line per item, plus its suite run.
+- [ ] The `review-frontend-feature` verdict pasted: one line per item.
 ```
 
 ### Step implementation checklist

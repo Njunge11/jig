@@ -21,7 +21,7 @@ Execute a step implementation checklist. The checklist drives the work — the i
 4. **Walk the governing rubric item by item against your diff** (`git diff main`) — backend: the `backend-standards` Review checklist; frontend: the `frontend-standards` `## Rules`. When the diff touches a file that imports `xstate` or a file under a `machine/` folder, walk the Shared items and the domain's items of the `state-machines` Review checklist the same way and run its Gates. Walk the tree and the Placement rules of the preloaded `structure` skill over every file the diff adds or moves, and move a misplaced file now. Name each item that the diff violates. Fix each violation. Commit the fixes as one commit. **Gate:** every item and every added or moved file has a recorded verdict, and the standing checks are green at the baseline counts.
 5. **Prove the `## Done` items.** For each item except the PR item: run its command, paste the command with its final summary output and its exit status, and tick the box. Then set this checklist's Status to `Done` in `docs/<project>/tracker.md`. Commit the checklist and the tracker. **Gate:** every non-PR box is `[x]`, with its proof in the transcript.
 6. **Open the PR as the preloaded `open-feature-pr` skill specifies.** That skill owns the branch, title, and body format, and the `gh` steps. Then tick the PR box with the URL, commit, and push so the PR updates. **Gate:** `gh` returns the PR URL, and every `## Done` box is `[x]`.
-7. **Invoke the domain's review skill** — backend: `review-backend-feature`; frontend: `review-frontend-feature` — with the checklist path and the branch as its arguments. It runs the independent review in its own forked subagent, which has no access to this session — that separation is what keeps the review independent. Never walk its checklists yourself. A diff with no test changes passes the test-skill items trivially; that is expected. **Gate:** the invocation returns the per-item verdict and a green suite run.
+7. **Invoke the domain's review skill** — backend: `review-backend-feature`; frontend: `review-frontend-feature` — with the checklist path and the branch as its arguments. It runs the independent review in its own forked subagent, which has no access to this session — that separation is what keeps the review independent. Never walk its checklists yourself. A diff with no test changes passes the test-skill items trivially; that is expected. **Gate:** the invocation returns the per-item verdict.
 8. **Return the proof** in the format under [Proof format](#proof-format) below. Then a watcher that sees only the transcript (e.g. `/goal`) can verify the work. The workflow ends here.
 
 ### Proof format
@@ -41,7 +41,7 @@ done
 
 tracker  docs/growth/tracker.md — 07 Status: Done
 PR       https://github.com/<org>/<repo>/pull/<n>
-review   <paste the verdict the domain's review run returned: one line per item, plus its suite run>
+review   <paste the verdict the domain's review run returned: one line per item, plus the test run of the files it fixed, when it fixed one>
 ```
 
 ## When a step fails

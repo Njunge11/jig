@@ -19,8 +19,8 @@ An independent second walk of the backend Review checklists against a feature's 
 4. Walk the `eve-agent` Review checklist **item by item** when the diff touches `agent/`, `evals/`, or a file that imports `eve/react`, and run its Gates. When the diff touches none of them, record `skipped — no agent files` and go on. **Gate:** every item has a recorded verdict, and the Gates' output is in the verdict, before you go to step 5.
 5. Walk the `state-machines` Review checklist **item by item**, the Shared and Backend items, when the diff touches a file that imports `xstate`, and run its Gates for Part A and Part B. When it touches none, record `skipped — no machine files` and go on. **Gate:** every item has a recorded verdict, and the Gates' output is in the verdict, before you go to step 6.
 6. Walk the `structure` tree and its Placement rules over **every file the diff adds or moves**: is it in its defined place? A file that is not moves now. **Gate:** every added or moved file has a recorded verdict before you go to step 7.
-7. Fix every violation in place. **Gate:** `vitest --project backend` is green after the fixes, and the `eve-agent` Gates pass again when step 4 ran, and the `state-machines` Gates when step 5 ran. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
-8. **Return the verdict**: one line per checklist item — `pass`, or `fixed` with `file:line` and the item number — and one line per added or moved file, plus the green `vitest --project backend` run, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
+7. Fix every violation in place. **Gate:** the test files that cover each fixed file are green, run by name (`vitest run <file>`). A review that fixed nothing runs no test: the builder's full run stands. Never run the full suite here. The `eve-agent` Gates pass again when step 4 ran, and the `state-machines` Gates when step 5 ran. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
+8. **Return the verdict**: one line per checklist item — `pass`, or `fixed` with `file:line` and the item number — and one line per added or moved file, plus the test run of the fixed files when a fix was made, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
 
 ### Verdict format
 
@@ -55,8 +55,8 @@ structure
 ### When a step fails
 
 - **A hook rejects the commit.** Fix what the hook reports, then commit again. Never pass `--no-verify`.
-- **The push is rejected.** The remote branch moved. Run `git pull --rebase`, re-run `vitest --project backend`, then push again.
-- **A fix turns the suite red.** The fix is wrong, not the test. Redo the fix so the test passes unchanged, unless the test itself violates a `backend-tests` item.
+- **The push is rejected.** The remote branch moved. Run `git pull --rebase`, run the test files of the fixed files again, then push again.
+- **A fix turns a test red.** The fix is wrong, not the test. Redo the fix so the test passes unchanged, unless the test itself violates a `backend-tests` item.
 
 ## Rules
 
