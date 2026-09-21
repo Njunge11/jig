@@ -30,6 +30,10 @@ Reject the test if any item is true. This list judges each test's quality, not t
 13. The test asserts **behavior that lives in the fake**, not in the code under test: the fake re-implements production logic (filtering, stamping, ordering), and the assertion observes that logic. A stateful fake lives in `<source>.repo.fake.ts` beside the real repo, with a contract test that proves it against the real implementation — never inline in one test file.
 14. A **statement-budget test** runs through a fake repo or a mocked client instead of the real database, or asserts a bound (`toBeLessThan`) where the exact count is knowable, or the count it asserts was read off the implementation instead of listed from the behavior (item 4). Gate for the `toBeLessThan` clause: `pnpm lint`, rule `no-restricted-syntax (backend-tests 14)`; walk the rest by hand.
 
+## A test that fails on and off
+
+Run the test file a maximum of 3 times to confirm it. Never loop a test run (`for i in $(seq 1 15); do vitest run …`): repetition costs minutes and finds no cause. After the third run, stop and report the test's name, the failure text, and how many of the 3 runs failed. The cause is in the test or in the code: state shared between tests, a clock or a random value read directly, or a promise nobody awaits. Find it by reading, with the Review checklist above.
+
 ## What not to do — and what to do instead
 
 Each example shows one Review-checklist item above. Items without an example need none.
