@@ -67,7 +67,7 @@ agent/                       ← only if the app has an eve agent: the agent's o
   channels/<name>.ts         ← one eve channel with its auth walk (wired once); eve names the file (eve, slack, twilio, …)
   hooks/<name>.ts            ← one observer per event
   tools/<tool_name>.ts       ← entry: eve agent tool; composes a feature's api/<name>.tool.ts
-  lib/                       ← the only folder under agent/ that eve accepts for your own code
+  lib/                       ← the only folder under agent/ that eve accepts for your own code: .ts modules, no .tsx and no React
     machine/<name>/          ← the conversation's machine: setup and root
     thread/                  ← the conversation: advance, restore, the reader, the stage's tools, its repos
     <concern>/               ← the parts every tool shares, one folder per concern (model, caller, transcript, auth)
@@ -113,7 +113,13 @@ evals/
    file only composes it. Eve reads only the named folders under
    `agent/`; everything else there is plain code under `lib/`. A
    folder of your own beside them, such as `agent/machine/`, makes
-   `eve info` print an `unsupported-directory` diagnostic.
+   `eve info` print an `unsupported-directory` diagnostic. eve
+   compiles `agent/lib/` as authored modules, and it accepts only
+   `.ts`, `.js`, `.mts`, `.cts`, `.mjs` and `.cjs`: no `.tsx`, so no
+   React component, context or hook lives there. What the chat's
+   UI shares across channels (a provider every card reads, a chat
+   layout) lives in `components/ui/`; a type both sides import may
+   stay in `agent/lib/<concern>/` as a `.ts` file.
 8. **A channel receives and draws.** `channels/<name>/` holds one
    channel's routers and screens and nothing that decides a
    stage; every channel calls the same `agent/` code. Its card
