@@ -74,6 +74,7 @@ Each case repeats a B task with no instruction to load a skill. The only grader 
 | C7 | The B4 task: build the create form | `recipe-form-with-mutation` or `frontend-standards` fires |
 | C8 | "How do I rename my git branch?" | No skill fires |
 | C9 | "Explain this regex" | No skill fires |
+| C10 | A draft with collecting, review and published stages, never called a machine | `state-machines` fires |
 
 ## D. Waste — text that changes nothing
 

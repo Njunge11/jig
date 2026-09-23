@@ -24,6 +24,8 @@ Two kinds of gap stop the work:
 1. The spec leaves undecided a detail the implementation checklists need.
 2. The audit shows the spec is wrong about the repo.
 
+A spec that describes a flow with named stages, where the same event does different things depending on the stage, and names no state machine for it, is a gap of the first kind. Ask the developer. The resolution is the machine as its own checklist row before any row that needs a stage (`state-machines` skill, "Is this a machine?").
+
 A detail that a standards skill or a recipe decides is not a gap. Where a search, a filter or a sort runs, where its state lives, which layer owns a query: the skill decides, and the checklist follows it. Do not ask the developer to choose.
 
 In both cases, ask the developer. Write the resolution into the spec doc. Then continue from the amended spec. Do not design the answer yourself.

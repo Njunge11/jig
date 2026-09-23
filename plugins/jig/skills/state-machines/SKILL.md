@@ -1,6 +1,6 @@
 ---
 name: state-machines
-description: The rules for XState v5 state machines, in three parts. Shared, how the machine module is set up, typed and modeled, and where a state's data lives (meta, tags, description). Backend, how a server computes a transition with pure functions, runs the returned actions, and persists the snapshot. Frontend, how a React client restores that snapshot and renders from it with useSelector, matches and hasTag. Use when you add or change a state machine, a state, a transition, a guard, an action, an invoked or spawned actor, a persisted snapshot, server code that moves a machine, React code that renders a machine's state or lists the actions a user can take, or when you review a diff that touches a machine, its snapshot, or code that reads a machine's state.
+description: The rules for XState v5 state machines, in three parts. Shared, how the machine module is set up, typed and modeled, and where a state's data lives (meta, tags, description). Backend, how a server computes a transition with pure functions, runs the returned actions, and persists the snapshot. Frontend, how a React client restores that snapshot and renders from it with useSelector, matches and hasTag. Use when a flow has named stages and the same event does different things depending on the stage, whether or not anyone has said "machine": a draft that moves through collecting, review and published, a conversation with a stage, a wizard, an order or an application with a lifecycle. Also use when you add or change a state machine, a state, a transition, a guard, an action, an invoked or spawned actor, a persisted snapshot, server code that moves a machine, React code that renders a machine's state or lists the actions a user can take, or when you review a diff that touches a machine, its snapshot, or code that reads a machine's state.
 ---
 
 # State machines
@@ -67,6 +67,16 @@ Each layer calls only the next. The stored snapshot is the only record of a stag
 | The author or reviewer of a machine file | Part A |
 | The backend builder or reviewer | Part A, Part B |
 | The frontend builder or reviewer | Part A, Part C |
+
+## Is this a machine?
+
+Decide this when the flow is designed, before any checklist is written, and write the answer into the spec as the machine's own row. Nobody has to say "machine" for this section to apply.
+
+A flow is a machine when it has named stages and the application behaves differently in response to the same event depending on the stage (XState docs, `finite-states`, "Different behavior = different state"). A draft where Submit sends it to review, Approve publishes it and Submit does nothing once published is a machine. A conversation an agent runs has such a stage (`eve-agent` skill). A one-shot request, a list, a form with one submit, and a display status computed from data are not.
+
+- **Who owns it.** A stage that outlives one request, one turn or one render is stored as a snapshot and moved by the server (Part B). A stage that lives inside one screen is the browser's (Part C).
+- **The failure this prevents.** The same flow built as booleans, a status column read by `if` chains, or a stage derived from the data on each request hides impossible states and undesirable transitions (Stately docs, "When to Use State Machines and Statecharts"). Never derive the stage from data.
+- **A spec without the machine.** A spec that describes such a flow and names no machine is a gap. The planner raises it with the developer (`implementation-planner`, Step 3), and the machine becomes its own row before any row that needs a stage.
 
 ## Before you change anything
 
