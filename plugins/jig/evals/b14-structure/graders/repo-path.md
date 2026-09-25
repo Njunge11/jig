@@ -1,5 +1,5 @@
 ---
 type: regex
-pattern: 'features/invites/db/invites\.repo\.ts'
+pattern: 'features/invites/db/(invites|invitations?)\.repo\.ts'
 flags: i
 ---

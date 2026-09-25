@@ -27,15 +27,15 @@ features/<feature>/
     <feature>.router.ts      ← entry: tRPC. The resource → router map; the only file that names every resource router
     <name>.tool.ts           ← the body of one eve tool (only if an agent runs this feature)
     <resource>.router.ts     ← one resource's procedures, with their input schemas and their composition (deps)
-    <feature>.service.ts
+    <concern>.service.ts     ← one concern the feature decides (create, publish, reads, …); named for the feature only when the feature has one concern
     __fixtures__/            ← shared test setup and scripted fakes (only if two test files share them)
     __tests__/
       <resource>.router.test.ts
-      <feature>.service.test.ts
+      <concern>.service.test.ts
   db/
-    <feature>.repo.ts
+    <resource>.repo.ts       ← one row set's reads and writes
     __tests__/
-      <feature>.repo.test.ts
+      <resource>.repo.test.ts
   mcp/
     <feature>.tool.ts        ← entry: MCP tool (only if the feature has one)
   workflows/                 ← entry: durable workflow (only if the feature has one)

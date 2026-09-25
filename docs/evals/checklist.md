@@ -58,6 +58,7 @@ Each case gives the code in the prompt and one task. The prompt tells the agent 
 | B26 | `frontend-authoring-custom` | Build a custom `Rating` component | Compound parts; exported prop types and `cn`; `value` / `onValueChange` / `defaultValue`; `data-state` and `data-slot`; keyboard map |
 | B27 | `frontend-standards` | Review a component with six faults | Names each fault: tokens, template-literal class, derived state, per-row query, label, icon button name |
 | B28 | `recipe-search-and-filters` | Add a search box over a list that the server caps at 5; the prompt says "keep the change small" | The server searches every row; no browser filter; `q` in the URL; debounce |
+| B29 | `backend-standards` | Add `publishDraft` and `draftChanges` to a feature whose one service already holds create, read and update | Each new concern is its own file, named for it; nothing is appended to `drafts.service.ts`; each new file opens with its one-sentence concern |
 
 ## C. Triggering — the description fires on the task and only on the task
 

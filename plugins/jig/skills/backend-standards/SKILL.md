@@ -10,7 +10,7 @@ This file gives the rules for backend code. Each rule has one home. The [Review 
 ## Principles
 
 - Follow the layered architecture. Never bypass a layer.
-- Give each layer one responsibility.
+- Give each layer one responsibility, and each file one concern (Structure, "One file, one concern").
 - Use the framework and ORM primitives (tRPC, Drizzle, Workflow SDK) before you write custom code.
 - Make as few database round trips as possible.
 
@@ -21,6 +21,19 @@ file-placement rule. If it is not already in your context, invoke
 it before you place a file. Place every file by its tree, never
 by imitating existing code. A feature is a folder. The schema is
 central.
+
+- **One file, one concern, at every layer.** A file hides one design decision, and a change to that decision touches only that file. That is Parnas's criterion for a module (1972), Dijkstra's separation of concerns (1974), functional cohesion (Stevens, Myers and Constantine, 1974) and Martin's single responsibility principle (2003): one rule with four names, quoted in `references/sources.md`. The test is a sentence, never a size. Write what the file owns in one sentence with no "and", and put that sentence as the file's first doc comment. One sentence is one file. A sentence with "and" is two files. Forty lines can fail the test, and four hundred can pass it. Name the file for its concern. A service is one concern the feature decides, never one file per feature. A repo is one row set. A router is one resource (`structure` rule 9). A helper module is one computation. A task that adds a second concern to a file adds a file instead. A file that already holds several concerns is restructuring work, a step checklist, never a precedent.
+
+```ts
+// WRONG — one service per feature: four concerns, four reasons to change
+// api/drafts.service.ts        startDraft, openForm, updateDraft, draftChanges
+
+// RIGHT — one service per concern; each file's first line is its sentence
+// api/start-draft.service.ts   "Creates a draft and puts it on its first stage."
+// api/open-draft.service.ts    "Answers a request to open a draft's form or its overview."
+// api/update-draft.service.ts  "Applies an edit stated in words to a draft."
+// api/draft-changes.ts         "Lists the fields an update changed, for the receipt."
+```
 
 - **The schema lives centrally in `db/schema/`**, with one file per domain. Set `schema: "./db/schema"` in `drizzle.config.ts`. The drizzle-kit tool reads the folder recursively. You must export every table. The schema is central because FKs cross domains constantly. Feature-local schema files would import across features.
 - **Monorepo schema placement**: tables that more than one app uses live in the workspace db package. That package is `packages/db`, which exports the schema and the client. That package owns their drizzle config and their migration history. An app's **private** tables stay in that app's `db/schema/`, with Drizzle's multi-project safeguards. Define every private table through a `pgTableCreator` name prefix (`<app>_`). Set `tablesFilter: ["<app>_*"]`. Give the app its own migrations journal (`migrations: { schema: "drizzle_<app>" }`). Private tables never FK into another app's tables. When a second app needs a table, move that table to the db package.
@@ -402,3 +415,4 @@ Reject the change if any item is true. Skip items 5–7 when the diff has no wor
 31. A non-test file forces a type with `as never` or a double assertion (`as any as T`, `as unknown as T`). Gate: `pnpm lint`, rule `no-restricted-syntax (backend-standards 31)`.
 32. A service moves a stage or status with hand-written conditions on a field, instead of `transition` on the machine and its stored snapshot (`state-machines`).
 33. An external call (email, HTTP API, LLM, queue) runs inside an open transaction, or a send that must not be lost has no outbox row written with the business writes.
+34. A file holds more than one concern: what it owns cannot be stated in one sentence without "and", or a change to one decision it holds would touch code that another decision owns. Line count is never the test.

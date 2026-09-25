@@ -56,6 +56,7 @@ Selectors marked `probed` fired on a bad fixture and stayed silent on a good one
 | 29 | No statement-budget test; count raised without a named behavior | judgment | | |
 | 31 | `as never` or a double assertion in a non-test file | lint now | `TSAsExpression[typeAnnotation.type="TSNeverKeyword"]`; `TSAsExpression[expression.type="TSAsExpression"][expression.typeAnnotation.type=/^TS(Any\|Unknown)Keyword$/]` | v2 `**/*.ts`, `**/*.tsx`, tests ignored |
 | 32 | a service moves a stage with conditions on a field instead of `transition` on the machine | judgment | | |
+| 34 | File holds more than one concern | judgment | the test is a sentence, not a count | |
 
 ### 1.2 backend-tests (14 items)
 
