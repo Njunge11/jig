@@ -29,6 +29,7 @@ Reject the test if any item is true. This list judges each test's quality, not t
 12. The test targets **code that is not ours or has no behavior of its own**: a third-party library's correctness (Zod parsing, Drizzle SQL generation), a trivial pass-through, or a private helper already covered through its public API.
 13. The test asserts **behavior that lives in the fake**, not in the code under test: the fake re-implements production logic (filtering, stamping, ordering), and the assertion observes that logic. A stateful fake lives in `<source>.repo.fake.ts` beside the real repo, with a contract test that proves it against the real implementation — never inline in one test file.
 14. A **statement-budget test** runs through a fake repo or a mocked client instead of the real database, or asserts a bound (`toBeLessThan`) where the exact count is knowable, or the count it asserts was read off the implementation instead of listed from the behavior (item 4). Gate for the `toBeLessThan` clause: `pnpm lint`, rule `no-restricted-syntax (backend-tests 14)`; walk the rest by hand.
+15. An entry-point call has no **call-trace test**, or the test asserts a substring of the block instead of every line in call order, or runs with `TRACE_LOG` unset so the block is empty.
 
 ## A test that fails on and off
 
@@ -250,6 +251,10 @@ A fake is code too. Give each fake repo a contract test. The contract test runs 
 ### Router tests — createCallerFactory
 
 Create the caller once in a test helper: `const createCaller = createCallerFactory(appRouter)`. Then do these steps per test. Build a context with a test session. Call procedures. Assert the response or the thrown error.
+
+### The call trace test
+
+One test per entry-point call, in that entry's test file. Set `TRACE_LOG=1` for the test (`vi.stubEnv`, undone in `afterEach`), pass a `log` that collects the block, call the entry once on the real database, and assert the block: one line per call the entry makes, in call order, each as `<indent>calling <name> to <purpose>. <result>. took <seconds> s`, and under each call the `query <verb> <table>` lines the client prints for it, with the seconds matched as `\d+\.\d{3}`. Assert the whole list, so a call that goes missing or moves fails the test. The lines are the checklist's call-trace task (`implementation-planner`).
 
 ### Workflow tests — steps plain, workflows via @workflow/vitest
 

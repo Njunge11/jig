@@ -110,6 +110,7 @@ Run all of these before a commit that touches `agent/`, `evals/` or a `useEveAge
 3. The project's live eval script exits `0`. It loads its own keys (Evals); a run skipped for a missing key is a failed gate, never a note in the handoff.
 4. For a lane change, `pnpm exec eve traces` of one real turn, with the count of model calls equal to the lane's budget.
 5. `pnpm lint` exits `0` in the app root. It proves every Review item that ends with `Gate:`; walk the other items by hand.
+6. For a change under `agent/` or in a feature's `api/` that a tool calls: the call-trace block of one real turn with `TRACE_LOG=1`, pasted, with one line per call the change adds or moves (`backend-standards` § "The call trace").
 
 ## Review checklist
 
@@ -127,6 +128,7 @@ Reject the change if any item is true. Walk it against every changed file under 
 10. A gate in the Gates section was not run, or its output is not in the proof.
 11. A judge assertion's `on` lacks a fact its criteria name, or a threshold the spec states rides `.atLeast` instead of `.gate`.
 12. A tool whose raw output a client, a hook or a mapping reads has no `outputSchema`. Gate: `pnpm lint`, rule `no-restricted-syntax (eve-agent new)`.
+13. A tool's `execute` body runs outside the tool's trace root, or a call under it runs outside `trace`, so the turn's block misses it (`backend-standards` Review item 35).
 
 ## eve docs map
 

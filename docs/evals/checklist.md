@@ -60,6 +60,7 @@ Each case gives the code in the prompt and one task. The prompt tells the agent 
 | B28 | `recipe-search-and-filters` | Add a search box over a list that the server caps at 5; the prompt says "keep the change small" | The server searches every row; no browser filter; `q` in the URL; debounce |
 | B29 | `backend-standards` | Add `publishDraft` and `draftChanges` to a feature whose one service already holds create, read and update | Each new concern is its own file, named for it; nothing is appended to `drafts.service.ts`; each new file opens with its one-sentence concern |
 | B30 | `state-machines` | Add a role stage after `details_complete` to a server-owned machine whose snapshots are stored in production | `details_complete` keeps a transition forward for the stored rows; a test resolves that value in the new machine and proves it moves forward; no deploy-time rewrite of rows |
+| B31 | `backend-standards` | Add `jobs.close` to an app whose db package holds `call-trace.ts` | The entry opens the trace root; every repo call and the email send is one `calling <name> to <purpose>` line; no hand-traced query, no id or result word in a line; a test asserts the block's lines in order |
 
 ## C. Triggering — the description fires on the task and only on the task
 

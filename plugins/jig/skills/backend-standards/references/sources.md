@@ -43,3 +43,17 @@ rules to the doc that grounds them.
   sent, data could get corrupted"; "Do not send out an event
   notification if the transaction is rolled back"; duplicate
   sends — "make the consuming service idempotent".
+
+## The call trace
+
+- One root per entry-point call, one `trace` line per call, one
+  print per block (The call trace, Review item 35) — jig's own
+  rule, verified 2026-09-25. The block format is the developer's:
+  "calling function n to do x. it took n seconds. if there are
+  queries, these are the queries each took. calling llm to do y.
+  success." A context-free query log was rejected: "just logging
+  queries randomly without context is utterly useless."
+  One write per block: Node docs, `process.md`, "A note on process
+  I/O": `console.log` writes synchronously to files and to
+  terminals on POSIX, so one write per line would block the
+  request once per line.

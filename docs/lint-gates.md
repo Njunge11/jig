@@ -57,6 +57,7 @@ Selectors marked `probed` fired on a bad fixture and stayed silent on a good one
 | 31 | `as never` or a double assertion in a non-test file | lint now | `TSAsExpression[typeAnnotation.type="TSNeverKeyword"]`; `TSAsExpression[expression.type="TSAsExpression"][expression.typeAnnotation.type=/^TS(Any\|Unknown)Keyword$/]` | v2 `**/*.ts`, `**/*.tsx`, tests ignored |
 | 32 | a service moves a stage with conditions on a field instead of `transition` on the machine | judgment | | |
 | 34 | File holds more than one concern | judgment | the test is a sentence, not a count | |
+| 35 | Entry opens no trace root; a service call outside `trace`; a line with no purpose, an id, or a hand-written result | judgment | | |
 
 ### 1.2 backend-tests (14 items)
 
@@ -76,6 +77,7 @@ Selectors marked `probed` fired on a bad fixture and stayed silent on a good one
 | 12 | Tests code that is not ours | judgment | | |
 | 13 | Asserts behavior that lives in the fake | judgment | | |
 | 14 | Budget test on a fake; `toBeLessThan`; count read off the implementation | lint now, part | selector `CallExpression[callee.property.name=/^toBeLessThan/]` | `**/*.test.ts` |
+| 15 | No call-trace test; a substring assertion; `TRACE_LOG` unset | judgment | | |
 
 ### 1.3 frontend-standards (65 rules; the Review is rules 1–65 plus recipe Verify lists)
 
@@ -153,6 +155,7 @@ Selectors marked `probed` fired on a bad fixture and stayed silent on a good one
 | 10 | Gate not run | judgment | | |
 | 11 | Judge `on` lacks a fact; `.atLeast` for a spec threshold | judgment | | |
 | new | Tool whose raw output a client, hook or mapping reads has no `outputSchema` | lint now | selector `CallExpression[callee.name="defineTool"] > ObjectExpression:not(:has(> Property[key.name="outputSchema"]))` (probed) | `agent/tools/**` |
+| 13 | Tool body, or a call under it, outside the trace root | judgment | | |
 
 ## 2. Counts
 

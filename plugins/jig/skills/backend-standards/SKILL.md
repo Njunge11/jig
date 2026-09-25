@@ -251,6 +251,62 @@ Errors flow up: Repository → Service → Entry → the global handler (tRPC) o
 - Never discard an error — let it propagate.
 - **Log every failure an entry hands to a client.** A `refused`, `notFound` or `forbidden` return and a thrown mutation error reach the server log with the procedure or tool name, the ids and the message. A failure the server does not log cannot be read when the user reports a dead screen.
 
+## The call trace
+
+Every request tells its story in one log block: each call it made, why it ran, what came back and how long it took, nested under the call that made it. The block is the first thing read when a screen dies or a turn is slow, so a call that is not in it did not happen, as far as the reader knows.
+
+```
+calling readRoleSuggestions to suggest the role's skills, tools and certifications. success. took 2.310 s
+  calling permittedCaller to check the permission jobs:update. allowed. took 0.021 s
+    query select user_companies. took 0.008 s
+  calling hasCredits to check the credits. yes. took 0.009 s
+    query select credit_grants. took 0.009 s
+  calling repo.findDraft to read the draft. success. took 0.012 s
+    query select job_drafts. took 0.012 s
+  calling suggestRoleTerms to ask the model for the role's suggestions. success. took 2.250 s
+```
+
+- **One root per entry-point call, opened where the request enters.** A tRPC procedure opens it in the first middleware of its base procedure, so the session, permission and credit checks the later middlewares run are its first lines; the root line is `calling <procedure> to <purpose>`, with the purpose from the procedure's `.meta({ purpose })`. An eve tool opens it around its `execute` body, keyed by eve's call id, so the turn hook prints it with the model steps around it. An MCP tool and a workflow step open it around their one service call. A handler that calls the service bare prints nothing: `trace` records only under an open root.
+- **Before you add an entry point, open the file that defines its base procedure and read its middlewares.** When none of them opens the root, this change adds that middleware, and the diff holds the base procedure's file. A change that names the root without showing it, or says the root "already exists" or "is assumed", has no root: the reviewer rejects it under item 35.
+- **Every call a service makes is one `trace` line: `calling <name> to <purpose>`.** A repo method (`calling repo.findDraft to read the draft`), another service, a model (`calling suggestRoleTerms to ask the model for the role's suggestions`), a workflow start (`calling workflow screen to screen the application. started`), the machine move (`calling advance to move the draft from details_pending to role_pending`). The name is the real function's name. The purpose says what the call is for, in plain words.
+- **A query traces itself.** The db client wraps every statement once, so no repo and no service traces a query by hand. Each shows as `query <verb> <table>` under the call that ran it.
+- **The result is read off the call, never written into the line.** A `refused`, `notFound`, `forbidden` or `invalid` return prints `refused: "<message>"`; a throw prints `failed: <message>`; a check prints its own word through `describe` (`yes`, `allowed`, `decided: tool draft, action create`); anything else prints `success`.
+- **A line holds no id and no message text.** The root says what the request does (`save the draft's details`), never what the user wrote.
+- **The trace costs nothing when off.** `TRACE_LOG=1` turns it on. Off, every helper returns `fn()` and builds nothing. On, the tree is built in memory and printed with one write when the root closes. It adds no statement to any call.
+- **The helper lives in the db package beside the client**, because the client is what traces the queries: `trace`, `traceQuery`, `traceLazyQuery`, `traceRoot`, `traceBlock`, `takeTrace`, `renderTrace`. An app that has none writes it once there, never per feature. Every entry point has a call-trace test (`backend-tests`, "The call trace test").
+
+```ts
+// WRONG — the handler calls the service bare; every trace line under it records nothing
+suggestions: creditedProcedure.input(schema).query(({ ctx, input }) =>
+  makeRoleSuggestionsService(deps(ctx)).readRoleSuggestions(input),
+),
+
+// RIGHT — the base procedure's first middleware opens the root; the checks and the service's calls are its lines
+export const creditedProcedure = protectedProcedure
+  .use(({ ctx, meta, path, next }) =>
+    // next() answers { ok, error } and never throws, so the root reads its word off that
+    traceBlock(`calling ${path} to ${meta?.purpose ?? "serve the request"}`, next, {
+      log: ctx.log,
+      describe: (result) => (result.ok ? "success" : `failed: ${result.error.message}`),
+    }),
+  )
+  .use(requirePermission)
+  .use(requireCredits);
+
+suggestions: creditedProcedure
+  .meta({ purpose: "suggest the role's skills, tools and certifications" })
+  .input(schema)
+  .query(({ ctx, input }) => makeRoleSuggestionsService(deps(ctx)).readRoleSuggestions(input)),
+
+// api/role-suggestions.service.ts — each call the service makes is one line
+const draft = await trace("calling repo.findDraft to read the draft", () =>
+  deps.repo.findDraft(companyId, draftId),
+);
+const terms = await trace("calling suggestRoleTerms to ask the model for the role's suggestions", () =>
+  suggestRoleTerms(role, { model: deps.model }),
+);
+```
+
 ## Control flow
 
 Write each method as a flat sequence: do one step, check its result, return early on failure. The reader follows the method from the top to the bottom.
@@ -416,3 +472,4 @@ Reject the change if any item is true. Skip items 5–7 when the diff has no wor
 32. A service moves a stage or status with hand-written conditions on a field, instead of `transition` on the machine and its stored snapshot (`state-machines`).
 33. An external call (email, HTTP API, LLM, queue) runs inside an open transaction, or a send that must not be lost has no outbox row written with the business writes.
 34. A file holds more than one concern: what it owns cannot be stated in one sentence without "and", or a change to one decision it holds would touch code that another decision owns. Line count is never the test.
+35. An entry-point call opens no trace root where the request enters, or the diff relies on a root middleware it does not show, or a call a service makes (a repo method, another service, a model, a workflow start, the machine move) runs outside `trace`, or a trace line names no purpose, holds an id or message text, or writes its result by hand instead of reading it off the call (The call trace).
