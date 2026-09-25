@@ -40,7 +40,7 @@ eve-agent
  1 pass
  3 fixed — agent/tools/get_job.ts:40 (toModelOutput added)
  ... one line per item, first to last — or: skipped — no agent files
- gates <paste `pnpm exec eve info` and the eval script's run>
+ gates <paste `pnpm exec eve info`; no eval script runs, the developer runs them>
 
 state-machines
  4 fixed — features/threads/api/thread.machine.ts:12 (the buttons moved from a table into meta)

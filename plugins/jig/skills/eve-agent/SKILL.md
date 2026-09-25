@@ -11,7 +11,7 @@ This skill holds the rules for the agent as a whole. The body of one tool file i
 
 1. **Open the doc page for the slot you change.** The docs ship with the package at `node_modules/eve/docs/`. The **eve docs map** section at the end of this skill maps each slot to its page and section. Read the page for the installed version, not a memory of eve. A rule that the installed docs do not state is not a rule.
 2. **Run `pnpm exec eve info` from the app root that installs `eve`.** It prints the discovered surface and the diagnostics. Never use `npx eve`: when the working directory has no `eve` installed, `npx` downloads the newest release and runs that version against the app. Fix every diagnostic before you write code.
-3. **Find the project's eval script** in `package.json`. Every change below ends with that script green.
+3. **Find the project's eval scripts** in `package.json`, and never run them. Every change below ends with its evals written and the typecheck green; the developer runs the evals.
 
 ## Rules
 
@@ -85,7 +85,7 @@ This skill holds the rules for the agent as a whole. The body of one tool file i
 - **`evals/evals.config.ts` exists, and one `.eval.ts` file is one case.**
 - **One eval per tool runs on the compiled build.** A scripted `mockModel` turns one message into the one tool call. This is the only test that sees what the eve compiler breaks.
 - **A lane eval asserts the exact tool list, in order, and the budget.** Use `t.toolOrder([...])` and `t.maxToolCalls(n)`, so a chain that grows by one tool fails.
-- **Tag the evals that need a real model `live`, and exclude the tag in the default script.** A `--tag` that matches nothing is a configuration error. The live script loads its own keys (`dotenv -e .env -- eve eval --tag live`). It bills a real model for every case, so a builder never runs it: the developer runs it by hand, when they choose.
+- **Tag the evals that need a real model `live`, and exclude the tag in the default script.** A `--tag` that matches nothing is a configuration error. The live script loads its own keys (`dotenv -e .env -- eve eval --tag live`). No agent runs either script: the developer runs both by hand, when they choose. A builder writes the evals and never runs them.
 - **A judge sees the criteria and `on`, nothing else.** Every fact the criteria name (the JD, the brief, the reference) goes inside the `on` value; the reply carries none of it.
 - **A bar is `.gate(n)`.** `.atLeast(n)` is soft: a missed score marks the case `scored` and the run still exits `0`.
 - **A live seed ensures reference rows and never deletes them.** Cases run concurrently against one database, so a seed inserts a unique row with `onConflictDoNothing` and its cleanup removes only the rows the case owns.
@@ -106,8 +106,8 @@ This skill holds the rules for the agent as a whole. The body of one tool file i
 Run all of these before a commit that touches `agent/`, `evals/` or a `useEveAgent` client. Paste the output in the proof.
 
 1. `pnpm exec eve info`, run from the app root, prints no diagnostic.
-2. The project's eval script (mock model, `--exclude-tag live`) exits `0`.
-3. The project's live eval script was not run. It bills a real model for every case, and one builder that reran it after every fix cost a day's model budget in an evening. The handoff names it under manual verification for the developer, who runs it by hand before the merge.
+2. No eval script was run. The project's eval scripts, mock and live, are the developer's: one builder that reran the live suite after every fix cost a day's model budget in an evening. The handoff names both under manual verification for the developer, who runs them by hand before the merge.
+3. Every eval the change needs exists in `evals/`, and the app's typecheck script exits `0` with it in the tree.
 4. For a lane change, `pnpm exec eve traces` of one real turn, with the count of model calls equal to the lane's budget.
 5. `pnpm lint` exits `0` in the app root. It proves every Review item that ends with `Gate:`; walk the other items by hand.
 6. For a change under `agent/` or in a feature's `api/` that a tool calls: the call-trace block of one real turn with `TRACE_LOG=1`, pasted, with one line per call the change adds or moves (`backend-standards` § "The call trace").
