@@ -171,6 +171,7 @@ The machine module holds the states and the transitions. Implementations are the
 - **Persist the snapshot, restore it with `resolveState`.** `JSON.stringify(state)` on the way out, `machine.resolveState(JSON.parse(stored))` on the way in, then `transition(machine, restored, event)`. To persist only the value, store `{ value, context }` and resolve that.
 - **When a live actor is needed, restore it with `createActor(machine, { snapshot }).start()`.** Actions do not run again on restore; invocations restart; spawned actors restore recursively.
 - **A snapshot is JSON.** No functions, classes or other non-serializable values. A restored snapshot can be incompatible after the machine changes. When actions must replay, persist the events from `inspect` and replay them.
+- **The machine accepts every stage value it has ever stored.** A stored snapshot rests on the machine that stored it, and a deploy never rewrites rows. So a state the change renames or removes, or a transition it takes away, stays in the machine as a road forward for the rows that rest on it: the old state keeps a transition to the new flow, and a row moves on with its next event. The machine test lists every stage value the store has ever held, and proves each one resolves in the new machine and has a transition forward, or is final. A value leaves that list only when no row can hold it, proven by a query, and the commit that drops it says so.
 - **Use `getMicrosteps` when one event crosses several states.** It returns every intermediate `[snapshot, actions]`.
 - **Mock an effect at the implementation.** Give `setup({ actions })` a fake action, or override it with `machine.provide`, and use `fromPromise(mockFn)` for a promise actor. Assert the outcome through the fake's record, per `backend-tests`.
 
@@ -225,7 +226,7 @@ The machine module holds the states and the transitions. Implementations are the
 Run the gates for your side before a commit. Paste the output in the proof.
 
 1. **Every side:** the app's typecheck script exits `0`.
-2. **Part A and Part B:** the backend test script exits `0`, with the machine's reachability test in it.
+2. **Part A and Part B:** the backend test script exits `0`, with the machine's reachability test and its stored-values test in it.
 3. **Part C:** the frontend test script exits `0`, with a render test per view the machine drives.
 
 ## Review checklist
@@ -252,14 +253,15 @@ Reject the change if any item is true. Walk the Shared items against every chang
 13. A server computes the next state with `getNextSnapshot` or `getInitialSnapshot`, or creates a live actor to compute a transition.
 14. A server persists a snapshot with a non-serializable value, or restores one without `resolveState` or the `snapshot` option.
 15. The actions returned by `transition` are not handled.
+16. A change to the states drops or renames a state that stored rows can rest on, without a transition forward for them. Or the machine test does not list every stage value the store has ever held and prove each one moves forward.
 
 ### Frontend
 
-16. A React component branches on the raw `value` of a hierarchical or parallel machine instead of `matches`.
-17. A screen of a server-owned machine creates an actor (`useMachine`, `useActorRef`, `createActor`) or sends an event to one. It must resolve the stored snapshot with `resolveState` and read it.
-18. A browser-owned machine starts without its persisted snapshot when one exists. Or it provides implementations through the hook's second argument, or passes new data through `input` instead of an event.
-19. A selector returns a new object without `shallowEqual`, or is defined inside the component.
-20. A UI test asserts `snapshot.value` or context instead of what is on screen.
+17. A React component branches on the raw `value` of a hierarchical or parallel machine instead of `matches`.
+18. A screen of a server-owned machine creates an actor (`useMachine`, `useActorRef`, `createActor`) or sends an event to one. It must resolve the stored snapshot with `resolveState` and read it.
+19. A browser-owned machine starts without its persisted snapshot when one exists. Or it provides implementations through the hook's second argument, or passes new data through `input` instead of an event.
+20. A selector returns a new object without `shallowEqual`, or is defined inside the component.
+21. A UI test asserts `snapshot.value` or context instead of what is on screen.
 
 ## XState docs map
 

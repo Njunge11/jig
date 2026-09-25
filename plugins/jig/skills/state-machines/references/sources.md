@@ -88,4 +88,5 @@ The docs were read in full on 2026-09-14 against `xstate` 5.33.0 and the `@xstat
 | One reader module resolves and reads the stored snapshot for every screen | jig `structure` skill, `agent/lib/thread/` | Not an XState rule. One reader keeps every channel on the same `getMeta`/`hasTag` reads. |
 | The machine test's file name, layer and fakes | jig `backend-tests` skill, review items 2 and 10 | Not an XState rule. |
 | The Gates | jig `implement-*` and `review-*` skills | Not an XState rule. The gates are the repo's standing checks. |
+| The machine accepts every stage value it has ever stored (Part B, review item 16) | jig, from the `persistence` caveat quoted above | Not an XState rule. XState says a restored snapshot "can be incompatible" after the machine changes and stops there. A stored row the new machine cannot move is a row the service refuses every event on, and a deploy never rewrites rows, so the machine keeps a road forward for every value it stored. |
 
