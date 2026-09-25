@@ -85,7 +85,7 @@ This skill holds the rules for the agent as a whole. The body of one tool file i
 - **`evals/evals.config.ts` exists, and one `.eval.ts` file is one case.**
 - **One eval per tool runs on the compiled build.** A scripted `mockModel` turns one message into the one tool call. This is the only test that sees what the eve compiler breaks.
 - **A lane eval asserts the exact tool list, in order, and the budget.** Use `t.toolOrder([...])` and `t.maxToolCalls(n)`, so a chain that grows by one tool fails.
-- **Tag the evals that need a real model `live`, and exclude the tag in the default script.** A `--tag` that matches nothing is a configuration error. The live script loads its own keys (`dotenv -e .env -- eve eval --tag live`), so the builder runs it alone.
+- **Tag the evals that need a real model `live`, and exclude the tag in the default script.** A `--tag` that matches nothing is a configuration error. The live script loads its own keys (`dotenv -e .env -- eve eval --tag live`). It bills a real model for every case, so a builder never runs it: the developer runs it by hand, when they choose.
 - **A judge sees the criteria and `on`, nothing else.** Every fact the criteria name (the JD, the brief, the reference) goes inside the `on` value; the reply carries none of it.
 - **A bar is `.gate(n)`.** `.atLeast(n)` is soft: a missed score marks the case `scored` and the run still exits `0`.
 - **A live seed ensures reference rows and never deletes them.** Cases run concurrently against one database, so a seed inserts a unique row with `onConflictDoNothing` and its cleanup removes only the rows the case owns.
@@ -107,7 +107,7 @@ Run all of these before a commit that touches `agent/`, `evals/` or a `useEveAge
 
 1. `pnpm exec eve info`, run from the app root, prints no diagnostic.
 2. The project's eval script (mock model, `--exclude-tag live`) exits `0`.
-3. The project's live eval script exits `0`. It loads its own keys (Evals); a run skipped for a missing key is a failed gate, never a note in the handoff.
+3. The project's live eval script was not run. It bills a real model for every case, and one builder that reran it after every fix cost a day's model budget in an evening. The handoff names it under manual verification for the developer, who runs it by hand before the merge.
 4. For a lane change, `pnpm exec eve traces` of one real turn, with the count of model calls equal to the lane's budget.
 5. `pnpm lint` exits `0` in the app root. It proves every Review item that ends with `Gate:`; walk the other items by hand.
 6. For a change under `agent/` or in a feature's `api/` that a tool calls: the call-trace block of one real turn with `TRACE_LOG=1`, pasted, with one line per call the change adds or moves (`backend-standards` § "The call trace").
