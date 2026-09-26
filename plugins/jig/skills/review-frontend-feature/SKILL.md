@@ -23,11 +23,15 @@ An independent second walk of the frontend rubric against a feature's diff. This
 8. Walk the `structure` tree and its Placement rules over **every file the diff adds or moves**: is it in its defined place? A file that is not moves now. **Gate:** every added or moved file has a recorded verdict before you go to step 9.
 9. Walk the checklist's `## Design facts` section, when it has one, **item by item against the changed files** — open the files and check each `D<n>` statement. **Gate:** every fact has a recorded verdict before you go to step 10.
 10. Fix every violation in place. **Gate:** the test files that cover each fixed file are green, run by name (`vitest run <file>`). A review that fixed nothing runs no test: the builder's full run stands. Never run the full suite here. The `state-machines` Gates pass again when step 7 ran. Commit all review fixes as **one commit**, message in the repo's enforced convention — with commitlint that's `refactor(<feature>): fix review-checklist violations`. Never bypass hooks (`--no-verify` is banned); a failing hook is work to fix. **Push the commit** so the open PR updates. **Gate:** `git status` shows the branch up to date with its remote.
-11. **Return the verdict**: one line per item of every rubric list — `pass`, `fixed` with `file:line`, or `browser-check` — plus the test run of the fixed files when a fix was made, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
+11. **Return the verdict**: one line per item of every rubric list — `pass`, `fixed` with `file:line`, `browser-check`, or `developer-check` — plus the test run of the fixed files when a fix was made, so a transcript-only watcher (e.g. `/goal`) can verify the walk happened. The workflow ends here.
 
 ### The `browser-check` verdict
 
 Read the code first — it settles most rules. When only the rendered browser can prove a rule, record `browser-check` instead of guessing a `pass`.
+
+### The `developer-check` verdict
+
+When only an input the developer produces can prove an item — the `pnpm exec eve traces` of one real turn, for frontend-tests Review item 9 — record `developer-check` and name the input. The verdict line is complete with that; the developer's step is already in the checklist's `## Manual verification`. Never send the turn, and never hold the verdict open for it: a `/goal` check only sees the transcript, so an item that waits on a developer's paste never resolves and the run loops until the stop-hook cap ends it.
 
 ### Verdict format
 
