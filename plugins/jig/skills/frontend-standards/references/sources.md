@@ -100,6 +100,15 @@ these pages on 2026-09-01.
 - Rule 37 — [TanStack Query: Parallel Queries](https://tanstack.com/query/v5/docs/framework/react/guides/parallel-queries)
 - Rules 57–59 — [TanStack Query: Optimistic Updates](https://tanstack.com/query/v5/docs/framework/react/guides/optimistic-updates)
   (v5 signatures: `context.client`, `onMutateResult`)
+- Rule 47 — [Next.js: staleTimes](https://nextjs.org/docs/app/api-reference/config/next-config-js/staleTimes):
+  `dynamic` "Default: 0 seconds (not cached)" (v15 changed it
+  from 30s); [Next.js: Link `prefetch`](https://nextjs.org/docs/app/api-reference/components/link#prefetch):
+  the default prefetches a dynamic route only "down to the
+  nearest segment with a `loading.js` boundary"; `true`: "The
+  full route will be prefetched"; "Prefetching is only enabled
+  in production". TanStack Query `hydrate` (query-core
+  `hydration.ts`): "Do not hydrate if an existing query exists
+  with newer data".
 - Rules 50–53 — [Next.js: loading.js](https://nextjs.org/docs/app/api-reference/file-conventions/loading)
 - Rules 54–55 — [Next.js: error.js](https://nextjs.org/docs/app/api-reference/file-conventions/error)
 - Rules 39–40, 49, 60–61 — absorbed from Vercel's React

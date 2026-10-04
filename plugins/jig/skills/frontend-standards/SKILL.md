@@ -324,9 +324,19 @@ export default async function Page() {
 46. Query keys are derived from `queryOptions` — never hand-write
     a key. Invalidate through the derived filter:
     `queryClient.invalidateQueries(trpc.users.table.queryFilter())`.
-47. One freshness layer. TanStack owns freshness for these
-    queries; do not also configure Next route/`fetch` caching for
-    them.
+47. One freshness layer for the data; the router keeps the page.
+    TanStack owns the data's freshness: never configure Next
+    `fetch` caching or a route `revalidate` for these queries. The
+    router's client cache is a different layer: it keeps a page
+    the user has seen, so a return shows it at once, with no
+    `loading.tsx` skeleton. Next keeps a dynamic page for 0
+    seconds by default, so set it in `next.config.ts`:
+    `experimental: { staleTimes: { dynamic: 300 } }`. The links of
+    the app's own navigation (the side menu, the header) set
+    `prefetch={true}`: the default prefetch of a dynamic route
+    stops at `loading.tsx`, so the first click shows the skeleton.
+    A kept page never overwrites newer data: TanStack's `hydrate`
+    skips a query whose cache holds newer data.
 
 ### Streaming — and when not to
 
