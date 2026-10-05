@@ -62,6 +62,7 @@ Each case gives the code in the prompt and one task. The prompt tells the agent 
 | B30 | `state-machines` | Add a role stage after `details_complete` to a server-owned machine whose snapshots are stored in production | `details_complete` keeps a transition forward for the stored rows; a test resolves that value in the new machine and proves it moves forward; no deploy-time rewrite of rows |
 | B31 | `backend-standards` | Add `jobs.close` to an app whose db package holds `call-trace.ts` | The entry opens the trace root; every repo call and the email send is one `calling <name> to <purpose>` line; no hand-traced query, no id or result word in a line; a test asserts the block's lines in order |
 | B32 | `frontend-standards` | Every move between Home and Jobs shows the skeleton, also a return to a page just seen | `experimental.staleTimes.dynamic` above 0; the side menu's `Link`s set `prefetch={true}`; every `loading.tsx` stays; no Next data cache on the queries |
+| B33 | `state-machines` | The candidates page's stage tabs and the home page's stage badge, from a stored status column, when the machine still says "Needs review" and the job page keeps its own `STAGE_LABEL` | The machine's `meta` says "Longlisted"; the machine marks the listed stages (a tag); one reader module reads names and sets from the state nodes; no screen, the job page included, keeps a list or map of stages |
 
 ## C. Triggering — the description fires on the task and only on the task
 
@@ -78,6 +79,7 @@ Each case repeats a B task with no instruction to load a skill. The only grader 
 | C7 | The B4 task: build the create form | `recipe-form-with-mutation` or `frontend-standards` fires |
 | C8 | "How do I rename my git branch?" | No skill fires |
 | C9 | "Explain this regex" | No skill fires |
+| C10 | The B33 task with no skill named: the candidates page's tabs from the status column | `state-machines` fires |
 
 ## D. Waste — text that changes nothing
 

@@ -1,6 +1,6 @@
 ---
 name: state-machines
-description: The rules for XState v5 state machines, in three parts. Shared, how the machine module is set up, typed and modeled, and where a state's data lives (meta, tags, description). Backend, how a server computes a transition with pure functions, runs the returned actions, and persists the snapshot. Frontend, how a React client restores that snapshot and renders from it with useSelector, matches and hasTag. Use when you add or change a state machine, a state, a transition, a guard, an action, an invoked or spawned actor, a persisted snapshot, server code that moves a machine, React code that renders a machine's state or lists the actions a user can take, or when you review a diff that touches a machine, its snapshot, or code that reads a machine's state.
+description: The rules for XState v5 state machines, in three parts. Shared, how the machine module is set up, typed and modeled, and where a state's data lives (meta, tags, description). Backend, how a server computes a transition with pure functions, runs the returned actions, and persists the snapshot. Frontend, how a React client restores that snapshot and renders from it with useSelector, matches and hasTag. Use when you add or change a state machine, a state, a transition, a guard, an action, an invoked or spawned actor, a persisted snapshot, server code that moves a machine, React code that renders a machine's state or lists the actions a user can take, a screen that names a stage or groups rows by one (a tab per stage, a stage label or badge, a stage filter), even when it reads only a stored status column, or when you review a diff that touches a machine, its snapshot, or code that reads a machine's state.
 ---
 
 # State machines
@@ -187,6 +187,14 @@ The machine module holds the states and the transitions. Implementations are the
 ## Part C. Frontend: restore and render the machine
 
 - **The owner of the actor decides the client.** When the backend moves the machine (Part B), the screen never creates an actor and never sends it an event. It resolves the stored snapshot with `machine.resolveState(stored)` and reads `getMeta`, `hasTag` and `matches` on the result. A user action goes to the server, which answers with the next stored snapshot. One reader module does the resolve and the reads for every screen. The rest of Part C is for a machine the browser owns.
+- **A screen that names a stage, or groups rows by one, reads the stage's data from the machine.** This holds for a list page that reads only the stored status of each row and never resolves a snapshot. A tab per stage, a stage label or badge, a stage filter and the order of the stages are static data about the states: the name is in the state's `meta`, and the set of stages that a screen shows is a tag. The reader module reads them from the machine's state nodes (`machine.states[value].meta`, `.tags`) and exports them; each screen imports them. A screen never writes its own map of stage names, its own list of stages or its own union of stage values. A second copy drifts: two screens name one stage two ways, and a new state shows on no screen until someone edits each copy. A value that only the URL uses, such as a tab key, is in the state's `meta` too; keep the keys that the URL already uses, so a saved link still opens its tab. A change that names a stage also removes every copy that already exists: search the repo for the stage values and their names, and change each map, list and union you find to import from the reader module, in the same change. A copy that you have not read is not a note for later: read it and change it.
+
+  ```ts
+  // the machine's reader module: every screen imports the stages from here
+  const listed = Object.values(applicationStageMachine.states).filter((node) => node.tags.includes("listed"));
+  export const LISTED_STAGES = listed.map((node) => ({ status: node.key, label: node.meta.label, tab: node.meta.tab }));
+  export const stageLabel = (status: ApplicationStatus) => applicationStageMachine.states[status].meta.label;
+  ```
 - **`@xstate/react` is the client of a browser-owned machine.** `useActorRef` gives a stable ref that does not rerender. `useSelector(actorRef, selector, compare?)` rerenders only when the selected value changes. Define selectors outside the component. Pass `shallowEqual` when a selector returns an object. `createActorContext` provides one actor to a tree.
 - **Restore a persisted snapshot with the `snapshot` option.** `useMachine(machine.provide(impl), { snapshot })` starts at that state.
 - **Branch the view on `matches`, and prefer `hasTag` where a group serves.** In a hierarchical or parallel machine the state value is an object, so use `matches` in `if`, `switch (true)` or a ternary.
@@ -262,6 +270,7 @@ Reject the change if any item is true. Walk the Shared items against every chang
 19. A browser-owned machine starts without its persisted snapshot when one exists. Or it provides implementations through the hook's second argument, or passes new data through `input` instead of an event.
 20. A selector returns a new object without `shallowEqual`, or is defined inside the component.
 21. A UI test asserts `snapshot.value` or context instead of what is on screen.
+22. A screen file holds its own map of stage names, list of stages or union of stage values, instead of importing them from the machine's reader module, which reads the state nodes' `meta` and `tags`. This includes a copy that was in the repo before the change and that the change left in place.
 
 ## XState docs map
 
