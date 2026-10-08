@@ -4,6 +4,7 @@ description: Build a feature's backend test-first, driven by a checklist file, w
 skills:
   - backend-tests
   - backend-standards
+  - backend-entry-points
   - structure
   - state-machines
   - eve-agent

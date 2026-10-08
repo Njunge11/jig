@@ -5,7 +5,7 @@ description: The rules for XState v5 state machines, in three parts. Shared, how
 
 # State machines
 
-The **XState docs map** section at the end of this skill maps each slot of a machine to its XState v5 docs page and side; use it in step 1. `references/sources.md` quotes the doc line behind each rule; load it only when a rule's ground is questioned.
+The **XState docs map** section at the end of this skill maps each slot of a machine to its XState v5 docs page and side; use it in step 1.
 
 ## Structure
 

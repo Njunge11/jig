@@ -1,6 +1,7 @@
 {
   "name": "jig",
   "displayName": "Jig",
+  "version": "1.1.0",
   "description": "Engineering skills for the Next.js + tRPC + Drizzle (T3-style) stack: a spec-to-PR TDD pipeline plus backend and frontend standards.",
   "author": {
     "name": "Njunge11",

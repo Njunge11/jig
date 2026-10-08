@@ -1,5 +1,5 @@
 ---
-description: "backend-standards workflow entry: deterministic function, retry-safe steps"
+description: "backend-entry-points workflow entry: deterministic function, retry-safe steps"
 tags: [obedience, backend]
 runs: 1
 max_turns: 8
@@ -7,7 +7,7 @@ timeout_seconds: 420
 allowed_tools: [Read, Glob, Grep, Skill]
 ---
 
-If a skill named `backend-standards` is available to you, invoke it with the Skill tool before you answer. If it is not available, answer without it.
+If a skill named `backend-entry-points` is available to you, invoke it with the Skill tool before you answer. If it is not available, answer without it.
 
 The app uses the Workflow DevKit (`"use workflow"` / `"use step"`). `screening.score(applicationId)` calls an LLM and can hit a rate limit. An application that was deleted can never be scored. `applications.getScore(applicationId)` (the saved score, or `null`), `applications.saveScore(applicationId, score)`, `notifications.wasSent(key)`, `notifications.markSent(key)` and `email.send(...)` exist.
 

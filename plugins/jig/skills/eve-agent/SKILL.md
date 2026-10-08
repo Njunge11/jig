@@ -5,9 +5,11 @@ description: The rules for an eve agent — the files under agent/ (instructions
 
 # eve agent
 
-This skill holds the rules for the agent as a whole. The body of one tool file is the eve entry of the `backend-standards` skill (its section "Entry — eve agent tool", Review items 26–27); this skill does not restate it.
+This skill holds the rules for the agent as a whole. The body of one tool file is the eve entry of the `backend-entry-points` skill (its section "Entry — eve agent tool", Review items 6–7); this skill does not restate it.
 
 ## Before you change anything under `agent/`
+
+Four steps, in order. Do all four before any edit; name all four when you state your plan.
 
 1. **Open the doc page for the slot you change.** The docs ship with the package at `node_modules/eve/docs/`. The **eve docs map** section at the end of this skill maps each slot to its page and section. Read the page for the installed version, not a memory of eve. A rule that the installed docs do not state is not a rule.
 2. **Run `pnpm exec eve info` from the app root that installs `eve`.** It prints the discovered surface and the diagnostics. Never use `npx eve`: when the working directory has no `eve` installed, `npx` downloads the newest release and runs that version against the app. Fix every diagnostic before you write code.
@@ -15,8 +17,6 @@ This skill holds the rules for the agent as a whole. The body of one tool file i
 4. **Find the project's eval scripts** in `package.json`, and never run them. Every change below ends with its evals written and the typecheck green; the developer runs the evals.
 
 ## Rules
-
-`references/sources.md` records the doc page and the observation behind each rule; load it only when a rule's ground is questioned.
 
 ### Instructions
 

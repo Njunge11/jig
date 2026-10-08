@@ -97,8 +97,6 @@ Two valid levels — **default to MSW**, drop to cache-seeding only for trivial 
 
 When you create or extend the UI test setup, or the suite runs slowly, use the **Frontend test setup** section below for the Vitest `ui` project config, the provider render wrapper, the MSW server lifecycle, the cache-seed path, and the performance levers (profile first, then `vitest doctor` — never brute-force config changes).
 
-`references/sources.md` maps each rule to the doc that grounds it — load it only when a rule's ground is questioned.
-
 ## Frontend test setup
 
 Use one Vitest config with a `ui` project beside the `backend` project (Vitest **`projects`** — current through Vitest 4; the `workspace` file is deprecated since 3.2). Put the tests in each feature's `ui/__tests__/`. Run them with `vitest --project ui`.

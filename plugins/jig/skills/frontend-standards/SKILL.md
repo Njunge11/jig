@@ -43,9 +43,6 @@ map, `asChild`)? The `frontend-authoring-custom` skill holds the
 rules. The one-time tRPC + TanStack wiring lives in the
 `frontend-wiring` skill. The agents that preload the recipes
 preload both; in any other session, invoke the one you need.
-[`references/sources.md`](references/sources.md) maps each rule
-to the doc that grounds it — load it only when a rule's ground is
-questioned.
 
 ## Rules
 

@@ -11,4 +11,4 @@ If a skill named `eve-agent` is available to you, invoke it with the Skill tool 
 
 The app has an eve agent under `agent/`, and `eve` is installed in `apps/dashboard`. You must add a second tool to the agent.
 
-Before you change any file, list in order the first three things you do, with the exact commands. Do not write any file.
+List in order the things you do before you change any file, with the exact command where a step has one. Do not write any file.

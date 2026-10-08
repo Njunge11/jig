@@ -8,7 +8,7 @@ user-invocable: false
 
 Only when shadcn genuinely lacks the component AND you were told to
 build custom. These are the components.build patterns, stated as
-build instructions. Doc links: `references/sources.md` of the `frontend-standards` skill.
+build instructions.
 
 ## Building the component's skeleton
 
