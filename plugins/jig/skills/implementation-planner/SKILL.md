@@ -120,7 +120,7 @@ How to write a TDD implementation checklist for backend work that changes what t
 - A checklist that renames or removes a machine's state, or takes away a transition, carries one task: the old state keeps a transition forward for the rows that rest on it, and the machine test lists every stage value the store has ever held and proves each one moves forward (`state-machines` Part B; its Review item 16). List the stored values from the repo audit of the machines that shipped, never from memory.
 - If the implementation checklist creates a new app or package, list its setup in Scope: package.json with the standard scripts, tsconfig, vitest setup, drizzle config, `db/schema/`.
 - `## Done` holds only what the builder can prove with output it can paste: a test run, a command, or the diff. A spec-stated check that only a human can perform goes under `## Manual verification` — the developer runs it, not the builder. `## Manual verification` is never empty: at least one step a person performs on the running app, because the checklist is a slice.
-- When the slice also has a `## Frontend + Integration` section, the two sections share one file: `## Backend` first, then `## Frontend + Integration`, then one `## Manual verification` and one `## Done` at the end that merges both templates' items. The backend run proves the Backend items and pushes the branch; the frontend run proves the rest and opens the one PR.
+- When the slice also has a `## Frontend + Integration` section, the two sections share one file: `## Backend` first, then `## Frontend + Integration`, then one `## Manual verification` and one `## Done` at the end that merges both templates' items. Each section's task line covers only its own boxes: a `V<n>` box is never under a line that needs every box checked, because only a person can tick it. The backend run proves the Backend items and pushes the branch; the frontend run proves the rest and opens the one PR.
 - A check the repo runs from a script is the builder's, even when it needs a key. When the script does not load its keys, the checklist's first task makes it (`dotenv -e .env -- …`), and the check is a Done item. Only a check with no script (a browser, a device, a person) is manual. The eval scripts (`eve eval`, mock or live) and a real turn (a message sent to the dev server, and the `eve traces` of it) are the exceptions: they call a model, so they are never a Done item and a builder never runs them. They go under `## Manual verification`, as the developer's own run from the chat interface.
 
 #### Template
@@ -152,7 +152,7 @@ Setup (only when this checklist creates a new app or package):
 
 ## Done
 
-- [ ] Every task box above is checked and shown.
+- [ ] Every task box in `## Backend` is checked and shown.
 - [ ] Green suite output pasted.
 - [ ] `git log` shows one commit per task.
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
