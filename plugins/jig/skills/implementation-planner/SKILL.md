@@ -90,6 +90,7 @@ Check every file you wrote. Fix every miss, then check again.
 12. Every TDD implementation checklist has a `## Manual verification` section with at least one step a person performs on the running app. One without it is not a slice: merge its work into the checklist that makes it visible, and renumber nothing that was already in the tracker.
 13. Every frontend task agrees with each recipe whose catalog row matches the slice. No task has the browser search, filter, sort or page rows that it already fetched; that work is a `## Backend` task on the list procedure.
 14. Every task that shows a machine's stage (a tab per stage, a stage label or badge, a stage filter) says that the stage's name and the set of stages come from the machine's reader module, and no task has a screen write its own list or map of them. Every copy that the repo audit found (a map, list or union of the machine's stage values or names, on any screen) has a task that replaces it with the reader module's export.
+15. No task is only a test. A task that names a test file and no behavior of its own (`<file>.test.ts covers …`, "the tests for …") is folded into the task whose behavior it tests: its cases join that task's text, and the tests-only task is deleted. The builder writes a task's tests in that task's commit, so a tests-only task can never get its own commit, and the Done item "one commit per task" then fails after the branch is pushed, where only a history rewrite could meet it.
 
 When every check passes, you are done.
 
@@ -114,6 +115,7 @@ How to write a TDD implementation checklist for backend work that changes what t
 - Copy the spec's wording verbatim. Do not invent labels or microcopy.
 - Write each task so its tests can pass the Review checklist of the `backend-tests` skill (invoked in Step 4): one observable behavior, expected values from the spec, testable in its layer's test setup.
 - Each failure path the spec states is a behavior: give it its own task. The task list is the feature's coverage contract — a behavior with no task gets no test.
+- A task is a behavior, never a test file. The builder writes a task's tests inside that task (its Red step), so a task that only names a test file (`<file>.test.ts covers …`) has no work of its own, gets no commit of its own, and fails the Done item "one commit per task". Write the cases a behavior's test needs into the task that builds the behavior. A fake's contract-test case goes in the task that adds the fake's method.
 - Each entry-point call the checklist adds or changes (a procedure, an MCP tool, an eve tool, a workflow step) gets one statement-budget task. List the statements the behavior needs, one per row set read or written, and write the count and the list into the task. The builder's test asserts that exact count on the real database (`backend-standards` § "Queries & performance"; `backend-tests` Review item 14). Derive the list from the spec and the repo audit, never from a run.
 - Each entry-point call the checklist adds or changes also gets one call-trace task: the lines its block prints, in call order, one per call, in the form `calling <name> to <purpose>` (`backend-standards` § "The call trace"). The builder's test asserts them (`backend-tests` Review item 15). Derive the lines from the statement-budget list and the calls between the statements.
 - Each `### <source file>` heading names one file, and one file holds one concern (`backend-standards` § Structure, "One file, one concern"): `<concern>.service.ts`, `<resource>.repo.ts`, `<resource>.router.ts`. A task that adds a second concern to a file goes under a second heading. Never plan one `<feature>.service.ts` that holds every service of the feature.
@@ -154,7 +156,7 @@ Setup (only when this checklist creates a new app or package):
 
 - [ ] Every task box in `## Backend` is checked and shown.
 - [ ] Green suite output pasted.
-- [ ] `git log` shows one commit per task.
+- [ ] `git log` shows one commit per task, or the handoff's Deviations names each commit that holds two tasks.
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] Tracker Status flipped to Done.
@@ -173,7 +175,7 @@ How to write a TDD implementation checklist for frontend work that changes what 
 - When mockup images come with the spec, add a `## Design facts` section: one `D<n>` statement per checkable fact, grouped by image. A fact states one thing the image shows — a part, its position or order, its count, its alignment, its variant, or its copy word for word. Never write a pixel size or a color read off the image: the codebase's design system supplies the tokens, so a fact says "icon-only", "muted", or "beside the day name" — never "32px" or "#6b7280".
 - Write each `V<n>` item to cite the `D<n>` facts it verifies, e.g. `V2 (D4–D7) At 768 ...`. A fact about copy, counts, or states is jsdom-testable — cover it with an `F<n>` item.
 - When you write a `## Design facts` section, add this item to `## Done`: `- [ ] One verdict per D item pasted: pass, fixed with file:line, or browser-check.` It makes the builder's fact walk visible to the /goal watcher.
-- Write each `F<n>` task so its tests can pass the Review checklist of the `frontend-tests` skill (invoked in Step 4): one observable behavior, expected values from the spec, driven through what the user sees and does.
+- Write each `F<n>` task so its tests can pass the Review checklist of the `frontend-tests` skill (invoked in Step 4): one observable behavior, expected values from the spec, driven through what the user sees and does. An `F<n>` task is a behavior, never a test file: a task that only names the tests of another task gets no commit of its own (see the backend format's rule).
 - Before you write the first `F<n>` task, invoke the `frontend-standards` skill and walk its catalog row by row against the slice. For every row that matches, invoke that row's `recipe-*` skill, and write the tasks to agree with it. A behavior that a recipe's Don't list forbids is never a task. Work that a recipe puts on the server — the rows a search, a filter, a sort or a page keeps — is a `## Backend` task plus an `F<n>` task for what the user sees. A prototype or a mockup shows what the user sees; it never decides where the work runs.
 - Never write "the recipe is …" into `## Scope`. The builder walks the whole catalog itself, and one named recipe reads as the whole answer.
 - Each failure path and each empty state the spec states is a behavior: give it its own `F<n>` task. The task list is the feature's coverage contract — a behavior with no task gets no test.
@@ -222,7 +224,7 @@ Transcribed from the mockup images. The builder builds to these statements, and 
 
 - [ ] Every F item above is checked and shown; every V item is checked or listed as browser-check.
 - [ ] Green `vitest` output pasted.
-- [ ] `git log` shows one commit per task.
+- [ ] `git log` shows one commit per task, or the handoff's Deviations names each commit that holds two tasks.
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] Tracker Status flipped to Done.

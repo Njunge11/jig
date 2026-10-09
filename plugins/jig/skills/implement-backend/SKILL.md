@@ -74,6 +74,8 @@ Do these steps for each task, in order. A task can need several tests. Write the
 6. **Commit.** One commit per task, when the task's tests pass. Never batch several tasks into one commit. The message follows the enforced convention of the repo. With commitlint present, that convention is Conventional Commits (`feat(scope): subject`). Write the message under the **Language rules** of the preloaded `open-feature-pr` skill. The git log becomes the step-by-step record of the feature. **Never bypass hooks** (`--no-verify` is banned). A failing pre-commit hook is part of the work. Diagnose and fix the hook failure. Hooks can auto-fix and re-stage files (Prettier/ESLint). That result is expected, not an error.
 7. **Check the task off.** Then take the next task. The work is done when the list is empty.
 
+A later task that only names tests of this task's behavior (an old checklist's `<file>.test.ts covers …`) keeps its own commit: write only this task's own cases now, and write that task's cases in its own Red step, so each commit holds one task.
+
 While you work:
 
 - A missing case discovered mid-task gets its test. The checklist stays unchanged.
@@ -85,6 +87,7 @@ While you work:
 - **`git checkout -b` reports that the branch exists.** Run `git branch --show-current`. If it is that branch, continue on it. If it is not, run `git checkout <branch>` and continue.
 - **A new test passes before you write the implementation.** The test does not test the new behavior. Rewrite the test to assert the behavior the task states. Never continue from a green Red step.
 - **A task will not go green.** Fix the code, never the test. The only permitted test edit is a fix to a test that contradicts the spec. If the spec and the checklist conflict, stop and report the conflict.
+- **Two tasks already share a commit.** Before the first push, split the commit locally with `git reset --soft` and two commits, and check that `git diff` against the old head prints nothing. After the push, never rewrite history (no rebase, no amend, no force-push): name the commit and both tasks in the handoff's **Deviations**, which meets the Done item.
 - **A pre-commit hook rejects the commit.** Fix what the hook reports, then commit again. Never pass `--no-verify`.
 - **A `## Backend` item is wrong or missing a case.** The task list is immutable. Write the extra test under the current task. Record the difference in the handoff's **Deviations** section.
 - **`git push` or `gh` fails at step 5.** Use the **When a step fails** section of the preloaded `open-feature-pr` skill. Do not open the PR by another route.
