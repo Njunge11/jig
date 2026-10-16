@@ -195,6 +195,15 @@ The machine module holds the states and the transitions. Implementations are the
   export const LISTED_STAGES = listed.map((node) => ({ status: node.key, label: node.meta.label, tab: node.meta.tab }));
   export const stageLabel = (status: ApplicationStatus) => applicationStageMachine.states[status].meta.label;
   ```
+- **When several cards draw one machine, the machine's `meta` names what each kind of card shows in each state.** A card that acts on the stage draws the stage's parts: its form, its receipt, its offer of the next step. A card that only reads the stage, such as an overview or a summary, is a separate kind of card. It reads its own `meta` key and never draws the parts of the card that acts. When several acting cards of one machine are on screen, one function picks the card that draws the stage's parts, such as the latest acting card in a chat. It counts acting cards only; a read-only card never counts, so it never takes the parts from an acting card above it. That pick is the only place the screen reads a card's position, and it never moves into the machine's context. What a card draws comes from the meta of its kind, never from a check of data beside the stored snapshot (a nullable column, a `has…` flag). A flag that skips one card is a patch, not the fix: give the card its own kind. A test iterates every state of the machine itself (`Object.keys(machine.states)` or `xstate/graph`, never a hand-written list), renders each kind of card, and asserts on screen what each one shows.
+
+  ```ts
+  // job.states.ts: one key per kind of card
+  jd_written: { meta: { acting: { part: "details-record", offer: "screening-questions", receipt: true }, reading: { part: "details-record" } } }
+
+  // the test: every state, every kind of card
+  it.each(Object.keys(jobMachine.states))("an overview in %s shows no receipt and no offer", (state) => { … });
+  ```
 - **`@xstate/react` is the client of a browser-owned machine.** `useActorRef` gives a stable ref that does not rerender. `useSelector(actorRef, selector, compare?)` rerenders only when the selected value changes. Define selectors outside the component. Pass `shallowEqual` when a selector returns an object. `createActorContext` provides one actor to a tree.
 - **Restore a persisted snapshot with the `snapshot` option.** `useMachine(machine.provide(impl), { snapshot })` starts at that state.
 - **Branch the view on `matches`, and prefer `hasTag` where a group serves.** In a hierarchical or parallel machine the state value is an object, so use `matches` in `if`, `switch (true)` or a ternary.
@@ -271,6 +280,7 @@ Reject the change if any item is true. Walk the Shared items against every chang
 20. A selector returns a new object without `shallowEqual`, or is defined inside the component.
 21. A UI test asserts `snapshot.value` or context instead of what is on screen.
 22. A screen file holds its own map of stage names, list of stages or union of stage values, instead of importing them from the machine's reader module, which reads the state nodes' `meta` and `tags`. This includes a copy that was in the repo before the change and that the change left in place.
+23. A card shows something the machine's `meta` does not name for its kind of card: a read-only card draws a stage part, receipt or offer, or counts when the screen picks the acting card for them; or the pick is in more than one place or in the machine's context; or a card decides what it shows from data beside the stored snapshot. This includes a rule that was in the repo before the change. Or no test iterates every state of the machine itself and asserts on screen what each kind of card shows.
 
 ## XState docs map
 
