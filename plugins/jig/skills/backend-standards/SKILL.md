@@ -22,7 +22,7 @@ it before you place a file. Place every file by its tree, never
 by imitating existing code. A feature is a folder. The schema is
 central.
 
-- **One file, one concern, at every layer.** A file hides one design decision, and a change to that decision touches only that file. That is Parnas's criterion for a module (1972), Dijkstra's separation of concerns (1974), functional cohesion (Stevens, Myers and Constantine, 1974) and Martin's single responsibility principle (2003): one rule with four names. The test is a sentence, never a size. Write what the file owns in one sentence with no "and", and put that sentence as the file's first doc comment. One sentence is one file. A sentence with "and" is two files. Forty lines can fail the test, and four hundred can pass it. Name the file for its concern. A service is one concern the feature decides, never one file per feature. A repo is one row set. A router is one resource (`structure` rule 9). A helper module is one computation. A task that adds a second concern to a file adds a file instead. A file that already holds several concerns is restructuring work, a step checklist, never a precedent.
+- **One file, one concern, at every layer.** A file hides one design decision, and a change to that decision touches only that file. That is Parnas's criterion for a module (1972), Dijkstra's separation of concerns (1974), functional cohesion (Stevens, Myers and Constantine, 1974) and Martin's single responsibility principle (2003): one rule with four names. The test is a sentence, never a size. Write what the file owns in one sentence with no "and", and put that sentence as the file's first doc comment. One sentence is one file. A sentence with "and" is two files. Steps that must succeed together are one concern: the sentence names their outcome, never the steps ("Publishes a complete draft as a job, in one transaction.", never "Copies the draft into a job and marks it published."). Forty lines can fail the test, and four hundred can pass it. Name the file for its concern. A service is one concern the feature decides, never one file per feature. A repo is one row set. A router is one resource (`structure` rule 9). A helper module is one computation. A task that adds a second concern to a file adds a file instead. A file that already holds several concerns is restructuring work, a step checklist, never a precedent.
 
 ```ts
 // WRONG — one service per feature: four concerns, four reasons to change
@@ -33,6 +33,7 @@ central.
 // api/open-draft.service.ts    "Answers a request to open a draft's form or its overview."
 // api/update-draft.service.ts  "Applies an edit stated in words to a draft."
 // api/draft-changes.ts         "Lists the fields an update changed, for the receipt."
+// api/publish-draft.service.ts "Publishes a complete draft as a job, in one transaction."
 ```
 
 - **The schema lives centrally in `db/schema/`**, with one file per domain. Set `schema: "./db/schema"` in `drizzle.config.ts`. The drizzle-kit tool reads the folder recursively. You must export every table. The schema is central because FKs cross domains constantly. Feature-local schema files would import across features.

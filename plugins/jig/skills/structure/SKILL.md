@@ -76,9 +76,9 @@ channels/<name>/             ← one channel's surface (web, whatsapp, …)
   ui/                        ← the shell, the composer, the transcript and the channel-only cards (text, file, error)
     cards/index.ts           ← the part-type → card map; the only file that names every card, its own and every feature's
     <part>.tsx               ← reads the stored snapshot through agent/lib/thread's reader and draws the feature card the state's meta names
-evals/
+evals/                       ← the developer's: no agent writes, runs or requires an eval
   evals.config.ts
-  tools/<tool_name>.eval.ts  ← one eval per eve tool, on the compiled build
+  tools/<tool_name>.eval.ts
 ```
 
 ## Placement rules
