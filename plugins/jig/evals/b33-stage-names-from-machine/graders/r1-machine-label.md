@@ -1,4 +1,4 @@
 ---
 type: regex
-pattern: 'label:\s*"Longlisted"'
+pattern: 'needs_review:\s*\{[^}]*label:\s*"Longlisted"'
 ---
