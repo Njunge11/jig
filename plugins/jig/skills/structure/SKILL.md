@@ -33,7 +33,7 @@ features/<feature>/
       <resource>.router.test.ts
       <concern>.service.test.ts
   db/
-    <resource>.repo.ts       ← one row set's reads and writes
+    <resource>.repo.ts       ← one row set
     __tests__/
       <resource>.repo.test.ts
   mcp/

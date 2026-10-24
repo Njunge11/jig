@@ -1,6 +1,6 @@
 ---
 name: recipe-search-and-filters
-description: The frontend recipe for search, filters, sort or pagination over a list — the server narrows the rows, the URL owns the state, the search input debounces. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. Invoke it before you write the code.
+description: The frontend recipe for search, filters, sort or pagination over a list — the server narrows the rows, the URL owns the state, the search input debounces. Gives the build order, the common failures, and the Verify list. Use when you build, review or fix that surface, including a list that falls back to its skeleton or spinner on each search, filter or page change. Invoke it before you write the code.
 user-invocable: false
 ---
 

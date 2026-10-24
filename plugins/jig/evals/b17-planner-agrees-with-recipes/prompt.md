@@ -11,6 +11,6 @@ If a skill named `implementation-planner` is available to you, invoke it with th
 
 Spec, section 3, Home page: "The page shows the five most recent open jobs of the workspace, each with its five newest candidates. A search box above the list filters the jobs by title or by candidate name as the user types. When nothing matches, the list shows 'No jobs to show'."
 
-The stack is Next.js App Router + tRPC v11 + TanStack Query v5 + Drizzle. `home.overview()` exists and returns the five jobs with their candidates.
+The stack is Next.js App Router + tRPC v11 + TanStack Query v5 + Drizzle. `home.overview()` exists and returns the five jobs with their candidates. This session has no copy of the repo: the facts in this message are the repo audit, so do not stop to ask for the code.
 
 Write only the `## Backend` and `## Frontend + Integration` task lists of the implementation checklist for this slice. Do not write any file.

@@ -32,7 +32,7 @@ Write each resolution into the spec as the rule it sets, in the spec's own words
 
 ### Step 4: Split the work into implementation checklists
 
-Split the spec's work into implementation checklists. One implementation checklist is one PR, and one PR is one slice: the smallest change a person can verify on the running app. A slice carries everything that outcome needs — the backend, the frontend, and any migration, agent tool, eval, machine, hook or seed on the path between them. A backend change nobody can see on a screen is not a slice: it belongs inside the slice that makes it visible. Order the checklists so that each one depends only on earlier ones.
+Split the spec's work into implementation checklists. One implementation checklist is one PR, and one PR is one slice: the smallest change a person can verify on the running app. A slice carries everything that outcome needs — the backend, the frontend, and any migration, agent tool, machine, hook or seed on the path between them. A backend change nobody can see on a screen is not a slice: it belongs inside the slice that makes it visible. Order the checklists so that each one depends only on earlier ones.
 
 A builder is the session that executes one implementation checklist, task by task: the developer starts it with the checklist's /goal command, and it runs the `implement-*` skills itself, with no builder subagent. Only the review runs in a subagent, read-only.
 
