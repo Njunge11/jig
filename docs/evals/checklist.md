@@ -8,10 +8,10 @@ Run the suite from `plugins/jig`:
 claude plugin eval . --model sonnet --judge-model sonnet --runs 1 --trust-plugin --no-publish --max-cost-usd 20 -j 8
 ```
 
-The delivery and gate cases prove that a skill loads. In a two-arm run the harness scores no `tool_used: Skill` grader, so it only reports them. Run these cases on one arm, so every grader scores, and with 3 runs, so a load that holds only some of the time fails:
+The delivery and gate cases prove that a skill loads. In a two-arm run the harness scores no `tool_used: Skill` grader, so it only reports them. Run these cases on one arm, so every grader scores, and with 3 runs, so a load that holds only some of the time fails. `--scaffold` runs the `fixture.sh` of `d06`–`d08`, which writes the checklist the lane reads:
 
 ```bash
-claude plugin eval . --tag delivery gates --ablation none --model sonnet --judge-model sonnet --runs 3 --trust-plugin --no-publish --max-cost-usd 10 -j 8
+claude plugin eval . --tag delivery gates --ablation none --scaffold --model sonnet --judge-model sonnet --runs 3 --trust-plugin --no-publish --max-cost-usd 10 -j 8
 ```
 
 A skill works when its case passes with the plugin. A skill earns its tokens when the same case scores lower with no plugin. A case that scores the same in both arms shows text that the model did not need.
@@ -20,7 +20,7 @@ Ground: Anthropic, Skill authoring best practices — "Evaluations are your sour
 
 ## A. Delivery — the rules reach the agent
 
-Since jig 1.1.4 the lanes run in the `/goal` session, with no builder agent: each lane's first step invokes its skills with the Skill tool. The gate cases `d01`, `d02` and `d05` prove those loads from the main trace (the `loads-*` graders). Only the two read-only reviewers are agents, and the A cases test them.
+Since jig 1.1.4 the lanes run in the `/goal` session, with no builder agent: each lane's first step invokes its skills with the Skill tool. The cases `d06`, `d07` and `d08` prove those loads from the main trace: each gives its lane a real checklist, and the `loads-*` graders want one Skill call per core skill, while the `skips-*` graders (`max: 0`, `arm: both`) reject a skill the checklist does not touch. A missing-checklist case (`d01`, `d02`, `d05`) cannot prove a load: the lane must stop before it loads anything. Only the two read-only reviewers are agents, and the A cases test them.
 
 The case spawns the reviewer as a subagent and tells it to quote from its context with no tool. A `regex` grader looks for the exact skill text. Each case also asks for one rule that the agent must NOT preload, so the set tests both directions: a `not_contains` grader rejects that rule's text, and a second grader wants the words `NOT IN CONTEXT`. The harness does not keep the subagent's trace, so it does not prove that the subagent used no tool.
 
