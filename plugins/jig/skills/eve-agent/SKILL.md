@@ -9,7 +9,7 @@ This skill holds the rules for the agent as a whole. The body of one tool file i
 
 ## Before you change anything under `agent/`
 
-Three steps, in order. Do all three before any edit; name all three when you state your plan.
+Three steps, in order. They are the first three steps of your plan, before any other read, load or check: the installed version is the docs folder's own, so no step comes before step 1. Do all three before any edit; name all three when you state your plan.
 
 1. **Open the doc page for the slot you change.** The docs ship with the package at `node_modules/eve/docs/`. The **eve docs map** section at the end of this skill maps each slot to its page and section. Read the page for the installed version, not a memory of eve. A rule that the installed docs do not state is not a rule.
 2. **Run `pnpm exec eve info` from the app root that installs `eve`.** It prints the discovered surface and the diagnostics. Never use `npx eve`: when the working directory has no `eve` installed, `npx` downloads the newest release and runs that version against the app. Fix every diagnostic before you write code.
