@@ -1,6 +1,6 @@
 ---
 name: recipe-data-table
-description: The frontend recipe for a data table — columns, sorting, pagination, row actions. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. The frontend builder and reviewer agents preload this recipe; in any other session, invoke it before you write the code.
+description: The frontend recipe for a data table — columns, sorting, pagination, row actions. Gives the build order, the common failures, and the Verify list. Use when you build or review that surface. Invoke it before you write the code.
 user-invocable: false
 ---
 

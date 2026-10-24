@@ -8,25 +8,34 @@ Run the suite from `plugins/jig`:
 claude plugin eval . --model sonnet --judge-model sonnet --runs 1 --trust-plugin --no-publish --max-cost-usd 20 -j 8
 ```
 
+The delivery and gate cases prove that a skill loads. In a two-arm run the harness scores no `tool_used: Skill` grader, so it only reports them. Run these cases on one arm, so every grader scores, and with 3 runs, so a load that holds only some of the time fails:
+
+```bash
+claude plugin eval . --tag delivery gates --ablation none --model sonnet --judge-model sonnet --runs 3 --trust-plugin --no-publish --max-cost-usd 10 -j 8
+```
+
 A skill works when its case passes with the plugin. A skill earns its tokens when the same case scores lower with no plugin. A case that scores the same in both arms shows text that the model did not need.
 
 Ground: Anthropic, Skill authoring best practices — "Evaluations are your source of truth for measuring Skill effectiveness"; "Establish baseline: Measure Claude's performance without the Skill"; "Does this paragraph justify its token cost?"
 
 ## A. Delivery — the rules reach the agent
 
-The case spawns the lane agent as a subagent and tells it to quote from its context with no tool. A `regex` grader looks for the exact skill text. The harness does not keep the subagent's trace, so it does not prove that the subagent used no tool.
+Since jig 1.1.4 the lanes run in the `/goal` session, with no builder agent: each lane's first step invokes its skills with the Skill tool. The gate cases `d01`, `d02` and `d05` prove those loads from the main trace (the `loads-*` graders). Only the two read-only reviewers are agents, and the A cases test them.
+
+The case spawns the reviewer as a subagent and tells it to quote from its context with no tool. A `regex` grader looks for the exact skill text. Each case also asks for one rule that the agent must NOT preload, so the set tests both directions: a `not_contains` grader rejects that rule's text, and a second grader wants the words `NOT IN CONTEXT`. The harness does not keep the subagent's trace, so it does not prove that the subagent used no tool.
 
 | Id | Agent | Proof asked |
 | --- | --- | --- |
-| A1 | `frontend-feature-builder` | Quotes Verify item 1 of `recipe-search-and-filters` and lists all 11 `recipe-*` skills |
-| A2 | `frontend-feature-reviewer` | Quotes Verify item 1 of `recipe-form-with-mutation` and the `does not apply` verdict rule |
-| A3 | `step-builder` | Quotes the layer rule of `backend-standards` and Verify item 1 of `recipe-data-table` |
-| A4 | `backend-feature-builder` | Quotes the module-scope `execute` rule, the `destructiveHint` default, the step retry count |
-| A5 | `backend-feature-reviewer` | Quotes item 4 of the `backend-tests` Review checklist, the statement-counter heading, the step retry count |
+| A2 | `frontend-feature-reviewer` | Quotes rule 3 of `frontend-standards`, item 1 of the `frontend-tests` Review checklist, and the `does not apply` verdict rule; Verify item 1 of `recipe-search-and-filters` is `NOT IN CONTEXT` |
+| A5 | `backend-feature-reviewer` | Quotes item 4 of the `backend-tests` Review checklist, the statement-counter heading, the step retry count; Shared item 2 of `state-machines` is `NOT IN CONTEXT` |
+| A6 | `backend-feature-reviewer` | Lists its tools: `Read` is there; `Edit`, `Write`, `NotebookEdit` and `MultiEdit` are not |
+| A7 | `frontend-feature-reviewer` | The same tool list as A6 |
+
+A1, A3 and A4 tested the builder agents, which jig 1.1.4 deletes.
 
 ## B. Obedience — the agent builds to the rule where a bare model does not
 
-Each case gives the code in the prompt and one task. The prompt tells the agent to invoke the skill first, because the lane agents hold the skill before they start. `Write` and `Edit` are off, so the agent returns the code in its reply. Each rule clause has its own `llm` grader (`graders/r<n>-<clause>.md`), so a failure names the clause. `regex` graders check the key calls; a `tool_used: Skill` grader shows if the skill loaded. Run with `--judge-model sonnet`: the default small judge gave wrong FAIL votes on correct answers.
+Each case gives the code in the prompt and one task. The prompt tells the agent to invoke the skill first, because each lane's first step invokes its skills before it builds. `Write` and `Edit` are off, so the agent returns the code in its reply. Each rule clause has its own `llm` grader (`graders/r<n>-<clause>.md`), so a failure names the clause. `regex` graders check the key calls; a `tool_used: Skill` grader shows if the skill loaded. Run with `--judge-model sonnet`: the default small judge gave wrong FAIL votes on correct answers.
 
 | Id | Skill under test | Task | Pass when |
 | --- | --- | --- | --- |
@@ -86,7 +95,7 @@ Each case repeats a B task with no instruction to load a skill. The only grader 
 | Id | Check | How |
 | --- | --- | --- |
 | D1 | Skills with a delta of 0 in section B | Read the with/without scores of each B case; list each skill whose case a bare model already passes |
-| D2 | Preload cost against use | Tokens that each lane agent preloads, against the recipes that its B cases used |
+| D2 | Preload cost against use | Tokens that each reviewer agent preloads, against the rubric items its verdicts use; and the skills each lane's load step invokes, against the skills its B cases needed |
 | D3 | Per-section ablation of a skill with a positive delta | Second pass: run the case with one section removed; a section with no score drop is a cut candidate |
 
 ## Not covered by these evals

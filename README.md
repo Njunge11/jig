@@ -18,9 +18,9 @@ Every skill loads on its own with `/jig:<skill>`. This table shows which ones ca
 | `structure` | Yes — it is the structure. |
 | `backend-standards` | Yes — places every file by the structure tree. |
 | `frontend-standards` | Yes — places every file by the structure tree. |
-| `implement-backend` | Yes — the lane preloads the structure skill. |
-| `implement-frontend` | Yes — the lane preloads the structure skill. |
-| `implement-steps` | Yes — the lane preloads the structure skill. |
+| `implement-backend` | Yes — the lane loads the structure skill with the Skill tool in its first step. |
+| `implement-frontend` | Yes — the lane loads the structure skill with the Skill tool in its first step. |
+| `implement-steps` | Yes — the lane loads the structure skill with the Skill tool in its first step. |
 | `review-backend-feature` | Yes — the review walks the structure tree over the diff. |
 | `review-frontend-feature` | Yes — the review walks the structure tree over the diff. |
 | `implementation-planner` | Yes — it writes `docs/<project>/`, and its checklists run the lanes above. |
@@ -29,8 +29,8 @@ Every skill loads on its own with `/jig:<skill>`. This table shows which ones ca
 | `open-feature-pr` | No — branch, title, and body conventions only. |
 | `state-machines` | No — XState rules for the machine module, the server that moves it, and the React client that renders it. |
 | `skill-audit` | No — it audits skills, not your code. |
-| `frontend-wiring`, `frontend-authoring-custom` | No — the one-time tRPC wiring and the custom-component rules. The frontend lanes preload both, so they are not in the `/` menu. |
-| `recipe-*` (11 skills) | No — each holds the build order and the Verify list of one frontend surface. The frontend lanes preload all of them, so they are not in the `/` menu. |
+| `frontend-wiring`, `frontend-authoring-custom` | No — the one-time tRPC wiring and the custom-component rules. The frontend lanes and the frontend review load each one when the work touches it, so they are not in the `/` menu. |
+| `recipe-*` (11 skills) | No — each holds the build order and the Verify list of one frontend surface. The frontend lanes and the frontend review load each one whose catalog row matches the work, so they are not in the `/` menu. |
 
 ## Human in the loop — on purpose
 
@@ -74,18 +74,18 @@ flowchart TD
     T -->|"backend TDD /goal"| B[implement-backend]
     T -->|"frontend TDD /goal"| F[implement-frontend]
     T -->|"step /goal"| SL[implement-steps]
-    B --> O[open-feature-pr opens the PR]
-    F --> O
-    SL --> O
-    O --> R["independent review — review-backend-feature or review-frontend-feature"]
-    R --> V[per-item verdict pushed to the PR]
-    V --> M[you read the verdict and merge]
+    B --> R["read-only review in a subagent — review-backend-feature or review-frontend-feature"]
+    F --> R
+    SL --> R
+    R --> X[the /goal session fixes every fail line in one commit]
+    X --> O[open-feature-pr pushes once and opens the PR]
+    O --> M[you read the verdict and merge]
 ```
 
 Example: your spec is `docs/growth/spec.md`.
 
 1. **Plan.** Run `/jig:implementation-planner docs/growth/spec.md`. The planner audits the repo, asks you about the spec's open decisions, then writes `docs/growth/tracker.md` and one checklist per PR. Each tracker row carries a `/goal` run command.
-2. **Build.** Copy one checklist's `/goal` command from the tracker and run it. The command starts the right lane — `implement-backend`, `implement-frontend`, or `implement-steps` — and keeps it working until every Done item is proven in the transcript. The lane builds test-first, opens the PR, and runs an independent review that reports a per-item verdict.
+2. **Build.** Copy one checklist's `/goal` command from the tracker and run it. The command starts the right lane — `implement-backend`, `implement-frontend`, or `implement-steps` — and keeps it working until every Done item is proven in the transcript. The lane runs in the `/goal` session itself: it loads its standards, builds test-first, and runs an independent, read-only review in a subagent that reports a per-item verdict. The session fixes every `fail` line, then pushes the branch once and opens the PR. A slice with a Backend and a Frontend section builds both in the same session and opens one PR.
 3. **Merge.** Read the PR and the review verdict, then merge.
 
 You can also invoke any skill directly with `/jig:<skill>` — for example `/jig:frontend-standards` loads the frontend rules while you work by hand. Skills also load automatically when your task matches their descriptions.

@@ -16,11 +16,9 @@ it before you place a file.
 
 ## The catalog — building X → recipe
 
-Each recipe is a skill of its own. The frontend builder and
-reviewer agents preload every recipe, so every recipe is already
-in their context: a recipe applies when its row matches, and
-nothing is left to load. In any other session, invoke the recipe
-skill of every row that matches before you write code. No row
+Each recipe is a skill of its own, and no agent preloads one.
+Walk the catalog row by row, then invoke the recipe skill of
+every row that matches before you write or review code. No row
 matches? Build from the rules below and tell the developer which
 recipe is missing.
 
@@ -41,8 +39,8 @@ recipe is missing.
 Authoring a genuinely new compound component (own state, keyboard
 map, `asChild`)? The `frontend-authoring-custom` skill holds the
 rules. The one-time tRPC + TanStack wiring lives in the
-`frontend-wiring` skill. The agents that preload the recipes
-preload both; in any other session, invoke the one you need.
+`frontend-wiring` skill. Invoke the one the work touches before
+you write or review that code.
 
 ## Rules
 

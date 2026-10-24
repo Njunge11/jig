@@ -34,7 +34,7 @@ Write each resolution into the spec as the rule it sets, in the spec's own words
 
 Split the spec's work into implementation checklists. One implementation checklist is one PR, and one PR is one slice: the smallest change a person can verify on the running app. A slice carries everything that outcome needs — the backend, the frontend, and any migration, agent tool, eval, machine, hook or seed on the path between them. A backend change nobody can see on a screen is not a slice: it belongs inside the slice that makes it visible. Order the checklists so that each one depends only on earlier ones.
 
-A builder is the agent that executes one implementation checklist, task by task, in a run the developer starts with the checklist's /goal command.
+A builder is the session that executes one implementation checklist, task by task: the developer starts it with the checklist's /goal command, and it runs the `implement-*` skills itself, with no builder subagent. Only the review runs in a subagent, read-only.
 
 Write each implementation checklist as `docs/<project>/checklists/NN-<slug>.md`. One question decides which checklist to write: **does the work change what the software does?**
 
@@ -122,7 +122,7 @@ How to write a TDD implementation checklist for backend work that changes what t
 - A checklist that renames or removes a machine's state, or takes away a transition, carries one task: the old state keeps a transition forward for the rows that rest on it, and the machine test lists every stage value the store has ever held and proves each one moves forward (`state-machines` Part B; its Review item 16). List the stored values from the repo audit of the machines that shipped, never from memory.
 - If the implementation checklist creates a new app or package, list its setup in Scope: package.json with the standard scripts, tsconfig, vitest setup, drizzle config, `db/schema/`.
 - `## Done` holds only what the builder can prove with output it can paste: a test run, a command, or the diff. A spec-stated check that only a human can perform goes under `## Manual verification` — the developer runs it, not the builder. `## Manual verification` is never empty: at least one step a person performs on the running app, because the checklist is a slice.
-- When the slice also has a `## Frontend + Integration` section, the two sections share one file: `## Backend` first, then `## Frontend + Integration`, then one `## Manual verification` and one `## Done` at the end that merges both templates' items. Each section's task line covers only its own boxes: a `V<n>` box is never under a line that needs every box checked, because only a person can tick it. The backend run proves the Backend items and pushes the branch; the frontend run proves the rest and opens the one PR.
+- When the slice also has a `## Frontend + Integration` section, the two sections share one file: `## Backend` first, then `## Frontend + Integration`, then one `## Manual verification` and one `## Done` at the end that merges both templates' items. Each section's task line covers only its own boxes: a `V<n>` box is never under a line that needs every box checked, because only a person can tick it. The backend run proves the Backend items and commits them locally; the frontend run, in the same session, proves the rest, pushes the branch once and opens the one PR.
 - A check the repo runs from a script is the builder's, even when it needs a key. When the script does not load its keys, the checklist's first task makes it (`dotenv -e .env -- …`), and the check is a Done item. Only a check with no script (a browser, a device, a person) is manual. The eval scripts (`eve eval`, mock or live) and a real turn (a message sent to the dev server, and the `eve traces` of it) are the exceptions: they call a model, so they are never a Done item and a builder never runs them. They go under `## Manual verification`, as the developer's own run from the chat interface.
 
 #### Template
@@ -159,9 +159,10 @@ Setup (only when this checklist creates a new app or package):
 - [ ] `git log` shows one commit per task, or the handoff's Deviations names each commit that holds two tasks.
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
+- [ ] The `review-backend-feature` verdict pasted: one line per item.
+- [ ] Every `fail` line of the review verdict is fixed in one commit, or the verdict has none.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
-- [ ] The `review-backend-feature` verdict pasted: one line per item.
 ```
 
 ### TDD implementation checklist — frontend
@@ -227,18 +228,19 @@ Transcribed from the mockup images. The builder builds to these statements, and 
 - [ ] `git log` shows one commit per task, or the handoff's Deviations names each commit that holds two tasks.
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
+- [ ] The `review-frontend-feature` verdict pasted: one line per item.
+- [ ] Every `fail` line of the review verdict is fixed in one commit, or the verdict has none.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
-- [ ] The `review-frontend-feature` verdict pasted: one line per item.
 ```
 
 ### Step implementation checklist
 
-How to write a step implementation checklist for work that only changes the code's structure, not what the software does. The `implement-steps` skill executes it in a forked builder, one step at a time.
+How to write a step implementation checklist for work that only changes the code's structure, not what the software does. The `implement-steps` skill executes it in the /goal session, one step at a time.
 
 #### How to fill it
 
-- The `implement-steps` skill executes the checklist in a forked builder that has the `backend-standards` and `frontend-standards` skills preloaded — the `Domain` line in `## Scope` picks which one governs the edits. The `implement-steps` skill also owns the branch, the baseline run, the review walk, and the PR. Write only the work into `## Steps` — no load-a-skill step, no branch step, no baseline step.
+- The `implement-steps` skill executes the checklist in the /goal session and loads the standards that the `Domain` line in `## Scope` names — `backend-standards` or `frontend-standards` with its matching recipes — and that skill governs the edits. The `implement-steps` skill also owns the branch, the baseline run, the review walk, and the PR. Write only the work into `## Steps` — no load-a-skill step, no branch step, no baseline step.
 - Copy the spec's wording verbatim. Do not invent labels or microcopy.
 - Write each step as a mechanical rule, never a vague intention. A mechanical rule names the files and the exact change, so that two builders produce the same diff from it.
   - Write: "move `apps/web/lib/email/` to `packages/email/src/`, and change every `@/lib/email` import to `@repo/email`"
@@ -276,6 +278,8 @@ Tick each box when you paste its output.
 
 - [ ] <standing check command> green at baseline counts, output pasted.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
+- [ ] The domain's review verdict pasted (`review-backend-feature` or `review-frontend-feature`): one line per item.
+- [ ] Every `fail` line of the review verdict is fixed in one commit, or the verdict has none.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 ```

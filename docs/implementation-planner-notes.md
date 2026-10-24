@@ -34,7 +34,7 @@ Sections: `## Scope` → `## Skills` → `## Backend` → `## Manual verificatio
 
 - The behavior list section is titled **`## Backend`** — that is the section `build-backend-feature` reads. (The workflow doc said "Behaviors"; resolved toward the executor. Reconcile the doc.)
 - **Scope** carries: what this builds, spec pointer, target app + feature slug, the one-time scaffold list (first feature of an app only), and "Builds on:".
-- **Skills** is documentation only — delivery is the builder agent's `skills:` frontmatter preload, never this section.
+- **Skills** is documentation only — delivery is the lane skill's load step (a Skill call per skill, behind a Gate; jig 1.1.4), never this section.
 - **Manual verification**: commands the developer actually runs, verified against the scaffold the checklist itself defines.
 - **Done**: transcript-visible artifacts only — checked items shown, green suite output, `git log` one-commit-per-behavior, handoff file exists, tracker row flipped, PR open with URL + What/Why/How/Verification body, plus invariants (no migration applied, no frontend files).
 
