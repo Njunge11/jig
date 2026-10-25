@@ -18,7 +18,7 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
    aggregating counts procedure, and its definitions must be the
    same predicates the tab contents query — a count computed one
    way and a list filtered another way drift apart. A mismatch is
-   a backend gap: apply the `frontend-standards` skill's "Backend gaps" section.
+   a backend gap: apply the `implement-frontend` skill's "Backend gaps" section.
 
 2. **The URL owns the active tab.** Add `tab` to the route's
    shared parsers module, next to its search/filter params:

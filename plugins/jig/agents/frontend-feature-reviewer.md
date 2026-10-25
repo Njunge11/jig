@@ -1,6 +1,6 @@
 ---
 name: frontend-feature-reviewer
-description: Review a feature's frontend diff against the frontend-standards Rules, the Verify list of every recipe that applies, and the frontend-tests Review checklist, read-only, and report a per-item verdict with the fix for each failure.
+description: Use only when the `review-frontend-feature` skill forks it, after a frontend build, to review that diff; never delegate other work to it. Review a feature's frontend diff against the frontend-standards Rules, the Verify list of every recipe that applies, and the frontend-tests Review checklist, read-only, and report a per-item verdict with the fix for each failure.
 tools: Read, Grep, Glob, Bash, Skill
 skills:
   - frontend-standards

@@ -378,7 +378,7 @@ Run before a commit. Paste the output in the proof.
 
 ## Review checklist
 
-Reject the change if any item is true. Items 5–9 and 26–27 live in the `backend-entry-points` Review checklist; walk it when the diff touches a workflow, an MCP tool, or an eve tool. The numbers below stay stable because the lint gate names use them.
+Reject the change if any item is true. Items 5–9 and 26 live in the `backend-entry-points` Review checklist; walk it when the diff touches a workflow, an MCP tool, or an eve tool. The numbers below stay stable because the lint gate names use them.
 
 1. A file is outside the feature tree, or the schema is outside its correct home (`db/schema/`; in a monorepo: the workspace db package for shared tables, the prefixed app-local `db/schema/` for private ones).
 2. A service or a repo is a class or a module singleton, or a layer below the entry point imports the db client. Gate for the class clause and the db-client import: `pnpm lint`, rule `no-restricted-syntax (backend-standards 2)` and `no-restricted-imports (backend-standards 2)`; walk the rest by hand.
@@ -406,7 +406,7 @@ Reject the change if any item is true. Items 5–9 and 26–27 live in the `back
 24. A factory writes a method body inside the object it returns, instead of returning a list of named functions. Gate: `pnpm lint`, rule `no-restricted-syntax (backend-standards 24)`.
 25. A call takes a function of more than one line, or an object literal of more than a few lines, as an inline argument — instead of a named function or a named constant declared above the call. Gate for the inline-function clause: `pnpm lint`, rule `no-restricted-syntax (backend-standards 25)`; walk the rest by hand.
 26. Moved — `backend-entry-points` Review item 6 (eve tool `execute` shape and failure returns).
-27. Moved — `backend-entry-points` Review item 7 (eve tool eval through the compiled agent).
+27. Removed — evals are the developer's; no agent writes or requires one (`eve-agent` § Evals).
 28. An entry hands a failure to a client that the server does not log with the procedure or tool name, the ids and the message.
 29. An entry-point call has no statement-budget test, or the diff raises a call's statement count without the behavior that needs the extra statement named in the task.
 30. A feature router holds the procedures of more than one resource, or holds input schemas or composition, instead of merging one `<resource>.router.ts` per resource as the `structure` skill lays out.

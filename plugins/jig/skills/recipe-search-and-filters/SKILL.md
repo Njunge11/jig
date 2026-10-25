@@ -19,7 +19,7 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
    the work server-side — `WHERE`, `ORDER BY`, `LIMIT` — and
    returns the rows plus the total count. A procedure that
    returns the full list for the client to `.filter()` is a
-   backend gap: apply the `frontend-standards` skill's "Backend gaps" section.
+   backend gap: apply the `implement-frontend` skill's "Backend gaps" section.
    The row count on screen never changes this: a dashboard's
    "newest 5" with a search box searches every row, so the
    procedure takes `q`.

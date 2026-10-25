@@ -3,6 +3,7 @@ name: review-frontend-feature
 description: Use to review a feature's FRONTEND after it is built and before its branch is pushed — walks the frontend-standards Rules, the Verify list of every recipe that applies, and the frontend-tests Review checklist against the feature's diff, and reports a per-item verdict with the change that fixes each failure. It changes no file.
 context: fork
 agent: jig:frontend-feature-reviewer
+background: false
 ---
 
 # Feature Review — Frontend

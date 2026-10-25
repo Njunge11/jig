@@ -1,6 +1,6 @@
 ---
 name: backend-feature-reviewer
-description: Review a feature's backend diff against the backend-standards, backend-entry-points and backend-tests Review checklists, read-only, and report a per-item verdict with the fix for each failure.
+description: Use only when the `review-backend-feature` skill forks it, after a backend build, to review that diff; never delegate other work to it. Review a feature's backend diff against the backend-standards, backend-entry-points and backend-tests Review checklists, read-only, and report a per-item verdict with the fix for each failure.
 tools: Read, Grep, Glob, Bash, Skill
 skills:
   - backend-tests

@@ -20,7 +20,7 @@ the `frontend-standards` skill apply throughout. Libraries: `react-hook-form`,
    it as the client resolver too. Client validation then mirrors
    the server for free; the server still re-validates — it is the
    authority. No procedure for the submit is a backend gap: apply
-   the `frontend-standards` skill's "Backend gaps" section.
+   the `implement-frontend` skill's "Backend gaps" section.
 
 2. **Form state.** `useForm` with the shared schema and a
    `defaultValues` entry for every field. An edit form takes its

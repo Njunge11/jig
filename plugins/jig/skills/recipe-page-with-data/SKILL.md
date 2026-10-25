@@ -17,7 +17,7 @@ type's specifics.
    `features/<name>/api`: its procedures and their input/output
    types. Wire against that actual shape — never invent it. A
    value the UI needs that no procedure returns is a backend gap:
-   apply the `frontend-standards` skill's "Backend gaps" section.
+   apply the `implement-frontend` skill's "Backend gaps" section.
 
 2. **Write the anatomy** — the named part tree, before any code:
 

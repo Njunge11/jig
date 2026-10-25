@@ -3,6 +3,7 @@ name: review-backend-feature
 description: Use to review a feature's BACKEND after it is built and before its branch is pushed — walks the backend-standards, backend-entry-points, backend-tests, eve-agent and state-machines Review checklists and the structure tree against the feature's diff, and reports a per-item verdict with the change that fixes each failure. It changes no file.
 context: fork
 agent: jig:backend-feature-reviewer
+background: false
 ---
 
 # Feature Review — Backend
