@@ -1,29 +1,15 @@
 ---
-description: "state-machines: render from hasTag and meta, no stage table"
-tags: [obedience, frontend]
-runs: 1
-max_turns: 8
-timeout_seconds: 420
-allowed_tools: [Read, Glob, Grep, Skill]
+description: "state-machines: a screen of a server-owned machine renders from hasTag and meta, no stage table"
+tags: [obedience, frontend, regression]
+max_turns: 40
+timeout_seconds: 1200
+allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-If a skill named `state-machines` is available to you, invoke it with the Skill tool before you answer. If it is not available, answer without it.
+If a skill named `state-machines` is available to you, invoke it with the Skill tool before you start. If it is not available, work without it.
 
-The server owns this XState v5 machine and stores its snapshot in the database. The page component receives the stored snapshot as a prop.
+The working directory is a store app: Next.js App Router, tRPC v11, TanStack Query v5, Drizzle, nuqs and XState v5. The server owns the product draft's machine, `productDraftMachine`, in `features/product-draft/machine/`, and stores each draft's `{ value }` in a `stage` column. `trpc.productDraft.read({ draftId })` returns the stored stage, and `trpc.productDraft.send({ draftId, event })` moves the draft on the server and returns its next stage. `features/product-draft/ui/` has `DetailsForm`, `ReviewForm` and `SummaryView`. The page `app/drafts/[draftId]/page.tsx` prefetches `productDraft.read` and renders `ProductDraftPanel` from `features/product-draft/ui/product-draft-panel.tsx`, which does not exist yet.
 
-```ts
-// features/job-draft/machine/job-draft.machine.ts
-export const jobDraftMachine = setup({ types: {} as { events: DraftEvent } }).createMachine({
-  id: "jobDraft",
-  initial: "collecting",
-  states: {
-    collecting: { tags: ["editable"], meta: { form: "details" }, on: { SUBMIT: "reviewing" } },
-    reviewing:  { tags: ["editable"], meta: { form: "review" },  on: { APPROVE: "published", BACK: "collecting" } },
-    published:  { meta: { form: "summary" } },
-  },
-});
-```
+Write `ProductDraftPanel({ draftId })`. It shows the form of the draft's current state (`DetailsForm`, `ReviewForm` or `SummaryView`) and an Edit button only while the draft can be edited. A click on Submit must move the draft.
 
-Write the React client part `JobDraftPanel({ snapshot })`. It shows the form of the current state (`DetailsForm`, `ReviewForm` or `SummaryView`) and an Edit button only while the draft can be edited. A click on Submit must move the draft. `trpc.jobDraft.send({ event })` exists.
-
-Do not write any file. Reply with the code.
+Do not write or change tests.
