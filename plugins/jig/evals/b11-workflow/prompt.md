@@ -1,16 +1,15 @@
 ---
 description: "backend-entry-points workflow entry: deterministic function, retry-safe steps"
-tags: [obedience, backend]
-runs: 1
-max_turns: 8
-timeout_seconds: 420
-allowed_tools: [Read, Glob, Grep, Skill]
+tags: [obedience, backend, regression]
+max_turns: 40
+timeout_seconds: 1200
+allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-If a skill named `backend-entry-points` is available to you, invoke it with the Skill tool before you answer. If it is not available, answer without it.
+If a skill named `backend-entry-points` is available to you, invoke it with the Skill tool before you start. If it is not available, work without it.
 
-The app uses the Workflow DevKit (`"use workflow"` / `"use step"`). `screening.score(applicationId)` calls an LLM and can hit a rate limit. An application that was deleted can never be scored. `applications.getScore(applicationId)` (the saved score, or `null`), `applications.saveScore(applicationId, score)`, `notifications.wasSent(key)`, `notifications.markSent(key)` and `email.send(...)` exist.
+The working directory is a store app: Next.js App Router, tRPC v11, TanStack Query v5, Drizzle and nuqs. It uses the Workflow DevKit (`"use workflow"` / `"use step"`); `next.config.ts` is already wrapped with `withWorkflow`. `fraud.score(orderId)` in `lib/fraud.ts` calls an LLM. On a rate limit it throws `RateLimitError` (with `retryAfterMs`); when the order was deleted it throws `OrderNotFoundError`, and a deleted order can never be scored. Both error classes are exported beside `fraud`. The orders service (`features/orders/api/orders.service.ts`) has `getScore(orderId)` (the saved score, or `null`), `saveScore(orderId, score)` and `getOwnerEmail(orderId)`. The notifications service (`features/notifications/api/notifications.service.ts`) has `wasSent(key)` and `markSent(key)`. `email.send({ to, template, data })` is in `lib/email.ts`. The db client is `db` in `db/client.ts`.
 
-Add a durable workflow `screen-application`: score the application, save the score, email the recruiter.
+Add a durable workflow `check-order`: score the order, save the score, email the store owner.
 
-Do not write any file. Reply with the full code of every file you add or change.
+Do not write or change tests.

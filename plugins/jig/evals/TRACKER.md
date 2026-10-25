@@ -20,9 +20,9 @@ An item with no eval run has no measured cost (—).
 | [x] | Verify or discard the uncommitted changes in the old cases (a, b, c, d folders not yet committed) | $23.00 | $1.57 |
 | [x] | Fixture `tsconfig.json`: ship `"jsx": "react-jsx"` and the `.next/dev/types` include that `next build` writes | — | — |
 | [x] | Fixture `next build` fails: prerendering `/products` throws `UNAUTHORIZED`, because the fixture's session is null | — | — |
-| [ ] | Convert the code cases to the store-app design: b09, b10, b11, b14, b15, b22, b23, b24, b25, b26, b28, b29, b30, b31, b33, b35, b36 | | |
+| [ ] | Convert the code cases to the store-app design: b09, b10, b11, b14, b15, b22, b23, b24, b25, b26, b28, b29, b30, b31, b33, b35, b36 | $6.64 | $1.22 |
 | [ ] | Decide b17 (planner writes a checklist) and b19 (open-feature-pr): grade the reply, or a written file | — | — |
 | [ ] | Remove each converted case's `-ref-good` / `-ref-bad` folders | — | — |
 | [x] | Remove the old `/private/tmp/e-*` workspaces | — | — |
 
-**Total so far:** agent $36.50, judge $5.44, together $41.94.
+**Total so far:** agent $43.14, judge $6.66, together $49.80.
