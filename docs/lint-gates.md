@@ -154,7 +154,7 @@ Selectors marked `probed` fired on a bad fixture and stayed silent on a good one
 | 9 | `useEveAgent` resumes without `resume: true`; shared store | lint now, part | selector `CallExpression[callee.name="useEveAgent"] > ObjectExpression:has(> Property[key.name="initialSession"]):not(:has(> Property[key.name="resume"]))` | `**/*.tsx` |
 | 10 | Gate not run | judgment | | |
 | 11 | Judge `on` lacks a fact; `.atLeast` for a spec threshold | judgment | | |
-| new | Tool whose raw output a client, hook or mapping reads has no `outputSchema` | lint now | selector `CallExpression[callee.name="defineTool"] > ObjectExpression:not(:has(> Property[key.name="outputSchema"]))` (probed) | `agent/tools/**` |
+| new | Tool whose raw output a client, hook or mapping reads has no `outputSchema` | lint now | selector `CallExpression[callee.name="defineTool"] > ObjectExpression:not(:has(> Property[key.name="outputSchema"])):not(:has(> SpreadElement))` (probed; a spread config is skipped, because the selector cannot see inside it) | `agent/tools/**` |
 | 13 | Tool body, or a call under it, outside the trace root | judgment | | |
 
 ## 2. Counts
@@ -238,7 +238,7 @@ Plumbing, the same for every rule:
 
 | Row | Rule id | Files | Reports |
 | --- | --- | --- | --- |
-| backend-standards 5 | `jig/workflow-deterministic` | `features/**/workflows/**/*.ts` (the `structure` tree's workflow home) | Inside a Program or a function whose body starts with the `"use workflow"` directive: `new Date()` with no argument, `Date.now()`, `Math.random()`, `crypto.randomUUID()`, `fetch()`; and an import whose source ends in `.service`, `.repo` or `.repository`, or is `@ajiri/db/client`, `drizzle-orm` or `@trpc/server`. The directive may sit at Program level or on one function's own body — the repo's real workflows use the function-level form — and the import clause reads the whole file in both cases, not only the scope the directive marks. |
+| backend-standards 5 | `jig/workflow-deterministic` | `features/**/workflows/**/*.ts` (the `structure` tree's workflow home) | Inside a Program or a function whose body starts with the `"use workflow"` directive: `fetch()` (the sandbox has no global `fetch`; `Date`, `Math.random()` and `crypto.randomUUID()` are seeded there, per the workflow docs' `api-reference/workflow-globals.mdx`, so they are not reported); and an import whose source ends in `.service`, `.repo` or `.repository`, or is `@ajiri/db/client`, `drizzle-orm` or `@trpc/server`. The directive may sit at Program level or on one function's own body — the repo's real workflows use the function-level form — and the import clause reads the whole file in both cases, not only the scope the directive marks. |
 | backend-standards 27, eval clause | `jig/tool-has-eval` | `agent/tools/*.ts` | The Program holds a `defineTool(` call and `evals/tools/<basename>.eval.ts` does not exist under `context.cwd`. The check-script clause stays judgment. |
 | backend-tests 10 | `jig/test-named-after-source` | v2 `**/__tests__/*.test.ts` and `*.test.tsx` | Neither `../<name>.ts` nor `../<name>.tsx` exists beside the `__tests__` folder, where `<name>` is the basename without `.test.ts` or `.test.tsx`. |
 | frontend-standards 16 | `jig/responsive-md-step` | v2 `**/*.tsx` | A string literal or template quasi whose whitespace-split classes hold one that starts with `lg:` and none that starts with `sm:` or `md:`. An object key such as `lg:` in a `cva` size map is an identifier, not a literal, and is not read. |

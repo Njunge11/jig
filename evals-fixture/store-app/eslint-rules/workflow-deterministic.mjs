@@ -1,6 +1,5 @@
 // docs/lint-gates.md §6.1 backend-standards 5: a `"use workflow"` function
-// must stay deterministic. Reports non-deterministic calls (new Date() with
-// no argument, Date.now(), Math.random(), crypto.randomUUID(), fetch()) and
+// must stay deterministic. Reports fetch() (the sandbox has no global fetch) and
 // imports of a service/repo layer or the db/orm/tRPC modules, wherever they
 // sit inside a Program or a function whose own body starts with the
 // directive.
@@ -134,37 +133,13 @@ const workflowDeterministicRule = {
           context.report({ node, messageId: "layerImport", data: { source } });
         }
       },
-      NewExpression(node) {
-        if (
-          node.callee.type === "Identifier" &&
-          node.callee.name === "Date" &&
-          node.arguments.length === 0 &&
-          inWorkflowScope(node)
-        ) {
-          context.report({ node, messageId: "nonDeterministicCall" });
-        }
-      },
+      // Date, Math.random() and crypto.randomUUID() are seeded in the workflow
+      // sandbox (workflow docs, api-reference/workflow-globals.mdx), so only
+      // fetch() is reported.
       CallExpression(node) {
         if (!inWorkflowScope(node)) return;
-        const callee = node.callee;
-        if (callee.type === "Identifier" && callee.name === "fetch") {
+        if (node.callee.type === "Identifier" && node.callee.name === "fetch") {
           context.report({ node, messageId: "nonDeterministicCall" });
-          return;
-        }
-        if (callee.type === "MemberExpression" && !callee.computed) {
-          const objectName =
-            callee.object.type === "Identifier" ? callee.object.name : null;
-          const propertyName =
-            callee.property.type === "Identifier"
-              ? callee.property.name
-              : null;
-          if (
-            (objectName === "Date" && propertyName === "now") ||
-            (objectName === "Math" && propertyName === "random") ||
-            (objectName === "crypto" && propertyName === "randomUUID")
-          ) {
-            context.report({ node, messageId: "nonDeterministicCall" });
-          }
         }
       },
     };

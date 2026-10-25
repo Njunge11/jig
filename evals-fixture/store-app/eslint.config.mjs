@@ -308,7 +308,8 @@ const eslintConfig = defineConfig([
         },
         {
           selector:
-            'CallExpression[callee.name="defineTool"] > ObjectExpression:not(:has(> Property[key.name="outputSchema"]))',
+            // A spread config (`{ ...GET_ORDER_CONFIG, execute }`) is skipped: the selector cannot see inside it.
+            'CallExpression[callee.name="defineTool"] > ObjectExpression:not(:has(> Property[key.name="outputSchema"])):not(:has(> SpreadElement))',
           message:
             "eve-agent new: a tool whose raw output a client, hook or mapping reads needs an outputSchema.",
         },
@@ -536,6 +537,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "coverage/**",
     "components/ui/**", "hooks/use-mobile.ts",
+    // withWorkflow writes its generated routes here.
+    "app/.well-known/**",
   ]),
 ]);
 
