@@ -11,3 +11,5 @@ If a skill named `recipe-search-and-filters` is available to you, invoke it with
 The working directory is a store app: Next.js App Router, tRPC v11, TanStack Query v5, Drizzle and nuqs. A store can hold thousands of products. The products page is `app/products/page.tsx`, and its code is in `features/products/`.
 
 Add a search box to the products page that finds products by title.
+
+Do not write or change tests.

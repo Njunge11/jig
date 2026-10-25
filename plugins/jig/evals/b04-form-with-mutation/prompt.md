@@ -11,3 +11,5 @@ If a skill named `recipe-form-with-mutation` is available to you, invoke it with
 The working directory is a store app: Next.js App Router, tRPC v11, TanStack Query v5, Drizzle and nuqs. The products page is `app/products/page.tsx`, and its code is in `features/products/`. The procedure `products.create` exists. When the title is taken, it throws a TRPCError whose cause carries `{ field: 'title', message: 'A product with this title exists' }`.
 
 Add a form to the products page that creates a product.
+
+Do not write or change tests.

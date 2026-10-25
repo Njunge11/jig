@@ -11,3 +11,5 @@ If a skill named `recipe-page-with-data` is available to you, invoke it with the
 The working directory is a store app: Next.js App Router, tRPC v11, TanStack Query v5, Drizzle and nuqs. The products code is in `features/products/`. The procedure `products.byId({ id })` exists.
 
 Build the product details page at `app/products/[id]/page.tsx`.
+
+Do not write or change tests.

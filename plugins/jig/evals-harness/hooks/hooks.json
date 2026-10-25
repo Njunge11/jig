@@ -1,5 +1,5 @@
 {
-  "description": "After the agent's last turn, writes the run's diff and the test, typecheck and lint results to .eval/.",
+  "description": "After the agent's last turn, writes the run's diff and the typecheck and lint results to .eval/.",
   "hooks": {
     "Stop": [
       {
