@@ -7,7 +7,7 @@ description: The entry rules for a durable workflow, an MCP tool, and an eve age
 
 These are the rules for the backend's non-router entry points. The `backend-standards` skill owns the layered architecture, the service and repository rules, and the tRPC router entry. Each entry here is entry glue over the same layers: compose the real service, call exactly one service method, shape the result. The rules are stack conventions, never one repo's layout: in an existing app, follow them where the files already live; in a new repo, the **Wire this once** items are the setup list, and the `structure` skill places the files. The code examples use placeholder domains — substitute your own. The [Review checklist](#review-checklist) is a fast index, not a second explanation.
 
-## Entry — Workflow (`workflows/<name>/`)
+## Entry — Workflow (`features/<feature>/workflows/<name>/`)
 
 Use a workflow for multi-step work that must survive crashes and waits — LLM calls, external APIs, human approval.
 
@@ -20,7 +20,7 @@ Use a workflow for multi-step work that must survive crashes and waits — LLM c
 - **Pause** with `await sleep("30d")` — this suspends the workflow and consumes no resources. Or pause with `createWebhook()` — the workflow resumes on external input. This is the human-approval pattern.
 - **Start** runs from the application code: call `start(workflow, [input])` from `"workflow/api"`. The result is `await run.returnValue`.
 
-## Entry — MCP tool (`mcp/*.tool.ts`)
+## Entry — MCP tool (`features/<feature>/mcp/*.tool.ts`)
 
 A tool is a router for an external agent (Claude/ChatGPT). The client owns the conversation and the loop. Each call is stateless.
 
