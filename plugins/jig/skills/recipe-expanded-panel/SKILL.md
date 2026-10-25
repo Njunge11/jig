@@ -58,7 +58,10 @@ overlay-vs-page event problems that rules 62–63 exist for.
    the app's one compound component
    (`Panel`/`PanelHeader`/`PanelExpandToggle`/`PanelBody`, per
    the `frontend-authoring-custom` skill); the second surface reuses
-   it. Never a second implementation.
+   it. Never a second implementation. It lives in
+   `components/ui/panel.tsx`: the `structure` tree puts the app's
+   compound components in `components/ui/`, never in
+   `components/` or a feature's `ui/`.
 
 5. **Responsive:** below `lg`, the docked mode usually cannot
    share the row — the panel becomes the whole width and the
@@ -91,6 +94,6 @@ overlay-vs-page event problems that rules 62–63 exist for.
       the mode must survive reload.
 - [ ] The toggle carries `aria-label` and `aria-expanded`;
       Escape collapses.
-- [ ] The app has ONE expandable-panel shell; this surface
-      reuses it.
+- [ ] The app has ONE expandable-panel shell, in
+      `components/ui/panel.tsx`; this surface reuses it.
 - [ ] The below-`lg` behavior is stated and built.
