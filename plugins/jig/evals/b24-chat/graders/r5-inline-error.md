@@ -1,8 +1,11 @@
 ---
 type: llm
+focus: {source: file, path: .eval/diff-app.txt}
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. The input is the git diff of the change the agent made to the app code, without its tests. If the diff has no code that decides the question, the verdict is FAIL.
 
-PASS if a chat error renders inline in the conversation with a retry. FAIL if it goes to the route error boundary or only to a toast.
+Question: when the chat has an `error`, does the chat surface render it inline, inside the conversation, with a retry control that calls `regenerate()` or resends the message?
+
+PASS if yes. FAIL if the error goes only to a toast, to a route error boundary, or is not rendered, or if there is no retry.

@@ -1,8 +1,11 @@
 ---
 type: llm
+focus: {source: file, path: .eval/diff-app.txt}
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. The input is the git diff of the change the agent made to the app code, without its tests. If the diff has no code that decides the question, the verdict is FAIL.
 
-PASS if conversation, message, input and response rendering come from the AI Elements registry components (`Conversation`, `Message`, `PromptInput`, `Response` or their current names). FAIL if bubbles, autoscroll or a markdown renderer are hand-made.
+Question: are the transcript, each message, the composer and the markdown text rendering all built from AI Elements components — `Conversation` / `ConversationContent`, `Message` / `MessageContent`, `PromptInput`, and `MessageResponse` (its older name is `Response`)?
+
+PASS if all four come from AI Elements. FAIL if any of them is hand-made markup (own bubbles, own scroll container, own textarea form, own markdown renderer).

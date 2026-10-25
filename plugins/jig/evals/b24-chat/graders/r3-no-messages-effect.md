@@ -1,8 +1,11 @@
 ---
 type: llm
+focus: {source: file, path: .eval/diff-app.txt}
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. The input is the git diff of the change the agent made to the app code, without its tests.
 
-PASS if no `useEffect` reads `messages`; a reaction to a data part runs in `onData` (or the stream reducer). FAIL if a `useEffect` watches `messages`.
+Question: does any `useEffect` in the code read `messages`?
+
+PASS if no `useEffect` reads `messages` (a reaction to a data part in `onData` is fine). FAIL if a `useEffect` reads or watches `messages`.

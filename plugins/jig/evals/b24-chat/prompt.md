@@ -1,16 +1,15 @@
 ---
 description: "recipe-chat: registry components, card map, status wired"
-tags: [obedience, frontend]
-runs: 1
-max_turns: 10
-timeout_seconds: 420
-allowed_tools: [Read, Glob, Grep, Skill]
+tags: [obedience, frontend, regression]
+max_turns: 40
+timeout_seconds: 1200
+allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-If a skill named `recipe-chat` is available to you, invoke it with the Skill tool before you answer. If it is not available, answer without it.
+If a skill named `recipe-chat` is available to you, invoke it with the Skill tool before you start. If it is not available, work without it.
 
-The app is Next.js App Router + tRPC v11 + TanStack Query v5 + Drizzle + shadcn/ui. The assistant endpoint `/api/chat` streams AI SDK UI messages: text parts plus a custom `data-job-card` part `{ jobId, title }`.
+The working directory is a store app: Next.js App Router, tRPC v11, TanStack Query v5, Drizzle, shadcn/ui and the AI SDK (`ai`, `@ai-sdk/react`). The assistant endpoint `/api/chat` streams AI SDK UI messages: text parts plus three custom data parts — `data-product-card` `{ productId, title }`, `data-order-card` `{ orderId, number }` and `data-delivery-slot` `{ start, end }`.
 
-Build the chat surface with `useChat`.
+Build the chat surface with `useChat`, on the page `/chat`.
 
-Do not write any file. Reply with the full code of every file you add or change.
+Do not write or change tests.
