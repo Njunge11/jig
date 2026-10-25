@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: b21-expanded-panel
+plugins: ["../..", "../../evals-harness"]
+context:
+  scaffold_script: fixture.sh

@@ -1,8 +1,11 @@
 ---
 type: llm
+focus: {source: file, path: .eval/diff-app.txt}
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. The input is the git diff of the change the agent made to the app code, without its tests. If the diff has no code that decides the question, the verdict is FAIL.
 
-PASS if the answer states and builds the behavior below the `lg` breakpoint. FAIL if small screens are not addressed.
+Question: does the code give the layout a deliberate behavior below the `lg` breakpoint, through breakpoint-prefixed classes (`lg:`, `max-lg:`, or a smaller breakpoint)?
+
+PASS if yes. FAIL if the layout and toggle have no breakpoint-prefixed classes, so small screens get whatever the desktop layout does.

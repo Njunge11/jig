@@ -13,7 +13,8 @@ An item with no eval run has no measured cost (—).
 | [x] | b07-data-table: run | $2.43 | $0.75 |
 | [x] | b08-backend-layers: run | $2.86 | $0.66 |
 | [x] | b20-edit-surfaces: run | $3.08 | $1.11 |
-| [ ] | b21-expanded-panel: run | | |
+| [x] | b21-expanded-panel: run | $1.67 | $0.59 |
+| [ ] | b21: recipe-expanded-panel names where the panel file goes (`components/ui/`, as `structure` says); a grader checks the place; run b21 again (2 of 3 runs put it in `components/`) | | |
 | [ ] | b32-no-skeleton-on-return: run | | |
 | [ ] | Verify the 20 uncommitted skill edits in `plugins/jig/skills` | — | — |
 | [ ] | Verify or discard the uncommitted changes in the old cases (a, b, c, d folders not yet committed) | — | — |
@@ -23,4 +24,4 @@ An item with no eval run has no measured cost (—).
 | [ ] | Remove each converted case's `-ref-good` / `-ref-bad` folders | — | — |
 | [ ] | Remove the old `/private/tmp/e-*` workspaces | — | — |
 
-**Total so far:** agent $9.18, judge $2.61, together $11.79.
+**Total so far:** agent $10.85, judge $3.20, together $14.05.
