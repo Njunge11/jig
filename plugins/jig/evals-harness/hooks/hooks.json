@@ -1,0 +1,16 @@
+{
+  "description": "After the agent's last turn, writes the run's diff and the test, typecheck and lint results to .eval/.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/collect.sh\"",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}

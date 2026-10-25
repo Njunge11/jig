@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: b04-form-with-mutation
+plugins: ["../..", "../../evals-harness"]
+context:
+  scaffold_script: fixture.sh

@@ -1,0 +1,5 @@
+{
+  "name": "jig-evals-harness",
+  "version": "0.1.0",
+  "description": "Eval-only. A Stop hook that records a jig eval run's change and test result in .eval/, for the graders. Never install it."
+}

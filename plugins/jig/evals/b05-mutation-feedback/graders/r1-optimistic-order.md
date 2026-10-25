@@ -1,8 +1,11 @@
 ---
 type: llm
+focus: {source: file, path: .eval/diff-app.txt}
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. The input is the git diff of the change the agent made to the app code, without its tests. If the diff has no code that decides the question, the verdict is FAIL.
 
-PASS if the optimistic cache write does all of: cancel the outgoing queries (`cancelQueries`) in `onMutate`, snapshot the previous data, set the new data, roll back from the snapshot in `onError`, invalidate in `onSettled`. The QueryClient may be reached as `context.client` (the context argument of the TanStack Query v5 mutation callbacks) or as `queryClient`; both are correct. FAIL if there is no `cancelQueries`, no rollback, or invalidation runs in `onSuccess` only.
+Question: Does the archive mutation write the cache optimistically in this order: cancel, snapshot, set, roll back on error, invalidate on settle?
+
+PASS if `onMutate` awaits `cancelQueries` for `products.list`, reads the previous data, sets the new data and returns the snapshot; `onError` restores the snapshot; `onSettled` invalidates `products.list`. The QueryClient may be `context.client` or `queryClient`. FAIL if a step is missing, or the invalidation runs only in `onSuccess`.
