@@ -1,8 +1,11 @@
 ---
 type: llm
+focus: {source: file, path: .eval/diff-app.txt}
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. The input is the git diff of the change the agent made to the app code, without its tests. If the diff has no code that decides the question, the verdict is FAIL.
 
-PASS if the rename dialog closes after the mutation succeeds (for example `onOpenChange(false)` / `setOpen(false)` inside `onSuccess`, or after an awaited `mutateAsync`). FAIL if the dialog closes at submit, before the mutation answers.
+Question: does the edit dialog close only after the `products.update` mutation succeeds?
+
+PASS if the close (`setOpen(false)` / `onOpenChange(false)`) runs in the mutation's `onSuccess`, or after an awaited `mutateAsync`. FAIL if the submit handler closes the dialog before the mutation answers.

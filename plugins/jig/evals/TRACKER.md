@@ -12,7 +12,7 @@ An item with no eval run has no measured cost (—).
 | [x] | b02-search-keeps-old-list: run again with `--keep-temp`; find why run 3 failed lint | $0.81 | $0.09 |
 | [x] | b07-data-table: run | $2.43 | $0.75 |
 | [x] | b08-backend-layers: run | $2.86 | $0.66 |
-| [ ] | b20-edit-surfaces: run | | |
+| [x] | b20-edit-surfaces: run | $3.08 | $1.11 |
 | [ ] | b21-expanded-panel: run | | |
 | [ ] | b32-no-skeleton-on-return: run | | |
 | [ ] | Verify the 20 uncommitted skill edits in `plugins/jig/skills` | — | — |
@@ -23,4 +23,4 @@ An item with no eval run has no measured cost (—).
 | [ ] | Remove each converted case's `-ref-good` / `-ref-bad` folders | — | — |
 | [ ] | Remove the old `/private/tmp/e-*` workspaces | — | — |
 
-**Total so far:** agent $6.10, judge $1.50, together $7.60.
+**Total so far:** agent $9.18, judge $2.61, together $11.79.
