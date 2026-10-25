@@ -7,8 +7,9 @@ user-invocable: false
 # Recipe: Chat and AI surfaces (AI SDK + AI Elements)
 
 Use this recipe for a chat panel, an assistant surface, or any
-streamed AI output. Libraries: `ai` + `@ai-sdk/react` (v6 API)
-and the AI Elements registry.
+streamed AI output. Libraries: `ai` + `@ai-sdk/react` (the
+`useChat` + transport API of AI SDK 5 and later; verified on
+`ai@7` / `@ai-sdk/react@4`) and the AI Elements registry.
 
 ## Build order
 
@@ -17,8 +18,11 @@ and the AI Elements registry.
    `components/ai-elements/`); they are shadcn-based, fully
    composable, and streaming-aware. Bubbles, autoscroll, loading
    states, and streamed-markdown rendering are solved problems —
-   `Conversation`, `Message`, `Response`, `PromptInput`,
-   `Loader`, `Tool`, `Reasoning`, `Sources` exist.
+   `Conversation` (+ `ConversationContent`,
+   `ConversationScrollButton`), `Message` (+ `MessageContent`,
+   `MessageResponse` for streamed markdown — the older registry
+   called it `Response`), `PromptInput` (+ `PromptInputSubmit`),
+   `Shimmer`, `Tool`, `Reasoning`, `Sources` exist.
 
 2. **Wire `useChat` with a transport.** `useChat` does NOT own
    the input — hold it in local state and send explicitly:
@@ -37,22 +41,38 @@ and the AI Elements registry.
    part up and renders it. Unknown types render nothing:
 
    ```tsx
+   // ui/app-message.ts
+   type AppDataParts = { product: ProductData; order: OrderData };
+   export type AppMessage = UIMessage<unknown, AppDataParts>;
+   export type AppMessagePart = AppMessage["parts"][number];
+   export type CardType = "text" | `data-${keyof AppDataParts}`;
+   export type Card = { Component: (props: { part: AppMessagePart }) => ReactNode };
+
    // ui/cards/index.ts — the only file that names every card
    export const CARDS = {
      text: textCard,
      "data-product": productCard,
      "data-order": orderCard,
-   } satisfies Record<AppMessagePart["type"], Card>;
+   } satisfies Record<CardType, Card>;
 
    // ui/transcript.tsx — no `part.type ===` branch anywhere
+   const cardFor: Partial<Record<AppMessagePart["type"], Card>> = CARDS;
    function MessagePart({ part }: { part: AppMessagePart }) {
-     const card = CARDS[part.type];
+     const card = cardFor[part.type];
      return card ? <card.Component part={part} /> : null;
    }
    ```
 
-   `satisfies Record<…>` makes `tsc` fail on a part type with no
-   card, so a new type cannot ship unrendered. A `switch` on
+   Key the map by the types the surface renders (`CardType`),
+   not by `AppMessagePart["type"]`: a `UIMessage` part union also
+   holds `reasoning`, `file`, `step-start`, `source-url`,
+   `tool-*` and more, so `Record<AppMessagePart["type"], …>`
+   demands a card for each and fails `tsc`. `satisfies
+   Record<CardType, Card>` fails `tsc` on a data part type with
+   no card, so a new type cannot ship unrendered; the widened
+   `cardFor` lookup returns `undefined` for every other type, so
+   it renders nothing. Each card narrows its own part
+   (`part.type === "data-order"`) inside its module. A `switch` on
    `part.type` is acceptable only while a surface has three part
    types or fewer; a fourth type moves it to the map.
 
@@ -63,10 +83,13 @@ and the AI Elements registry.
 
 5. **Status drives the composer.** `status` is `"submitted"`,
    `"streaming"`, `"ready"`, or `"error"`: while
-   submitted/streaming, show the loader, swap send for a stop
-   button wired to `stop()`; on error, surface `error` with a
-   retry — a chat failure is inline in the conversation, not a
-   route boundary.
+   submitted/streaming, show a pending indicator and swap send
+   for a stop button wired to `stop()` —
+   `<PromptInputSubmit status={status} onStop={stop} />` does the
+   swap (it is a stop button while generating only when `onStop`
+   is passed); on error, surface `error` with a retry
+   (`regenerate()`) — a chat failure is inline in the
+   conversation, not a route boundary.
 
 6. **Structured AI output is typed data parts, one card each.**
    The server streams `data-*` parts. Each `data-*` type is one
@@ -79,7 +102,7 @@ and the AI Elements registry.
    in the surface imports a card except the map. A new card is
    one folder and one map line, and no existing file changes.
    A form inside a card follows the `recipe-form-with-mutation` skill; streamed
-   markdown renders through `Response`, never through a
+   markdown renders through `MessageResponse`, never through a
    hand-parsed accumulator (the rich-text recipe's streaming
    rule). Handlers a card needs from the surface (send, open a
    panel, a mutation) arrive through one typed context scoped to

@@ -179,10 +179,45 @@ Before you write a query, check these options: one query instead of several, one
 ## Transactions
 
 - Use a transaction when multiple writes must succeed together. Also use one when reads and writes must stay consistent (state transitions, money, anything multi-table).
-- The **service** opens the transaction and passes the `tx` handle into the repository calls. Repositories never start one.
+- The **service** opens the transaction, and the repository calls inside it run on the `tx` handle. Repositories never start one.
+- **The service opens it through a `write` dependency.** The service takes `write: <T>(run: (repo: Repo) => Promise<T>) => Promise<T>` and writes the steps that must succeed together inside `deps.write(async (repo) => …)`. The composition root binds it once: `write: (run) => db.transaction((tx) => run(makeRepo(tx)))`. Binding the mechanism is composition, not business logic, so the entry holds no transaction of its own. The service imports no Drizzle type, and its test passes `write: (run) => run(fakeRepo)` (`backend-tests`, service tests on a fake repo).
+
+```ts
+// api/cancel-order.service.ts — the service decides what runs inside
+export function makeCancelOrderService(deps: {
+  write: <T>(run: (repo: OrdersRepo) => Promise<T>) => Promise<T>;
+  email: EmailClient;
+}) {
+  async function cancelOrder(orderId: string, storeId: string) {
+    const order = await deps.write(async (repo) => {
+      const [cancelled] = await trace("calling repo.cancelOrder to cancel the order", () =>
+        repo.cancelOrder(orderId, storeId),
+      );
+      if (!cancelled) return null;
+      await trace("calling repo.releaseStock to put the order's stock back", () => repo.releaseStock(orderId));
+      return cancelled;
+    });
+    if (!order) return { status: "notFound" as const, message: "No such order." };
+    await trace("calling email.send to tell the customer the order is cancelled", () =>
+      deps.email.send({ to: order.customerEmail, template: "order-cancelled", data: { orderId } }),
+    );
+    return { status: "cancelled" as const };
+  }
+
+  return { cancelOrder };
+}
+
+// api/orders.router.ts — the composition root binds the mechanism
+cancel: orgProcedure.input(cancelOrderInput).mutation(({ ctx, input }) =>
+  makeCancelOrderService({
+    write: (run) => ctx.db.transaction((tx) => run(makeOrdersRepo(tx))),
+    email,
+  }).cancelOrder(input.orderId, ctx.storeId),
+),
+```
 - Do not wrap independent read-only operations in a transaction.
 - **Never call an external service inside an open transaction** — email, an HTTP API, an LLM, a queue. The database can roll back; the call cannot. Commit first, then make the call. "All or none" with an external call never means one transaction around both.
-- When the call must not be lost after the commit, write an outbox row in the same transaction as the business writes. A separate process — a workflow step — sends the row and marks it sent. The send can run twice, so the receiver or the step check makes it idempotent.
+- When the call must not be lost after the commit, write an outbox row in the same transaction as the business writes. A separate process — a workflow step — sends the row and marks it sent. The send can run twice, so the receiver or the step check makes it idempotent. An outbox row with no sender sends nothing: the change that writes the row also adds the step that sends it and marks it sent.
 
 ## Error handling
 
@@ -210,7 +245,7 @@ calling readProductSuggestions to suggest the product's title, tags and category
 
 - **One root per entry-point call, opened where the request enters.** A tRPC procedure opens it in the first middleware of its base procedure, so the session, permission and credit checks the later middlewares run are its first lines; the root line is `calling <procedure> to <purpose>`, with the purpose from the procedure's `.meta({ purpose })`. An eve tool opens it around its `execute` body, keyed by eve's call id, so the turn hook prints it with the model steps around it. An MCP tool and a workflow step open it around their one service call. A handler that calls the service bare prints nothing: `trace` records only under an open root.
 - **Before you add an entry point, open the file that defines its base procedure and read its middlewares.** When none of them opens the root, this change adds that middleware, and the diff holds the base procedure's file. A change that names the root without showing it, or says the root "already exists" or "is assumed", has no root: the reviewer rejects it under item 35.
-- **Every call a service makes is one `trace` line: `calling <name> to <purpose>`.** A repo method (`calling repo.findDraft to read the draft`), another service, a model (`calling suggestProductTerms to ask the model for the product's suggestions`), a workflow start (`calling workflow fulfil to fulfil the order. started`), the machine move (`calling advance to move the draft from details_pending to pricing_pending`). The name is the real function's name. The purpose says what the call is for, in plain words.
+- **Every call a service makes is one `trace` line: `calling <name> to <purpose>`.** A repo method (`calling repo.findDraft to read the draft`), another service, a model (`calling suggestProductTerms to ask the model for the product's suggestions`), a workflow start (`calling workflow fulfil to fulfil the order. started`), the machine move (`calling advance to move the draft from details_pending to pricing_pending`). The name is the real function's name. The purpose says what the call is for, in plain words. The `write` dependency that opens a transaction (Transactions) is not a call that gets a line: the steps inside it are the lines.
 - **A query traces itself.** The db client wraps every statement once, so no repo and no service traces a query by hand. Each shows as `query <verb> <table>` under the call that ran it.
 - **The result is read off the call, never written into the line.** A `refused`, `notFound`, `forbidden` or `invalid` return prints `refused: "<message>"`; a throw prints `failed: <message>`; a check prints its own word through `describe` (`yes`, `allowed`, `decided: tool draft, action create`); anything else prints `success`.
 - **A line holds no id and no message text.** The root says what the request does (`save the draft's details`), never what the user wrote.
@@ -412,6 +447,6 @@ Reject the change if any item is true. Items 5–9 and 26 live in the `backend-e
 30. A feature router holds the procedures of more than one resource, or holds input schemas or composition, instead of merging one `<resource>.router.ts` per resource as the `structure` skill lays out.
 31. A non-test file forces a type with `as never` or a double assertion (`as any as T`, `as unknown as T`). Gate: `pnpm lint`, rule `no-restricted-syntax (backend-standards 31)`.
 32. A service moves a stage or status with hand-written conditions on a field, instead of `transition` on the machine and its stored snapshot (`state-machines`).
-33. An external call (email, HTTP API, LLM, queue) runs inside an open transaction, or a send that must not be lost has no outbox row written with the business writes.
+33. An external call (email, HTTP API, LLM, queue) runs inside an open transaction, or a send that must not be lost has no outbox row written with the business writes, or an outbox row has no step that sends it.
 34. A file holds more than one concern: what it owns cannot be stated in one sentence without "and", or a change to one decision it holds would touch code that another decision owns. Line count is never the test.
 35. An entry-point call opens no trace root where the request enters, or the diff relies on a root middleware it does not show, or a call a service makes (a repo method, another service, a model, a workflow start, the machine move) runs outside `trace`, or a trace line names no purpose, holds an id or message text, or writes its result by hand instead of reading it off the call (The call trace).

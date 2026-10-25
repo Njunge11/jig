@@ -71,7 +71,14 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
    settle. `cancelQueries` comes first (a slow refetch would
    clobber the optimistic value); callbacks receive `context`
    with `context.client`, and `onMutate`'s return arrives as the
-   `onMutateResult` parameter:
+   `onMutateResult` parameter (typed `| undefined` in `onError`
+   and `onSettled`). `queryFilter()` with no input matches every
+   cached input of the procedure, so it suits `cancelQueries` and
+   `invalidateQueries`; `getQueryData`/`setQueryData` need the
+   exact key, which `queryFilter().queryKey` is only for a
+   procedure without input. A list cached under inputs uses
+   `trpc.x.list.queryKey(input)`, or `getQueriesData(filter)` and
+   `setQueriesData(filter, updater)` for every cached input:
 
    ```ts
    const filter = trpc.promo.list.queryFilter();
@@ -83,7 +90,8 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
        return { prev };
      },
      onError: (_e, _v, onMutateResult, context) => {
-       context.client.setQueryData(filter.queryKey, onMutateResult.prev); // rollback
+       if (onMutateResult) // undefined when onMutate threw
+         context.client.setQueryData(filter.queryKey, onMutateResult.prev); // rollback
        toast.error("Couldn't mark the promo paid");
      },
      onSettled: (_d, _e, _v, _r, context) =>

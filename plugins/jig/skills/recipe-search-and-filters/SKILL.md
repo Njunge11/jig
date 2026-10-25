@@ -50,7 +50,7 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
    list:
 
    ```tsx
-   export default async function Page({ searchParams }: PageProps) {
+   export default async function Page({ searchParams }: PageProps<"/products">) {
      const filters = await loadProductsListParams(searchParams);
      prefetch(trpc.products.list.queryOptions(filters));
      return (
@@ -61,16 +61,27 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
    }
    ```
 
+   `PageProps<"/products">` is the global route type that Next
+   writes to `.next/types` on `next dev`, `next build` or
+   `next typegen`. Without those files `tsc` fails with "Cannot
+   find name 'PageProps'", so the app's `typecheck` script is
+   `next typegen && tsc --noEmit`, as the Next CLI docs show.
+
 4. **Client list: URL state in, a deferred input to one suspense
    query.** `placeholderData` does not exist for suspense queries,
-   and nuqs sets the new state at once, outside any transition —
+   and nuqs sets its state synchronously inside the setter call —
    its `startTransition` option wraps only the URL write, for
    `shallow: false` server re-renders. So a query keyed on the
    fresh state suspends with nothing to hold the old list, and
-   the route's `loading.tsx` replaces the page. Key the query on
+   the route's `loading.tsx` replaces the page. Wrapping your own
+   `setFilters` call in `startTransition` holds the list for that
+   call only: the back button, or another component writing the
+   same key, still updates the state outside it. Key the query on
    `useDeferredValue` of the state: React keeps the revealed list
-   on screen until the narrowed one arrives. The busy cue is
-   "the state and the deferred state differ":
+   on screen until the narrowed one arrives, whatever changed the
+   state. The busy cue is "the state and the deferred state
+   differ" (`useQueryStates` returns the same object until a value
+   changes):
 
    ```tsx
    const [filters, setFilters] = useQueryStates(productsListParams);
@@ -87,11 +98,21 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
 5. **The search input holds a draft; the URL gets the commit,
    debounced.** nuqs state updates instantly, and the query fires
    on every state change — so a keystroke must not reach
-   `setFilters` directly. Selects and sort commit immediately, no
-   debounce:
+   `setFilters` directly. nuqs's own `limitUrlUpdates: debounce()`
+   delays only the URL write; its state, and a query keyed on it,
+   still change per keystroke. When the URL's `q` changes from
+   outside the box, the draft follows it during render (React's
+   "adjust state when a prop changes" pattern, no effect). Selects
+   and sort commit immediately, no debounce:
 
    ```tsx
    const [draft, setDraft] = useState(filters.q);
+   const [seenQ, setSeenQ] = useState(filters.q);
+   if (filters.q !== seenQ) {
+     // the URL changed outside the box (clear filters, back button)
+     setSeenQ(filters.q);
+     setDraft(filters.q);
+   }
    const commit = useDebouncedCallback(
      (q: string) => setFilters({ q, page: 1 }), 400);
 

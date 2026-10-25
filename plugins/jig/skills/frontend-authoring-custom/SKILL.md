@@ -64,12 +64,23 @@ build instructions.
 
 ## State
 
-- Support controlled and uncontrolled with `useControllableState`:
+- Support controlled and uncontrolled with `useControllableState`
+  (`@radix-ui/react-use-controllable-state`):
   `value` + `onValueChange` for controlled callers, `defaultValue` for
   uncontrolled — those exact names. Call `onValueChange` on every
-  change.
+  change:
+
+  ```tsx
+  const [value, setValue] = useControllableState({
+    prop: valueProp,
+    defaultProp: defaultValue ?? 0,
+    onChange: onValueChange,
+    caller: "Rating",
+  });
+  ```
 - Expose state for styling as `data-state` with the Radix vocabulary:
-  `open`/`closed`, `active`/`inactive`, `on`/`off`, plus `data-side`,
+  `open`/`closed`, `checked`/`unchecked` (radio and checkbox items),
+  `active`/`inactive`, `on`/`off`, plus `data-side`,
   `data-orientation`, `data-disabled` where they apply.
 - Give every part `data-slot`, kebab-case, named by purpose:
   `data-slot="submit-button"`, never `blueButton` or a generic
@@ -84,9 +95,14 @@ build instructions.
 - Semantic HTML first. Use ARIA to enhance, never to replace; do not
   change native semantics unless necessary; never hide a focusable
   element from assistive technology.
-- Declare and implement the keyboard map before shipping: Tab order;
-  ArrowUp/ArrowDown (or Left/Right) plus Home/End for list-like parts;
-  Enter/Space activates; Escape dismisses.
+- Declare and implement the keyboard map of the matching WAI-ARIA APG
+  pattern (w3.org/WAI/ARIA/apg/patterns) before shipping: Tab moves
+  into and out of the widget at one stop. A single-select group (the
+  radio group pattern: a rating, a segmented choice) moves focus and
+  the selection together on the arrow keys, wraps at the ends, checks
+  the focused item on Space, and enters on the checked item. List-like
+  parts (listbox, menu, tabs) add Home/End. Enter/Space activates a
+  button; Escape dismisses a popup.
 - Focus management: set initial focus on open; roving tabindex
   (`0` active, `-1` others) for composite widgets; trap focus in modal
   surfaces; return focus to the trigger on close.

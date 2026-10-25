@@ -138,11 +138,16 @@ not restate them. This list is also the review checklist.
     then variant styles, then conditional (state) styles, then
     the caller's `className` last so it can override.
 14. Never build class names from template literals
-    (`` `bg-[${color}]` `` breaks Tailwind's scanner). A dynamic
-    value goes through a CSS variable:
-    `className="bg-[var(--tone)]"`. A feature component with
-    several visual permutations defines them with CVA, outside
-    the component body. Gate: `pnpm lint`, rule `no-restricted-syntax (frontend-standards 14)`.
+    (`` `text-${tone}-600` ``, `` `bg-[${color}]` ``): Tailwind
+    scans source as plain text, so a class that never appears
+    whole is never generated. A prop with a fixed set of values
+    maps each value to a complete class string — a lookup object
+    or CVA variants, defined outside the component body, with
+    semantic tokens per rule 11 (`{ danger: "text-destructive",
+    neutral: "text-muted-foreground" }`). Only a value with no
+    fixed set (a user-picked color) goes through a CSS variable:
+    `className="bg-[var(--tone)]"`, the variable set on the
+    element's `style`. Gate: `pnpm lint`, rule `no-restricted-syntax (frontend-standards 14)`.
 
 ### Responsive — every form factor, breakpoint utilities only
 
@@ -219,9 +224,16 @@ const fullName = first + " " + last;
 26. Use the right primitive (a `Dialog`, not a styled `div`);
     keep semantic elements; never strip `aria-*` or roles from
     shadcn parts.
-27. Icon-only buttons carry an accessible name (`aria-label`,
-    icon `aria-hidden`). Gate: `pnpm lint`, rule `jsx-a11y/control-has-associated-label`.
-28. Inputs get `<label>`s, not placeholders-as-labels. Gate: `pnpm lint`, rule `jsx-a11y/label-has-associated-control`.
+27. Icon-only buttons are the kit's `Button` (`size="icon"`) and
+    carry an accessible name (`aria-label`, icon `aria-hidden`).
+    Walk it by hand: `jsx-a11y/control-has-associated-label`
+    assumes a self-closing capitalized child such as
+    `<RefreshCw />` may render a label, so an icon-only button
+    passes lint.
+28. Inputs get `<label>`s, not placeholders-as-labels. Walk it by
+    hand: the jsx-a11y rules check DOM elements only, so a plain
+    `<input>` with no label fails lint, but the kit's `<Input />`
+    with no label passes.
 29. Do not convey meaning by color alone; keep the
     `:focus-visible` ring.
 30. Touch targets are at least 44×44px — pad small icon buttons

@@ -19,7 +19,26 @@ the `frontend-standards` skill apply throughout. Libraries: `react-hook-form`,
    input schema is THE schema: export it from one module and use
    it as the client resolver too. Client validation then mirrors
    the server for free; the server still re-validates — it is the
-   authority. No procedure for the submit is a backend gap: apply
+   authority. The schema lives in `api/<resource>.schema.ts`, which
+   imports only zod (`structure`, rule 9). Moving the schema there
+   is a change to the router too: write the router's new
+   `.input(...)` import as code, never as a note to do it.
+
+   ```ts
+   // features/products/api/products.schema.ts
+   export const createProductSchema = z.object({
+     title: z.string().min(3).max(120),
+     description: z.string().max(2000),
+   });
+
+   // features/products/api/products.router.ts
+   create: protectedProcedure.input(createProductSchema).mutation(({ ctx, input }) => …),
+
+   // features/products/ui/create-product-form.tsx
+   const form = useForm({ resolver: zodResolver(createProductSchema), … });
+   ```
+
+   No procedure for the submit is a backend gap: apply
    the `implement-frontend` skill's "Backend gaps" section.
 
 2. **Form state.** `useForm` with the shared schema and a
@@ -27,8 +46,8 @@ the `frontend-standards` skill apply throughout. Libraries: `react-hook-form`,
    `defaultValues` from the entity's prefetched query data:
 
    ```tsx
-   const form = useForm<z.infer<typeof productSchema>>({
-     resolver: zodResolver(productSchema),
+   const form = useForm<z.infer<typeof createProductSchema>>({
+     resolver: zodResolver(createProductSchema),
      defaultValues: { title: "", description: "" },
    });
    ```

@@ -74,10 +74,19 @@ no network, no `postMessage`, no reload.
      (`window.__updatePreview = setProps`) and the parent calls
      `iframeRef.current.contentWindow.__updatePreview(draft)`.
 
-6. **Foreign or untrusted HTML** (an email body, user-submitted
-   markup) never enters the document: render it in a sandboxed
-   `<iframe srcDoc sandbox="">` — that is style isolation AND
-   script containment.
+6. **Foreign or untrusted HTML** (pasted or user-submitted
+   markup) never reaches `dangerouslySetInnerHTML` raw — React's
+   rule is "only use `dangerouslySetInnerHTML` with trusted and
+   sanitized data". Pick by how the real page shows it:
+   - **Part of the page's own content** (a pasted product
+     description the public page renders inline): the shared
+     render component sanitizes it with an allowlist sanitizer
+     (DOMPurify, the OWASP-recommended one) before
+     `dangerouslySetInnerHTML`, so the preview and the page run
+     the same sanitizer. Sanitize on save on the server too.
+   - **A separate document** (an email body, a full HTML page):
+     render it in a sandboxed `<iframe srcDoc sandbox="">` — that
+     is style isolation AND script containment.
 
 ## Don't — common failures
 
@@ -89,8 +98,8 @@ no network, no `postMessage`, no reload.
   and share the real one.
 - Don't fetch inside the shared render component — props in,
   markup out.
-- Don't inject foreign HTML with `dangerouslySetInnerHTML` for a
-  preview.
+- Don't pass foreign HTML to `dangerouslySetInnerHTML` without
+  sanitizing it first.
 - Don't debounce the whole preview — only the expensive
   derivation feeding it.
 
@@ -102,8 +111,9 @@ no network, no `postMessage`, no reload.
 - [ ] No cross-app iframe or `postMessage` in the draft path.
 - [ ] The preview sits in the target's theme scope; tokens and
       fonts match the real page.
-- [ ] Foreign HTML renders only inside a sandboxed `srcDoc`
-      iframe.
+- [ ] Foreign HTML is sanitized (DOMPurify) inside the shared
+      component before `dangerouslySetInnerHTML`, or renders only
+      inside a sandboxed `srcDoc` iframe.
 - [ ] If a device-width mode exists, it uses the same-origin
       preview route; the iframe mounts with the pane, the toggle
       changes only CSS width, and `src`/`key` never change after

@@ -13,7 +13,7 @@ Open the pull request for a completed implementation checklist. The checklist's 
 ## Branch and title
 
 - Branch: use `<type>/<slug>` with a Conventional Commits type. Examples: `feat/invitations-schema`, `chore/packages-db`.
-- Title: use the Conventional Commits format. Write the title in the imperative. Use a maximum of 72 characters. Example: `feat(invitations): add invitations schema and repo`. The title must stay a valid commit message after a squash-merge.
+- Title: use the Conventional Commits format: `<type>(<scope>): <description>`. The type is one of `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `revert`, `style`, `test`. Start the description in lower case: commitlint's `config-conventional` rejects a sentence-case subject. Write the title in the imperative. Use a maximum of 72 characters. Example: `feat(invitations): add invitations schema and repo`. The title must stay a valid commit message after a squash-merge.
 
 ## Body template
 
@@ -86,13 +86,20 @@ Check the title and the body against this list. Fix each failure before you run 
 ## Open it
 
 1. Push the branch: `git push -u origin HEAD`.
-2. Run `gh pr create --title "<title>" --body "<body>"` against the default branch.
+2. Run `gh pr create` against the default branch, with the body read from a quoted heredoc. A body passed in `--body "…"` runs every backtick span in it as a shell command.
+
+```bash
+gh pr create --title "<title>" --body-file - <<'EOF'
+<body>
+EOF
+```
+
 3. Show the PR URL in your output. A transcript-only watcher (e.g. `/goal`) verifies it.
 
 ## When a step fails
 
 - **`git push` is rejected as non-fast-forward.** The remote branch moved. Run `git pull --rebase`. Run the suite again. Then push again.
 - **A pre-push hook fails.** The hook failure is part of the work. Diagnose it and fix it. Never pass `--no-verify`.
-- **`gh` reports "must be authenticated".** Run `gh auth status`. Ask the developer to run `gh auth login`. Do not open the PR by another route.
+- **`gh` says to run `gh auth login`.** It is not authenticated. Run `gh auth status`. Ask the developer to run `gh auth login`. Do not open the PR by another route.
 - **`gh` reports "no commits between main and the branch".** You are on `main`, or the branch holds no commit. Run `git log main..HEAD` to confirm. Commit the work on the feature branch, then push again.
 - **`gh` reports that a pull request for the branch already exists.** The PR is open. Run `gh pr view --json url -q .url` and show that URL. Never open a second PR.

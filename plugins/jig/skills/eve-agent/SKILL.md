@@ -125,7 +125,7 @@ Reject the change if any item is true. Walk it against every changed file under 
 
 ## eve docs map
 
-Load this file to find the doc page for the slot you change. Every path is under `node_modules/eve/docs/` in the app that installs `eve`. Open the page before you write. Check the installed version in `package.json` first; the pages describe that version.
+Load this file to find the doc page for the slot you change. Every path is under `node_modules/eve/docs/` in the app that installs `eve`. Open the page before you write. The folder ships inside the installed package, so its pages describe the installed version; no version check comes before them.
 
 | Slot | Page | Sections to read |
 | ---- | ---- | ---------------- |
@@ -152,6 +152,6 @@ Load this file to find the doc page for the slot you change. Every path is under
 | Evals: multi-turn, in-flight, datasets | `evals/cases.mdx` | "Multi-turn evals", "In-flight turns" |
 | Evals: CLI, tags, exit codes, artifacts | `evals/running.mdx` | whole page |
 | CLI: `info`, `build`, `dev`, `logs`, `traces`, `eval` | `reference/cli.md` | "eve info", "eve build", "eve dev", "eve logs", "eve traces", "eve eval", "Recommended loop" |
-| Tracing and the error catalog | `guides/instrumentation.md` | whole page |
-| Sandbox | `sandbox.mdx` | whole page |
+| Tracing | `guides/instrumentation/instrumentation.mdx` | whole page |
+| Sandbox | `sandbox/index.mdx` | whole page |
 | Channels | `channels/overview.mdx`, `channels/eve.mdx` | the page of the channel in use |

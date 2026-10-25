@@ -246,6 +246,8 @@ Pass `countingLogger` to `drizzle(client, { logger: countingLogger })` when the 
 
 Use no DB. Assert the returned values and the data persisted to the fake.
 
+A service that writes in a transaction takes a `write` dependency (`backend-standards`, Transactions). Its test passes `write: (run) => run(fakeRepo)`, so the steps run on the fake and the test needs no database handle.
+
 A fake is code too. Give each fake repo a contract test. The contract test runs the same assertions against the fake and against the PGlite-backed real repo. Then the fake cannot drift from the behavior it substitutes for.
 
 ### Router tests — createCallerFactory

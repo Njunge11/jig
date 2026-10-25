@@ -32,10 +32,12 @@ with no v8 call sites there is nothing to migrate.
 
    ```tsx
    import {
-     createColumnHelper, rowPaginationFeature, tableFeatures,
+     createColumnHelper, tableFeatures,
    } from "@tanstack/react-table";
 
-   export const features = tableFeatures({ rowPaginationFeature });
+   // the URL owns sort and page, so the table registers no sorting
+   // or pagination feature
+   export const features = tableFeatures({});
    const helper = createColumnHelper<typeof features, Product>();
 
    export const columns = helper.columns([
@@ -59,27 +61,31 @@ with no v8 call sites there is nothing to migrate.
    `DropdownMenu`; its items run mutations per
    the `recipe-form-with-mutation` skill / the mutation-feedback recipe.
 
-3. **Table instance in manual mode.** The data is already
-   paginated, sorted, and filtered by the server — tell the table
-   so, give it the total, and omit the client row models
-   (`createPaginatedRowModel`, `createSortedRowModel`,
-   `createFilteredRowModel` stay out of `features`):
+3. **Table instance over the server's rows.** The data is
+   already paginated, sorted, and filtered by the server. In v9 a
+   table sorts, filters or pages only through a feature plus its
+   row-model factory registered in `features`
+   (`rowSortingFeature` + `sortedRowModel: createSortedRowModel()`,
+   and the same for filtering and pagination). Register none, and
+   the table renders `rows` in the server's order:
 
    ```tsx
-   const table = useTable({
-     features,
-     columns,
-     data: rows,
-     manualPagination: true,
-     manualSorting: true,
-     manualFiltering: true,
-     rowCount: total,
-   });
+   const table = useTable({ features, columns, data: rows });
    ```
+
+   The manual flags are typed per feature: `manualSorting` exists
+   only with `rowSortingFeature`, `manualPagination` and
+   `rowCount` only with `rowPaginationFeature`. A table that
+   drives its headers through `rowSortingFeature` (its
+   `getToggleSortingHandler`) sets `manualSorting: true`, passes
+   the URL's sort as `state.sorting`, and writes it back in
+   `onSortingChange`; it never registers `sortedRowModel`.
 
 4. **Render** with the kit's `Table` parts and
    `<table.FlexRender />`, inside the table's own
-   `overflow-x-auto` container:
+   `overflow-x-auto` container. `row.getAllCells()` is core;
+   `row.getVisibleCells()` exists only with
+   `columnVisibilityFeature`:
 
    ```tsx
    <div className="overflow-x-auto">
@@ -98,7 +104,7 @@ with no v8 call sites there is nothing to migrate.
        <TableBody>
          {table.getRowModel().rows.map((row) => (
            <TableRow key={row.id}>
-             {row.getVisibleCells().map((cell) => (
+             {row.getAllCells().map((cell) => (
                <TableCell key={cell.id}>
                  <table.FlexRender cell={cell} />
                </TableCell>
@@ -113,9 +119,38 @@ with no v8 call sites there is nothing to migrate.
    Zero rows renders the two empty states from
    the `recipe-search-and-filters` skill step 7, not a bare table.
 
-5. **Pagination**: the kit's ONE `Pagination` component, bound to
-   `setParams({ page })`, with the page count derived from
-   `total` and the page size.
+5. **Pagination**: the kit's ONE `Pagination` family, bound to
+   `setParams({ page })`, with the page count
+   `Math.ceil(total / pageSize)` from the server's `total`. The
+   shadcn `Pagination` is a set of parts, not a component that
+   takes `page` or `onPageChange`: compose `Pagination` >
+   `PaginationContent` > `PaginationItem` > `PaginationPrevious` /
+   `PaginationLink` / `PaginationNext`. Each link is an `<a>`: give
+   it the real `href` from the params module's `createSerializer`,
+   and an `onClick` that calls `preventDefault()` and `setParams`,
+   so a click stays a client update:
+
+   ```tsx
+   // search-params.ts: export const serializeProductsListParams = createSerializer(productsListParams);
+   const link = (page: number) => ({
+     href: serializeProductsListParams({ ...params, page }),
+     onClick: (e: React.MouseEvent) => { e.preventDefault(); setParams({ page }); },
+   });
+
+   <Pagination>
+     <PaginationContent>
+       <PaginationItem>
+         <PaginationPrevious {...link(Math.max(1, params.page - 1))} aria-disabled={params.page <= 1} />
+       </PaginationItem>
+       {pages.map((p) => (
+         <PaginationItem key={p}>
+           <PaginationLink {...link(p)} isActive={p === params.page}>{p}</PaginationLink>
+         </PaginationItem>
+       ))}
+       …
+     </PaginationContent>
+   </Pagination>
+   ```
 
 ## Don't — common failures
 
@@ -123,9 +158,10 @@ with no v8 call sites there is nothing to migrate.
   duplicates multiply fast.
 - Don't fetch all rows and let the table paginate, sort, or
   filter client-side — manual mode exists because SQL did it.
-- Don't write v8 API (`useReactTable`, `ColumnDef[]`,
-  `flexRender(...)`) — this stack is on v9: `useTable`,
-  `tableFeatures`, the column helper, `<table.FlexRender />`.
+- Don't write v8 API (`useReactTable`, `getCoreRowModel()`,
+  `getSortedRowModel()`, `getPaginationRowModel()`) — this stack
+  is on v9: `useTable`, `tableFeatures`, the column helper,
+  `<table.FlexRender />`.
 - Don't make a header sortable when the procedure cannot sort
   that key.
 - Don't hand-roll `<table>` markup — kit `Table` parts +
@@ -137,8 +173,10 @@ with no v8 call sites there is nothing to migrate.
 
 - [ ] `@tanstack/react-table` is v9; no v8 API appears in the
       diff.
-- [ ] `features` holds `rowPaginationFeature` only; no client
-      row models; all three manual flags and `rowCount` set.
+- [ ] No client row models: no `sortedRowModel`,
+      `filteredRowModel` or `paginatedRowModel` in `features`; a
+      registered sorting or pagination feature sets its manual
+      flag (`manualSorting`, `manualPagination` + `rowCount`).
 - [ ] Columns come from the column helper, typed from the
       procedure's output, in their own module.
 - [ ] Sorting and page changes write the URL through the shared

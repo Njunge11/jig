@@ -16,7 +16,7 @@ An item with no eval run has no measured cost (—).
 | [x] | b21-expanded-panel: run | $1.67 | $0.59 |
 | [x] | b21: recipe-expanded-panel names where the panel file goes (`components/ui/`, as `structure` says); a grader checks the place; run b21 again (2 of 3 runs put it in `components/`) | $1.73 | $0.59 |
 | [x] | b32-no-skeleton-on-return: run | $0.92 | $0.08 |
-| [ ] | Verify the 20 uncommitted skill edits in `plugins/jig/skills` | — | — |
+| [x] | Verify the 20 uncommitted skill edits in `plugins/jig/skills` | — | — |
 | [ ] | Verify or discard the uncommitted changes in the old cases (a, b, c, d folders not yet committed) | — | — |
 | [x] | Fixture `tsconfig.json`: ship `"jsx": "react-jsx"` and the `.next/dev/types` include that `next build` writes | — | — |
 | [x] | Fixture `next build` fails: prerendering `/products` throws `UNAUTHORIZED`, because the fixture's session is null | — | — |

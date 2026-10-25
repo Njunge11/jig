@@ -37,7 +37,7 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
    the counts:
 
    ```tsx
-   export default async function Page({ searchParams }: PageProps) {
+   export default async function Page({ searchParams }: PageProps<"/orders">) {
      const { tab } = await loadOrdersParams(searchParams);
      prefetch(trpc.orders.counts.queryOptions());
      prefetch(trpc.orders.list.queryOptions({ tab }));
@@ -51,18 +51,25 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
    }
    ```
 
+   `PageProps<"/orders">` is the route type that `next typegen`
+   generates; the `recipe-search-and-filters` skill, step 3, has
+   the `typecheck` script that runs it.
+
 4. **Client: controlled Tabs bound to the URL state**; each content
    panel owns its Suspense boundary. Do not pass `startTransition`
    to `useQueryStates`: nuqs sets the new tab at once, outside that
    transition, and a transition never waits for a Suspense
    boundary that mounts with the new panel. A switch to a tab with
    no cached data shows that panel's skeleton; step 5 is what
-   makes a switch instant:
+   makes a switch instant. Radix's `onValueChange` hands a plain
+   `string`; the tab parser's `parse` turns it into the tab
+   literal (an unknown value becomes `null`, the default):
 
    ```tsx
    const [{ tab }, setParams] = useQueryStates(ordersParams);
 
-   <Tabs value={tab} onValueChange={(v) => setParams({ tab: v })}>
+   <Tabs value={tab}
+     onValueChange={(v) => setParams({ tab: ordersParams.tab.parse(v) })}>
      <TabsList>
        <TabsTrigger value="open" onMouseEnter={prefetchOpen}
          onFocus={prefetchOpen}>
@@ -88,7 +95,9 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
    ```
 
    The cache deduplicates: hovering twice, or returning to a
-   visited tab, fetches nothing.
+   visited tab, fetches nothing while the data is younger than the
+   query client's `staleTime` (the `frontend-wiring` skill sets a
+   non-zero one; at `0`, each hover refetches).
 
 6. **Tabs that carry their own filters:** a tab switch resets
    tab-scoped params (page, tab-local filters) in the same

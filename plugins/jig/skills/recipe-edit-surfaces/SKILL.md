@@ -61,14 +61,17 @@ and the surface mechanics.
 
 4. **A dialog opened from a dropdown menu is controlled.** The
    row owns the `open` state, the menu item opens it with
-   `onSelect={() => setOpen(true)}`, and the dialog renders
-   OUTSIDE the menu. A `DialogTrigger` inside
-   `DropdownMenuContent` dies when the menu unmounts on select.
+   `onSelect={() => setOpen(true)}`, and the whole dialog — the
+   `Dialog` / `AlertDialog` root and its content — renders OUTSIDE
+   the menu, with no `DialogTrigger`. Radix mounts
+   `DropdownMenuContent` only while the menu is open (unless
+   `forceMount`), so a dialog rendered inside it unmounts the
+   moment the item's select closes the menu.
 
 5. **Destructive confirms** are an `AlertDialog`: the body states
-   the consequence; the confirm button is the specific verb
-   (`Delete product`), destructive variant — never "OK", "Yes", or
-   "Done". The title and button name the same action.
+   the consequence; the confirm button is the verb and its object
+   (`Delete product`), destructive variant — never "OK", "Yes",
+   "Confirm", or "Done". The title and button name the same action.
 
 ## Build order — inline edit
 
@@ -110,7 +113,8 @@ and the surface mechanics.
   collapsibles under it, because a page-level outside-click
   handler misreads the overlay's events — rules 62–63 are the
   fix.
-- Don't put a `DialogTrigger` inside `DropdownMenuContent`.
+- Don't render a `Dialog` or `AlertDialog` inside
+  `DropdownMenuContent` — it unmounts with the menu.
 
 ## Verify
 

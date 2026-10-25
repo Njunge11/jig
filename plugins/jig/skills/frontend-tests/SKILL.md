@@ -99,7 +99,7 @@ When you create or extend the UI test setup, or the suite runs slowly, use the *
 
 ## Frontend test setup
 
-Use one Vitest config with a `ui` project beside the `backend` project (Vitest **`projects`** — current through Vitest 4; the `workspace` file is deprecated since 3.2). Put the tests in each feature's `ui/__tests__/`. Run them with `vitest --project ui`.
+Use one Vitest config with a `ui` project beside the `backend` project (Vitest **`projects`** — current through Vitest 5; the `workspace` file is deprecated since 3.2). Put the tests in each feature's `ui/__tests__/`. Run them with `vitest --project ui`.
 
 ```ts
 // vitest.config.ts — the ui project
@@ -161,7 +161,10 @@ server.use(trpcMsw.users.funnel.query(() => ({ signups: 1204, /* … */ })));
 No network at all; `useSuspenseQuery` reads the warm cache and renders immediately:
 
 ```tsx
-queryClient.setQueryData(trpc.users.funnel.queryOptions({ period: "30d" }).queryKey, mockFunnel);
+const queryClient = makeTestClient();
+// outside a component there is no useTRPC(): build the proxy from the same client
+const trpc = createTRPCOptionsProxy<AppRouter>({ client: makeTRPCClient(), queryClient });
+queryClient.setQueryData(trpc.users.funnel.queryKey({ period: "30d" }), mockFunnel);
 renderWithProviders(<FunnelCards />, { queryClient });
 ```
 
@@ -169,7 +172,7 @@ renderWithProviders(<FunnelCards />, { queryClient });
 
 ### Performance
 
-**Profile first — never brute-force config changes.** The `Duration` line of every run breaks the time into phases (`environment`, `transform`, `import`, `setup`, `worker`, `tests`), and each phase maps to one configuration fix. `vitest doctor` measures the candidate configs by running the suite under each and reports the comparison — including whether the tests still pass with `isolate: false`. Change config only on what the profile or `vitest doctor` shows.
+**Profile first — never brute-force config changes.** The `Duration` line of every run breaks the time into phases (`environment`, `transform`, `import`, `setup`, `worker`, `tests`), and each phase maps to one configuration fix. `vitest doctor` (Vitest 5 and later; Vitest 4 has no such command) measures the candidate configs by running the suite under each and reports the comparison — including whether the tests still pass with `isolate: false`. Change config only on what the profile or `vitest doctor` shows.
 
 **The environment phase dominates DOM suites.** Creating the DOM costs roughly 200–500ms (`jsdom`) or 90–200ms (`happy-dom`) per test file under default isolation, because every file gets a fresh worker. The levers, from the Vitest guide:
 
@@ -181,7 +184,7 @@ renderWithProviders(<FunnelCards />, { queryClient });
 
 ### Dev dependencies
 
-Verified current (September 2026): `msw-trpc@2.0.1` peers `@trpc/server@^11` + `msw@^2`; `msw@2.15.x`; `@testing-library/jest-dom@7` (the `/vitest` entry point is real in v7).
+Verified current (October 2026): `msw-trpc@2.0.1` peers `@trpc/server@^11` + `msw@^2`, so install `msw@^2` (2.15.x) — `msw@3` is out but outside that peer range; `@testing-library/jest-dom@7` (the `/vitest` entry point is real in v7).
 
 ```
 vitest  jsdom

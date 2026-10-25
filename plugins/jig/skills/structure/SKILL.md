@@ -27,6 +27,7 @@ features/<feature>/
     <feature>.router.ts      ← entry: tRPC. The resource → router map; the only file that names every resource router
     <name>.tool.ts           ← the body of one eve tool (only if an agent runs this feature)
     <resource>.router.ts     ← one resource's procedures, with their input schemas and their composition (deps)
+    <resource>.schema.ts     ← an input schema a client form also validates with; imports only zod (only if a form shares one)
     <concern>.service.ts     ← one concern the feature decides (create, publish, reads, …); named for the feature only when the feature has one concern
     __fixtures__/            ← shared test setup and scripted fakes (only if two test files share them)
     __tests__/
@@ -131,7 +132,11 @@ evals/                       ← the developer's: no agent writes, runs or requi
    serves (cart, items, settings, …) and names nothing else,
    the same way `ui/cards/index.ts` maps part types to cards. A
    procedure, its input schema and its composition live in the
-   resource's file. Merge with `t.mergeRouters` so the client's
+   resource's file. An input schema that a client form also
+   validates with lives in `<resource>.schema.ts` beside it, which
+   imports only zod: the router and the form both import it, and
+   the form never imports the router, whose imports reach the
+   server code. Merge with `t.mergeRouters` so the client's
    procedure paths do not change. A feature with one resource has
    one resource router; the map file still exists.
 10. **Check before you finish.** Walk every file you created or
