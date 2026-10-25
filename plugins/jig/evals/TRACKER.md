@@ -10,7 +10,7 @@ An item with no eval run has no measured cost (—).
 | Done | Item | Agent | Judge |
 |---|---|---|---|
 | [x] | b02-search-keeps-old-list: run again with `--keep-temp`; find why run 3 failed lint | $0.81 | $0.09 |
-| [ ] | b07-data-table: run | | |
+| [x] | b07-data-table: run | $2.43 | $0.75 |
 | [ ] | b08-backend-layers: run | | |
 | [ ] | b20-edit-surfaces: run | | |
 | [ ] | b21-expanded-panel: run | | |
@@ -23,4 +23,4 @@ An item with no eval run has no measured cost (—).
 | [ ] | Remove each converted case's `-ref-good` / `-ref-bad` folders | — | — |
 | [ ] | Remove the old `/private/tmp/e-*` workspaces | — | — |
 
-**Total so far:** agent $0.81, judge $0.09, together $0.90.
+**Total so far:** agent $3.24, judge $0.84, together $4.08.

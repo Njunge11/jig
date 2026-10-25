@@ -1,8 +1,11 @@
 ---
 type: llm
+focus: {source: file, path: .eval/diff-app.txt}
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. The input is the git diff of the change the agent made to the app code, without its tests. If the diff has no code that decides the question, the verdict is FAIL.
 
-PASS if only `title` and `createdAt` render a sort control. FAIL if a column that the server cannot sort has a sort control.
+Question: Do only the `title` and `createdAt` columns render a sort control?
+
+PASS if a sort control appears on the `title` and `createdAt` headers and on no other column. FAIL if another column has a sort control, or neither of the two has one.
