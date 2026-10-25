@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: b26-authoring-custom
+plugins: ["../..", "../../evals-harness"]
+context:
+  scaffold_script: fixture.sh

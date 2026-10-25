@@ -1,16 +1,15 @@
 ---
 description: "recipe-page-preview: share the real render component, no cross-app iframe"
-tags: [obedience, frontend]
-runs: 1
-max_turns: 10
-timeout_seconds: 420
-allowed_tools: [Read, Glob, Grep, Skill]
+tags: [obedience, frontend, regression]
+max_turns: 40
+timeout_seconds: 1200
+allowed_tools: [Read, Glob, Grep, Skill, Write, Edit, Bash]
 ---
 
-If a skill named `recipe-page-preview` is available to you, invoke it with the Skill tool before you answer. If it is not available, answer without it.
+If a skill named `recipe-page-preview` is available to you, invoke it with the Skill tool before you start. If it is not available, work without it.
 
-A pnpm monorepo has two Next.js apps: `apps/dashboard` (the job wizard) and `apps/job-board` (the public job page), and a shared package `packages/ui` that exports raw `.tsx`.
+The working directory is a store app: Next.js App Router, tRPC v11, TanStack Query v5, Drizzle, react-hook-form and shadcn/ui. The public product page, `app/shop/[productId]/page.tsx`, renders in the shop's own theme. The product editor, `app/products/[productId]/edit/page.tsx`, edits the product's title, price and description. The description is HTML that the seller pasted from another tool.
 
-The wizard needs a live preview of the public job page, beside the form, that updates as the user types. The job description is HTML that the user pasted.
+The product editor needs a live preview of the public product page, beside the form, that updates as the seller types.
 
-Describe the design and give the code of the key files. Do not write any file.
+Do not write or change tests.

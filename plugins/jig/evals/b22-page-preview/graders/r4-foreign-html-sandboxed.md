@@ -1,8 +1,11 @@
 ---
 type: llm
+focus: {source: file, path: .eval/diff-app.txt}
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. The input is the git diff of the change the agent made to the app code, without its tests. If the diff has no code that decides the question, the verdict is FAIL.
 
-PASS if the pasted HTML renders only inside a sandboxed `srcDoc` iframe (or the answer sanitizes and states that foreign HTML must not go through `dangerouslySetInnerHTML` in the app tree). FAIL if pasted HTML goes through `dangerouslySetInnerHTML` with no sandbox.
+Question: before the pasted description HTML is rendered, is it either sanitized with an allowlist sanitizer (DOMPurify, sanitize-html) or contained in a sandboxed `srcDoc` iframe?
+
+PASS if yes. FAIL if the raw pasted HTML reaches `dangerouslySetInnerHTML` or `innerHTML` with no sanitizer and no sandbox.

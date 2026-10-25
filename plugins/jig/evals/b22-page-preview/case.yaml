@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: b22-page-preview
+plugins: ["../..", "../../evals-harness"]
+context:
+  scaffold_script: fixture.sh
