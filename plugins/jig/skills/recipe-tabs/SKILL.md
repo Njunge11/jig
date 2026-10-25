@@ -24,11 +24,11 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
    shared parsers module, next to its search/filter params:
 
    ```ts
-   export const candidatesParams = {
-     tab: parseAsStringLiteral(["active", "interview", "rejected"])
-       .withDefault("active"),
+   export const ordersParams = {
+     tab: parseAsStringLiteral(["open", "shipped", "cancelled"])
+       .withDefault("open"),
    };
-   export const loadCandidatesParams = createLoader(candidatesParams);
+   export const loadOrdersParams = createLoader(ordersParams);
    ```
 
 3. **Prefetch delta: counts + the active tab only.** In the
@@ -38,13 +38,13 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
 
    ```tsx
    export default async function Page({ searchParams }: PageProps) {
-     const { tab } = await loadCandidatesParams(searchParams);
-     prefetch(trpc.candidates.counts.queryOptions());
-     prefetch(trpc.candidates.list.queryOptions({ tab }));
+     const { tab } = await loadOrdersParams(searchParams);
+     prefetch(trpc.orders.counts.queryOptions());
+     prefetch(trpc.orders.list.queryOptions({ tab }));
      return (
        <HydrateClient>
-         <Suspense fallback={<CandidatesTabsSkeleton />}>
-           <CandidatesTabs />
+         <Suspense fallback={<OrdersTabsSkeleton />}>
+           <OrdersTabs />
          </Suspense>
        </HydrateClient>
      );
@@ -60,18 +60,18 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
    makes a switch instant:
 
    ```tsx
-   const [{ tab }, setParams] = useQueryStates(candidatesParams);
+   const [{ tab }, setParams] = useQueryStates(ordersParams);
 
    <Tabs value={tab} onValueChange={(v) => setParams({ tab: v })}>
      <TabsList>
-       <TabsTrigger value="active" onMouseEnter={prefetchActive}
-         onFocus={prefetchActive}>
-         Active <Badge>{counts.active}</Badge>
+       <TabsTrigger value="open" onMouseEnter={prefetchOpen}
+         onFocus={prefetchOpen}>
+         Open <Badge>{counts.open}</Badge>
        </TabsTrigger>
        …
      </TabsList>
-     <TabsContent value="active">
-       <Suspense fallback={<ListSkeleton />}><ActiveList /></Suspense>
+     <TabsContent value="open">
+       <Suspense fallback={<ListSkeleton />}><OpenList /></Suspense>
      </TabsContent>
      …
    </Tabs>
@@ -83,8 +83,8 @@ recipe only changes what tabs change. Libraries: shadcn `Tabs`
    ```tsx
    const queryClient = useQueryClient();
    const trpc = useTRPC();
-   const prefetchActive = () =>
-     queryClient.prefetchQuery(trpc.candidates.list.queryOptions({ tab: "active" }));
+   const prefetchOpen = () =>
+     queryClient.prefetchQuery(trpc.orders.list.queryOptions({ tab: "open" }));
    ```
 
    The cache deduplicates: hovering twice, or returning to a

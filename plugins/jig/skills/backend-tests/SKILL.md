@@ -24,7 +24,7 @@ Reject the test if any item is true. This list judges each test's quality, not t
 7. The test **shares state** with other tests: no rollback transaction (repo) or no fresh fake (service).
 8. The test fails the **rewrite litmus**: the test breaks if a developer rewrites the implementation (ORM → raw SQL, service restructured, auth strategy swapped).
 9. The test **reads poorly**: the name does not state the action and the expected outcome, or the body contains logic (loops, conditionals). Duplication between tests is acceptable when it helps clarity. Gate for the logic-in-the-body clause: `pnpm lint`, rule `no-restricted-syntax (backend-tests 9)`; walk the rest by hand.
-10. The test is in the **wrong file**: the file mixes layers, or the file is not named after the source file it tests (`<source-file>.test.ts` — so `users.repo.test.ts`, `users.service.test.ts`, `users.router.test.ts`, `create-job-draft.tool.test.ts`).
+10. The test is in the **wrong file**: the file mixes layers, or the file is not named after the source file it tests (`<source-file>.test.ts` — so `users.repo.test.ts`, `users.service.test.ts`, `users.router.test.ts`, `create-product-draft.tool.test.ts`).
 11. The test verifies **more than one specified behavior**. One behavior per test; a task with several behaviors gets several tests.
 12. The test targets **code that is not ours or has no behavior of its own**: a third-party library's correctness (Zod parsing, Drizzle SQL generation), a trivial pass-through, or a private helper already covered through its public API.
 13. The test asserts **behavior that lives in the fake**, not in the code under test: the fake re-implements production logic (filtering, stamping, ordering), and the assertion observes that logic. A stateful fake lives in `<source>.repo.fake.ts` beside the real repo, with a contract test that proves it against the real implementation — never inline in one test file.
@@ -125,23 +125,23 @@ expect(fakePayments.charges).toEqual([{ amount: 116, cartId: "c1" }]);
 // ❌ the fake filters deleted rows itself — the test stays green even when
 // the real repo forgets its isNull(deletedAt) filter
 const fakeRepo = {
-  rows: [{ id: "j1", deletedAt: null as Date | null }],
-  async softDeleteJob(id: string) {
+  rows: [{ id: "p1", deletedAt: null as Date | null }],
+  async softDeleteProduct(id: string) {
     const row = this.rows.find((r) => r.id === id);
     if (row) row.deletedAt = DELETED_AT;             // ← production logic
     return row?.id ?? null;
   },
-  async getJob(id: string) {
+  async getProduct(id: string) {
     const row = this.rows.find((r) => r.id === id);
-    return row && !row.deletedAt ? toJob(row) : null; // ← production logic
+    return row && !row.deletedAt ? toProduct(row) : null; // ← production logic
   },
 };
-await svc.deleteJob("j1", COMPANY_ID);
-expect((await svc.getJob("j1", COMPANY_ID)).status).toBe("notFound");
+await svc.deleteProduct("p1", STORE_ID);
+expect((await svc.getProduct("p1", STORE_ID)).status).toBe("notFound");
 
 // ✅ the service's own behavior: it maps the repo's answer to the outcome
-const svc = makeJobsService({ repo: { ...reads, softDeleteJob: async () => "j1" } });
-expect(await svc.deleteJob("j1", COMPANY_ID)).toEqual({ status: "deleted" });
+const svc = makeProductsService({ repo: { ...reads, softDeleteProduct: async () => "p1" } });
+expect(await svc.deleteProduct("p1", STORE_ID)).toEqual({ status: "deleted" });
 // The filtering itself is a repo behavior. The repo test proves it on PGlite.
 ```
 
@@ -166,10 +166,10 @@ The budget is the one test that fails when a call grows a query nobody needs. It
 expect(statementCount()).toBeLessThan(10);
 
 // ✅ listed from the behavior: the gate reads the membership (1),
-//    the update writes the draft and returns it (1), the review reads
-//    the draft's places (1) — three statements, no more
+//    the update writes the cart's address and returns it (1), the review reads
+//    the cart's items (1) — three statements, no more
 statementCount.reset();
-await caller.submitDetails({ companyId, draftId, employmentType: "Full-time" });
+await caller.submitAddress({ storeId, cartId, country: "KE" });
 expect(statementCount()).toBe(3);
 ```
 

@@ -96,15 +96,15 @@ not restate them. This list is also the review checklist.
 
 ```tsx
 // Wrong: config props multiply forever
-<CandidateCard compact hideActions withBadge badgeTone="warn" />
+<OrderCard compact hideActions withBadge badgeTone="warn" />
 
 // Right: the call site composes what it needs
-<CandidateCard>
-  <CandidateCardHeader>
-    <Badge variant="outline">Interview</Badge>
-  </CandidateCardHeader>
-  <CandidateCardBody />
-</CandidateCard>
+<OrderCard>
+  <OrderCardHeader>
+    <Badge variant="outline">Shipped</Badge>
+  </OrderCardHeader>
+  <OrderCardBody />
+</OrderCard>
 ```
 
 8. Expose component state for styling through data attributes,
@@ -340,9 +340,9 @@ export default async function Page() {
 49. Streaming is the default, not a law. Two cases earn
     `await prefetch(...)` instead (same wiring, same
     `useSuspenseQuery` — the only change is when the HTML ships):
-    the content must be in the initial HTML (a public posting
+    the content must be in the initial HTML (a public product
     page that crawlers and link unfurls read), or the query is so
-    small and fast that its skeleton is just flicker (the company
+    small and fast that its skeleton is just flicker (the store
     name in the shell). A dashboard of sections streams; a public
     document page awaits. Choose per section, and say why in the
     code.

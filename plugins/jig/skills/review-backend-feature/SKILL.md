@@ -38,7 +38,7 @@ backend-tests
 
 eve-agent
  1 pass
- 3 fail — agent/tools/get_job.ts:40 — no toModelOutput; add one that returns the job's title and status
+ 3 fail — agent/tools/get_order.ts:40 — no toModelOutput; add one that returns the order's number and status
  ... one line per item, first to last — or: skipped — no agent files
  gates <paste `pnpm exec eve info`; no eval script and no real turn run, the developer runs them>
 
@@ -49,7 +49,7 @@ state-machines
 
 structure
  features/invites/api/invites.service.ts pass
- agent/lib/posting.states.ts fail — move to features/job-posting/machine/job-posting.states.ts
+ agent/lib/checkout.states.ts fail — move to features/checkout/machine/checkout.states.ts
 ```
 
 ### When a step fails

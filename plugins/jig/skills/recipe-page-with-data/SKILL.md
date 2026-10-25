@@ -22,12 +22,12 @@ type's specifics.
 2. **Write the anatomy** — the named part tree, before any code:
 
    ```
-   JobsPage
-   ├── JobsStats            — the period's aggregate numbers
+   ProductsPage
+   ├── ProductsStats            — the period's aggregate numbers
    │   └── StatCard (×4)
-   ├── JobsTable            — the paginated job rows
-   │   ├── JobsTableToolbar — search + filters
-   │   └── JobRow
+   ├── ProductsTable            — the paginated product rows
+   │   ├── ProductsTableToolbar — search + filters
+   │   └── ProductRow
    └── (shared state: period filter — owner: the URL)
    ```
 

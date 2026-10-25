@@ -41,8 +41,8 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
    ```
 
 3. **The toast contract.** Success names the action and the
-   object, past tense: `toast.success("Job archived")`. Failure
-   names what failed: `toast.error("Couldn't archive the job")`.
+   object, past tense: `toast.success("Product archived")`. Failure
+   names what failed: `toast.error("Couldn't archive the product")`.
    Toasts are for mutations only — read failures belong to the
    error boundary.
 
@@ -51,7 +51,7 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
 
    ```tsx
    onSettled: (_d, _e, _v, _r, context) =>
-     context.client.invalidateQueries(trpc.jobs.list.queryFilter()),
+     context.client.invalidateQueries(trpc.products.list.queryFilter()),
    ```
 
 5. **Variables-only optimism** — render the pending item from the
@@ -95,7 +95,7 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
    immediately; the toast's action runs the inverse mutation:
 
    ```tsx
-   toast.success("Candidate archived", {
+   toast.success("Product archived", {
      action: { label: "Undo", onClick: () => unarchive.mutate({ id }) },
    });
    ```

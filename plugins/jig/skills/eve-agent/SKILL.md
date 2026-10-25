@@ -29,7 +29,7 @@ Three steps, in order. They are the first three steps of your plan, before any o
 - **Project the result for the model with `toModelOutput`.** A result that a client renders holds options, prefilled values or long text. The model needs the status, the ids and the field names. Return `{ type: "json", value }` with only those. Hooks and the client still receive the full result on `action.result`.
 
   ```ts
-  // agent/tools/update_job_draft.ts — the client renders `output`; the model reads the projection
+  // agent/tools/update_product_draft.ts — the client renders `output`; the model reads the projection
   toModelOutput(output) {
     return { type: "json", value: { status: output.status, draft_id: output.draftId, missing: output.missing.map((f) => f.name) } };
   },

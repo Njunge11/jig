@@ -33,13 +33,13 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
      createLoader, parseAsInteger, parseAsString, parseAsStringLiteral,
    } from "nuqs/server";
 
-   export const jobsListParams = {
+   export const productsListParams = {
      q: parseAsString.withDefault(""),
      status: parseAsStringLiteral(["all", "open", "closed"]).withDefault("all"),
      sort: parseAsStringLiteral(["newest", "title"]).withDefault("newest"),
      page: parseAsInteger.withDefault(1),
    };
-   export const loadJobsListParams = createLoader(jobsListParams);
+   export const loadProductsListParams = createLoader(productsListParams);
    ```
 
    Invalid or missing params fall back to the parser defaults, so
@@ -51,11 +51,11 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
 
    ```tsx
    export default async function Page({ searchParams }: PageProps) {
-     const filters = await loadJobsListParams(searchParams);
-     prefetch(trpc.jobs.list.queryOptions(filters));
+     const filters = await loadProductsListParams(searchParams);
+     prefetch(trpc.products.list.queryOptions(filters));
      return (
        <HydrateClient>
-         <Suspense fallback={<JobsTableSkeleton />}><JobsList /></Suspense>
+         <Suspense fallback={<ProductsTableSkeleton />}><ProductsList /></Suspense>
        </HydrateClient>
      );
    }
@@ -73,10 +73,10 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
    "the state and the deferred state differ":
 
    ```tsx
-   const [filters, setFilters] = useQueryStates(jobsListParams);
+   const [filters, setFilters] = useQueryStates(productsListParams);
    const shown = useDeferredValue(filters);
    const isStale = shown !== filters;
-   const { data } = useSuspenseQuery(trpc.jobs.list.queryOptions(shown));
+   const { data } = useSuspenseQuery(trpc.products.list.queryOptions(shown));
    // render the list; dim it while isStale
    ```
 

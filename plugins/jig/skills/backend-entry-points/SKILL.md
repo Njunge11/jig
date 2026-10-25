@@ -37,31 +37,31 @@ A tool is a router for an external agent (Claude/ChatGPT). The client owns the c
 
 A tool is a router for the app's own eve agent. eve owns the conversation, the loop and the session; the file name is the tool name, and the file is the composition root.
 
-- **One file per tool, and the file name is the tool name.** eve registers every file under `agent/tools/` and names the tool after the file. Write the file name in the case the agent's instructions and the client use (`get_job.ts` → `get_job`). Never wrap the tool in a factory: the file's default export is `defineTool({ ...CONFIG, execute })`, and nothing else exports it.
-- **The file is the composition root.** Module scope constructs the real stores and the real service once — `const jobs = makeJobsService({ repo: makeJobsRepo(db) })` — and it is the only file on the tool's path that imports the db client. The service and the repo take their dependencies as arguments, as everywhere else.
+- **One file per tool, and the file name is the tool name.** eve registers every file under `agent/tools/` and names the tool after the file. Write the file name in the case the agent's instructions and the client use (`get_order.ts` → `get_order`). Never wrap the tool in a factory: the file's default export is `defineTool({ ...CONFIG, execute })`, and nothing else exports it.
+- **The file is the composition root.** Module scope constructs the real stores and the real service once — `const orders = makeOrdersService({ repo: makeOrdersRepo(db) })` — and it is the only file on the tool's path that imports the db client. The service and the repo take their dependencies as arguments, as everywhere else.
 - **Declare `execute` as a named function at module scope, and pass the name.** The eve compiler hoists `execute` out of its closure into a generated function. It copies only the `const` and `let` bindings of an enclosing function into that function, and it drops a nested function declaration. A tool whose `execute` is declared inside a function body compiles, and then throws `ReferenceError` on its first call. `eve build` never reports this. A module-scope function needs no copy, so it is the one shape that compiles and runs.
 
 ```ts
 // WRONG — a factory declares execute inside a function body; the compiled
-// tool throws "getJob is not defined" on its first call
-export function makeGetJob(deps: { db: Db }) {
-  const jobs = makeJobsService({ repo: makeJobsRepo(deps.db) });
-  async function getJob(input: GetJobInput, ctx: ToolContext) { … }
-  return defineTool({ ...GET_JOB_CONFIG, execute: getJob });
+// tool throws "getOrder is not defined" on its first call
+export function makeGetOrder(deps: { db: Db }) {
+  const orders = makeOrdersService({ repo: makeOrdersRepo(deps.db) });
+  async function getOrder(input: GetOrderInput, ctx: ToolContext) { … }
+  return defineTool({ ...GET_ORDER_CONFIG, execute: getOrder });
 }
-export default makeGetJob({ db });
+export default makeGetOrder({ db });
 
 // RIGHT — the file composes at module scope and passes a module-scope name
-const authz = makeCompanyAuthz(createAuthz({ db }));
-const jobs = makeJobsService({ repo: makeJobsRepo(db) });
+const authz = makeStoreAuthz(createAuthz({ db }));
+const orders = makeOrdersService({ repo: makeOrdersRepo(db) });
 
-async function getJob(input: GetJobInput, ctx: ToolContext) {
-  const caller = await permittedCaller(ctx, authz, PERMISSIONS.JOBS_READ);
+async function getOrder(input: GetOrderInput, ctx: ToolContext) {
+  const caller = await permittedCaller(ctx, authz, PERMISSIONS.ORDERS_READ);
   if (!caller) return FORBIDDEN;
-  return jobs.getJob(input.job_id, caller.companyId);
+  return orders.getOrder(input.order_id, caller.storeId);
 }
 
-export default defineTool({ ...GET_JOB_CONFIG, execute: getJob });
+export default defineTool({ ...GET_ORDER_CONFIG, execute: getOrder });
 ```
 
 - **The body is entry glue.** Read the caller through one shared helper in `agent/lib/` — it reads the session the channel door left on the context and asks the policy one coarse question — and return the tool's refusal when it answers nothing. Then call **exactly one** service method and shape the result. The same **Never** list as the router applies: no business logic, no transactions, no queries. The tool never reads headers or tokens; the channel's auth walk owns them.

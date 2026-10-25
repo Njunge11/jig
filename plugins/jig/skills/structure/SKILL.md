@@ -53,7 +53,7 @@ features/<feature>/
     __tests__/
       <part>.test.tsx        ← behavior tests
 db/schema/
-  <domain>.ts                ← one file per domain (users.ts, jobs.ts, billing.ts)
+  <domain>.ts                ← one file per domain (users.ts, orders.ts, billing.ts)
 app/<route>/
   page.tsx                   ← thin: parse params, prefetch, compose from features/<feature>/ui
   layout.tsx
@@ -128,7 +128,7 @@ evals/                       ← the developer's: no agent writes, runs or requi
    the channel screen reads the snapshot and picks the card.
 9. **A router is a map of resource routers.** `<feature>.router.ts`
    merges one `<resource>.router.ts` per resource the feature
-   serves (draft, questions, settings, …) and names nothing else,
+   serves (cart, items, settings, …) and names nothing else,
    the same way `ui/cards/index.ts` maps part types to cards. A
    procedure, its input schema and its composition live in the
    resource's file. Merge with `t.mergeRouters` so the client's

@@ -36,7 +36,7 @@ with no v8 call sites there is nothing to migrate.
    } from "@tanstack/react-table";
 
    export const features = tableFeatures({ rowPaginationFeature });
-   const helper = createColumnHelper<typeof features, Job>();
+   const helper = createColumnHelper<typeof features, Product>();
 
    export const columns = helper.columns([
      helper.accessor("title", {
@@ -48,14 +48,14 @@ with no v8 call sites there is nothing to migrate.
      }),
      helper.display({
        id: "actions",
-       cell: ({ row }) => <JobRowActions job={row.original} />,
+       cell: ({ row }) => <ProductRowActions product={row.original} />,
      }),
    ]);
    ```
 
    `SortableHeader` is a `Button variant="ghost"` calling
    `setParams({ sort: field, page: 1 })`; its arrow reads the
-   current `sort` from the same URL state. `JobRowActions` is a
+   current `sort` from the same URL state. `ProductRowActions` is a
    `DropdownMenu`; its items run mutations per
    the `recipe-form-with-mutation` skill / the mutation-feedback recipe.
 

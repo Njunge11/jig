@@ -40,8 +40,8 @@ and the AI Elements registry.
    // ui/cards/index.ts — the only file that names every card
    export const CARDS = {
      text: textCard,
-     "data-candidate": candidateCard,
-     "data-offer": offerCard,
+     "data-product": productCard,
+     "data-order": orderCard,
    } satisfies Record<AppMessagePart["type"], Card>;
 
    // ui/transcript.tsx — no `part.type ===` branch anywhere

@@ -95,35 +95,35 @@ The machine module holds the states and the transitions. Implementations are the
 - **Split a large machine with `createStateConfig` and the type-bound helpers.** Both carry the setup's context, event, action, guard and tag types into any file that imports the setup. Share one setup between machines with `setup.extend`.
 
   ```ts
-  // posting.setup.ts: one setup, typed once, imports xstate only
-  export const postingSetup = setup({
+  // checkout.setup.ts: one setup, typed once, imports xstate only
+  export const checkoutSetup = setup({
     types: {
-      context: {} as { draftId: string | null },
-      events: {} as { type: "draft.created"; draftId: string } | { type: "published" },
-      tags: {} as "editable" | "live",
+      context: {} as { orderId: string | null },
+      events: {} as { type: "order.created"; orderId: string } | { type: "paid" },
+      tags: {} as "editable" | "locked",
     },
     actions: {
-      recordDraft: assign({ draftId: (_, params: { draftId: string }) => params.draftId }),
-      notifyPublished: (_, _params: { draftId: string }) => {}, // each side provides this
+      recordOrder: assign({ orderId: (_, params: { orderId: string }) => params.orderId }),
+      notifyPaid: (_, _params: { orderId: string }) => {}, // each side provides this
     },
   });
 
-  // posting.states.ts: a state config carries the setup's types
-  export const review = postingSetup.createStateConfig({ tags: ["editable"], meta: { form: "review", buttons: ["publish"] } });
-  export const details = postingSetup.createStateConfig({
+  // checkout.states.ts: a state config carries the setup's types
+  export const review = checkoutSetup.createStateConfig({ tags: ["editable"], meta: { form: "review", buttons: ["pay"] } });
+  export const address = checkoutSetup.createStateConfig({
     tags: ["editable"],
-    meta: { form: "details", buttons: ["publish"] },
-    description: "The recruiter fills the job details.",
+    meta: { form: "address", buttons: ["continue"] },
+    description: "The shopper fills the delivery address.",
     on: {
-      "draft.created": {
+      "order.created": {
         target: "review",
-        actions: { type: "recordDraft", params: ({ event }) => ({ draftId: event.draftId }) },
+        actions: { type: "recordOrder", params: ({ event }) => ({ orderId: event.orderId }) },
       },
     },
   });
 
-  // posting.machine.ts
-  export const postingMachine = postingSetup.createMachine({ id: "posting", context: { draftId: null }, initial: "details", states: { details, review } });
+  // checkout.machine.ts
+  export const checkoutMachine = checkoutSetup.createMachine({ id: "checkout", context: { orderId: null }, initial: "address", states: { address, review } });
   ```
 
 ### Keep a state's data on its state node
@@ -135,7 +135,7 @@ The machine module holds the states and the transitions. Implementations are the
 
   ```ts
   // getMeta() is keyed by state node id; the machine is flat, so its value is the leaf name.
-  const meta = snapshot.getMeta()[`posting.${snapshot.value}`];   // { form: "details", buttons: ["publish"] } | undefined
+  const meta = snapshot.getMeta()[`checkout.${snapshot.value}`];   // { form: "address", buttons: ["continue"] } | undefined
   const editable = snapshot.hasTag("editable");
   const events = getNextTransitions(snapshot).map((t) => t.eventType);
   ```
@@ -177,10 +177,10 @@ The machine module holds the states and the transitions. Implementations are the
 
   ```ts
   // One request moves one stored machine.
-  const before = postingMachine.resolveState(JSON.parse(row.snapshot));
-  const [after, actions] = transition(postingMachine, before, event);
+  const before = checkoutMachine.resolveState(JSON.parse(row.snapshot));
+  const [after, actions] = transition(checkoutMachine, before, event);
   await repo.save(row.id, JSON.stringify(after));
-  for (const action of actions) await runServerAction(action);   // { type: "notifyPublished", params: { draftId } }
+  for (const action of actions) await runServerAction(action);   // { type: "notifyPaid", params: { orderId } }
   return { snapshot: after };
   ```
 
@@ -191,18 +191,18 @@ The machine module holds the states and the transitions. Implementations are the
 
   ```ts
   // the machine's reader module: every screen imports the stages from here
-  const listed = Object.values(applicationStageMachine.states).filter((node) => node.tags.includes("listed"));
+  const listed = Object.values(orderStatusMachine.states).filter((node) => node.tags.includes("listed"));
   export const LISTED_STAGES = listed.map((node) => ({ status: node.key, label: node.meta.label, tab: node.meta.tab }));
-  export const stageLabel = (status: ApplicationStatus) => applicationStageMachine.states[status].meta.label;
+  export const stageLabel = (status: OrderStatus) => orderStatusMachine.states[status].meta.label;
   ```
 - **When several cards draw one machine, the machine's `meta` names what each kind of card shows in each state.** A card that acts on the stage draws the stage's parts: its form, its receipt, its offer of the next step. A card that only reads the stage, such as an overview or a summary, is a separate kind of card. It reads its own `meta` key and never draws the parts of the card that acts. When several acting cards of one machine are on screen, one function picks the card that draws the stage's parts, such as the latest acting card in a chat. It counts acting cards only; a read-only card never counts, so it never takes the parts from an acting card above it. That pick is the only place the screen reads a card's position, and it never moves into the machine's context. What a card draws comes from the meta of its kind, never from a check of data beside the stored snapshot (a nullable column, a `has…` flag). A flag that skips one card is a patch, not the fix: give the card its own kind. A test iterates every state of the machine itself (`Object.keys(machine.states)` or `xstate/graph`, never a hand-written list), renders each kind of card, and asserts on screen what each one shows and that every other part, receipt and offer the machine names is absent: a test that checks only what shows passes a card that also draws the wrong offer.
 
   ```ts
-  // job.states.ts: one key per kind of card
-  jd_written: { meta: { acting: { part: "details-record", offer: "screening-questions", receipt: true }, reading: { part: "details-record" } } }
+  // order.states.ts: one key per kind of card
+  paid: { meta: { acting: { part: "order-record", offer: "track-delivery", receipt: true }, reading: { part: "order-record" } } }
 
   // the test: every state, every kind of card
-  it.each(Object.keys(jobMachine.states))("an overview in %s shows no receipt and no offer", (state) => { … });
+  it.each(Object.keys(orderMachine.states))("an overview in %s shows no receipt and no offer", (state) => { … });
   ```
 - **`@xstate/react` is the client of a browser-owned machine.** `useActorRef` gives a stable ref that does not rerender. `useSelector(actorRef, selector, compare?)` rerenders only when the selected value changes. Define selectors outside the component. Pass `shallowEqual` when a selector returns an object. `createActorContext` provides one actor to a tree.
 - **Restore a persisted snapshot with the `snapshot` option.** `useMachine(machine.provide(impl), { snapshot })` starts at that state.

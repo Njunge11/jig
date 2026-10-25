@@ -27,8 +27,8 @@ the `frontend-standards` skill apply throughout. Libraries: `react-hook-form`,
    `defaultValues` from the entity's prefetched query data:
 
    ```tsx
-   const form = useForm<z.infer<typeof jobSchema>>({
-     resolver: zodResolver(jobSchema),
+   const form = useForm<z.infer<typeof productSchema>>({
+     resolver: zodResolver(productSchema),
      defaultValues: { title: "", description: "" },
    });
    ```
@@ -58,18 +58,18 @@ the `frontend-standards` skill apply throughout. Libraries: `react-hook-form`,
    the write changed and tells the user:
 
    ```tsx
-   const mutation = useMutation(trpc.jobs.create.mutationOptions({
+   const mutation = useMutation(trpc.products.create.mutationOptions({
      onSuccess: () => {
-       queryClient.invalidateQueries(trpc.jobs.list.queryFilter());
-       toast.success("Job created");
-       router.push(`/jobs`); // or form.reset() for create-another
+       queryClient.invalidateQueries(trpc.products.list.queryFilter());
+       toast.success("Product created");
+       router.push(`/products`); // or form.reset() for create-another
      },
    }));
 
    <form onSubmit={form.handleSubmit((data) => mutation.mutate(data))}>
      …
      <Button type="submit" disabled={mutation.isPending}>
-       {mutation.isPending ? <Spinner /> : null} Create job
+       {mutation.isPending ? <Spinner /> : null} Create product
      </Button>
    </form>
    ```

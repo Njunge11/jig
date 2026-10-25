@@ -22,7 +22,7 @@ it before you place a file. Place every file by its tree, never
 by imitating existing code. A feature is a folder. The schema is
 central.
 
-- **One file, one concern, at every layer.** A file hides one design decision, and a change to that decision touches only that file. That is Parnas's criterion for a module (1972), Dijkstra's separation of concerns (1974), functional cohesion (Stevens, Myers and Constantine, 1974) and Martin's single responsibility principle (2003): one rule with four names. The test is a sentence, never a size. Write what the file owns in one sentence with no "and", and put that sentence as the file's first doc comment. One sentence is one file. A sentence with "and" is two files. Read the sentence of every file you add before you hand the code over, a shared module of fields or constants included: when one has "and", split that file now, so each part gets its own sentence. Steps that must succeed together are one concern: the sentence names their outcome, never the steps ("Publishes a complete draft as a job, in one transaction.", never "Copies the draft into a job and marks it published."). Forty lines can fail the test, and four hundred can pass it. Name the file for its concern. A service is one concern the feature decides, never one file per feature. A repo is one row set, and its sentence names the row set, never its verbs ("Owns the job rows.", never "Reads and writes the jobs rows."). A router is one resource (`structure` rule 9). A helper module is one computation. A task that adds a second concern to a file adds a file instead. A file that already holds several concerns is restructuring work, a step checklist, never a precedent.
+- **One file, one concern, at every layer.** A file hides one design decision, and a change to that decision touches only that file. That is Parnas's criterion for a module (1972), Dijkstra's separation of concerns (1974), functional cohesion (Stevens, Myers and Constantine, 1974) and Martin's single responsibility principle (2003): one rule with four names. The test is a sentence, never a size. Write what the file owns in one sentence with no "and", and put that sentence as the file's first doc comment. One sentence is one file. A sentence with "and" is two files. Read the sentence of every file you add before you hand the code over, a shared module of fields or constants included: when one has "and", split that file now, so each part gets its own sentence. Steps that must succeed together are one concern: the sentence names their outcome, never the steps ("Publishes a complete draft as a product, in one transaction.", never "Copies the draft into a product and marks it published."). Forty lines can fail the test, and four hundred can pass it. Name the file for its concern. A service is one concern the feature decides, never one file per feature. A repo is one row set, and its sentence names the row set, never its verbs ("Owns the order rows.", never "Reads and writes the orders rows."). A router is one resource (`structure` rule 9). A helper module is one computation. A task that adds a second concern to a file adds a file instead. A file that already holds several concerns is restructuring work, a step checklist, never a precedent.
 
 ```ts
 // WRONG — one service per feature: four concerns, four reasons to change
@@ -33,7 +33,7 @@ central.
 // api/open-draft.service.ts    "Answers a request to open a draft's form or its overview."
 // api/update-draft.service.ts  "Applies an edit stated in words to a draft."
 // api/draft-changes.ts         "Lists the fields an update changed, for the receipt."
-// api/publish-draft.service.ts "Publishes a complete draft as a job, in one transaction."
+// api/publish-draft.service.ts "Publishes a complete draft as a product, in one transaction."
 ```
 
 - **The schema lives centrally in `db/schema/`**, with one file per domain. Set `schema: "./db/schema"` in `drizzle.config.ts`. The drizzle-kit tool reads the folder recursively. You must export every table. The schema is central because FKs cross domains constantly. Feature-local schema files would import across features.
@@ -58,17 +58,17 @@ await validate(form, orgId, reader);
 
 ```ts
 // WRONG — twelve method bodies inside one object literal
-export const makeJobsService = (deps) => ({
-  async publish(id) { …30 lines… },
-  async close(id) { …20 lines… },
+export const makeOrdersService = (deps) => ({
+  async place(id) { …30 lines… },
+  async cancel(id) { …20 lines… },
 });
 
 // RIGHT — named functions, then the surface
-export function makeJobsService(deps) {
-  async function publish(id) { …30 lines… }
-  async function close(id) { …20 lines… }
+export function makeOrdersService(deps) {
+  async function place(id) { …30 lines… }
+  async function cancel(id) { …20 lines… }
 
-  return { publish, close };
+  return { place, cancel };
 }
 ```
 
@@ -198,19 +198,19 @@ Errors flow up: Repository → Service → Entry → the global handler (tRPC) o
 Every request tells its story in one log block: each call it made, why it ran, what came back and how long it took, nested under the call that made it. The block is the first thing read when a screen dies or a turn is slow, so a call that is not in it did not happen, as far as the reader knows.
 
 ```
-calling readRoleSuggestions to suggest the role's skills, tools and certifications. success. took 2.310 s
-  calling permittedCaller to check the permission jobs:update. allowed. took 0.021 s
-    query select user_companies. took 0.008 s
+calling readProductSuggestions to suggest the product's title, tags and category. success. took 2.310 s
+  calling permittedCaller to check the permission products:update. allowed. took 0.021 s
+    query select store_members. took 0.008 s
   calling hasCredits to check the credits. yes. took 0.009 s
     query select credit_grants. took 0.009 s
   calling repo.findDraft to read the draft. success. took 0.012 s
-    query select job_drafts. took 0.012 s
-  calling suggestRoleTerms to ask the model for the role's suggestions. success. took 2.250 s
+    query select product_drafts. took 0.012 s
+  calling suggestProductTerms to ask the model for the product's suggestions. success. took 2.250 s
 ```
 
 - **One root per entry-point call, opened where the request enters.** A tRPC procedure opens it in the first middleware of its base procedure, so the session, permission and credit checks the later middlewares run are its first lines; the root line is `calling <procedure> to <purpose>`, with the purpose from the procedure's `.meta({ purpose })`. An eve tool opens it around its `execute` body, keyed by eve's call id, so the turn hook prints it with the model steps around it. An MCP tool and a workflow step open it around their one service call. A handler that calls the service bare prints nothing: `trace` records only under an open root.
 - **Before you add an entry point, open the file that defines its base procedure and read its middlewares.** When none of them opens the root, this change adds that middleware, and the diff holds the base procedure's file. A change that names the root without showing it, or says the root "already exists" or "is assumed", has no root: the reviewer rejects it under item 35.
-- **Every call a service makes is one `trace` line: `calling <name> to <purpose>`.** A repo method (`calling repo.findDraft to read the draft`), another service, a model (`calling suggestRoleTerms to ask the model for the role's suggestions`), a workflow start (`calling workflow screen to screen the application. started`), the machine move (`calling advance to move the draft from details_pending to role_pending`). The name is the real function's name. The purpose says what the call is for, in plain words.
+- **Every call a service makes is one `trace` line: `calling <name> to <purpose>`.** A repo method (`calling repo.findDraft to read the draft`), another service, a model (`calling suggestProductTerms to ask the model for the product's suggestions`), a workflow start (`calling workflow fulfil to fulfil the order. started`), the machine move (`calling advance to move the draft from details_pending to pricing_pending`). The name is the real function's name. The purpose says what the call is for, in plain words.
 - **A query traces itself.** The db client wraps every statement once, so no repo and no service traces a query by hand. Each shows as `query <verb> <table>` under the call that ran it.
 - **The result is read off the call, never written into the line.** A `refused`, `notFound`, `forbidden` or `invalid` return prints `refused: "<message>"`; a throw prints `failed: <message>`; a check prints its own word through `describe` (`yes`, `allowed`, `decided: tool draft, action create`); anything else prints `success`.
 - **A line holds no id and no message text.** The root says what the request does (`save the draft's details`), never what the user wrote.
@@ -220,7 +220,7 @@ calling readRoleSuggestions to suggest the role's skills, tools and certificatio
 ```ts
 // WRONG — the handler calls the service bare; every trace line under it records nothing
 suggestions: creditedProcedure.input(schema).query(({ ctx, input }) =>
-  makeRoleSuggestionsService(deps(ctx)).readRoleSuggestions(input),
+  makeProductSuggestionsService(deps(ctx)).readProductSuggestions(input),
 ),
 
 // RIGHT — the base procedure's first middleware opens the root; the checks and the service's calls are its lines
@@ -236,16 +236,16 @@ export const creditedProcedure = protectedProcedure
   .use(requireCredits);
 
 suggestions: creditedProcedure
-  .meta({ purpose: "suggest the role's skills, tools and certifications" })
+  .meta({ purpose: "suggest the product's title, tags and category" })
   .input(schema)
-  .query(({ ctx, input }) => makeRoleSuggestionsService(deps(ctx)).readRoleSuggestions(input)),
+  .query(({ ctx, input }) => makeProductSuggestionsService(deps(ctx)).readProductSuggestions(input)),
 
-// api/role-suggestions.service.ts — each call the service makes is one line
+// api/product-suggestions.service.ts — each call the service makes is one line
 const draft = await trace("calling repo.findDraft to read the draft", () =>
-  deps.repo.findDraft(companyId, draftId),
+  deps.repo.findDraft(storeId, draftId),
 );
-const terms = await trace("calling suggestRoleTerms to ask the model for the role's suggestions", () =>
-  suggestRoleTerms(role, { model: deps.model }),
+const terms = await trace("calling suggestProductTerms to ask the model for the product's suggestions", () =>
+  suggestProductTerms(draft, { model: deps.model }),
 );
 ```
 
@@ -260,58 +260,58 @@ The difference is the shape of the shared helper, not the shape of the caller.
 
 ```ts
 // WRONG — the helper takes the rest of the method
-async function withOwnedJob(id, companyId, run) {
-  const job = await repo.getById(id);
-  if (job?.companyId !== companyId) return notFound("Job");
-  return run(job);                       // ← the caller's body arrives here
+async function withOwnedOrder(id, storeId, run) {
+  const order = await repo.getById(id);
+  if (order?.storeId !== storeId) return notFound("Order");
+  return run(order);                       // ← the caller's body arrives here
 }
 
-async function closeJob(id: string, companyId: string) {
-  return withOwnedJob(id, companyId, async (job) =>
-    isValidTransition(job.status, "closed")
-      ? written(await repo.setStatus(id, "closed"))
-      : failed(cannotTransition(job.status, "closed")),
-  );                                     // ← closeJob has no body of its own
+async function cancelOrder(id: string, storeId: string) {
+  return withOwnedOrder(id, storeId, async (order) =>
+    isValidTransition(order.status, "cancelled")
+      ? written(await repo.setStatus(id, "cancelled"))
+      : failed(cannotTransition(order.status, "cancelled")),
+  );                                     // ← cancelOrder has no body of its own
 }
 
-// RIGHT — the helper returns the job, and the caller checks it
-async function loadOwnedJob(id, companyId) {
-  const job = await repo.getById(id);
-  return job?.companyId === companyId
-    ? { success: true as const, data: job }
-    : { success: false as const, error: notFound("Job") };
+// RIGHT — the helper returns the order, and the caller checks it
+async function loadOwnedOrder(id, storeId) {
+  const order = await repo.getById(id);
+  return order?.storeId === storeId
+    ? { success: true as const, data: order }
+    : { success: false as const, error: notFound("Order") };
 }
 
-async function closeJob(id: string, companyId: string) {
-  const owned = await loadOwnedJob(id, companyId);
+async function cancelOrder(id: string, storeId: string) {
+  const owned = await loadOwnedOrder(id, storeId);
   if (!owned.success) return owned;      // ← one step, one check
 
   const current = owned.data.status;
-  if (!isValidTransition(current, "closed")) {
-    return failed(cannotTransition(current, "closed"));
+  if (!isValidTransition(current, "cancelled")) {
+    return failed(cannotTransition(current, "cancelled"));
   }
-  return written(await repo.setStatus(id, "closed"));
+  return written(await repo.setStatus(id, "cancelled"));
 }
 ```
 
-Both versions share the same ownership check. Only the second one lets you read `closeJob` from the top to the bottom.
+Both versions share the same ownership check. Only the second one lets you read `cancelOrder` from the top to the bottom.
 
-**Pass a name, never a body.** An argument of a call is a variable, a named constant, or a named function. When an argument is a function of more than one line, or an object literal of more than a few lines, declare it above the call with a name — then the call reads as one line, and each part reads on its own. A one-line arrow that forwards to a method (`(id) => repo.getJob(id)`) stays inline.
+**Pass a name, never a body.** An argument of a call is a variable, a named constant, or a named function. When an argument is a function of more than one line, or an object literal of more than a few lines, declare it above the call with a name — then the call reads as one line, and each part reads on its own. A one-line arrow that forwards to a method (`(id) => repo.getProduct(id)`) stays inline.
 
 ```ts
 // WRONG — one call swallows the config and the handler; the reader scrolls
 // through sixty lines to find out that this is one registration
 register(
-  "delete_job",
+  "delete_product",
   {
-    title: "Take one job off the board",
-    description: "Delete one job this workspace has posted. …",
-    inputSchema: deleteJobInput,
-    outputSchema: deleteJobResult,
+    title: "Take one product out of the catalog",
+    description: "Delete one product this store sells. …",
+    inputSchema: deleteProductInput,
+    outputSchema: deleteProductResult,
     annotations: { readOnlyHint: false, destructiveHint: true },
   },
   async (args, scope) => {
-    const outcome = await deps.jobs.deleteJob(args.job_id, scope.companyId);
+    const outcome = await deps.products.deleteProduct(args.product_id, scope.storeId);
     if (outcome.status !== "deleted") {
       return { isError: true, content: [{ type: "text", text: outcome.message }] };
     }
@@ -320,24 +320,24 @@ register(
 );
 
 // RIGHT — the call passes names
-const DELETE_JOB_CONFIG = {
-  title: "Take one job off the board",
-  description: "Delete one job this workspace has posted. …",
-  inputSchema: deleteJobInput,
-  outputSchema: deleteJobResult,
+const DELETE_PRODUCT_CONFIG = {
+  title: "Take one product out of the catalog",
+  description: "Delete one product this store sells. …",
+  inputSchema: deleteProductInput,
+  outputSchema: deleteProductResult,
   annotations: { readOnlyHint: false, destructiveHint: true },
 };
 
-export function registerDeleteJob(register: RegisterTool, deps: DeleteJobDeps) {
-  async function deleteJob(args: DeleteJobArgs, scope: CompanyScope) {
-    const outcome = await deps.jobs.deleteJob(args.job_id, scope.companyId);
+export function registerDeleteProduct(register: RegisterTool, deps: DeleteProductDeps) {
+  async function deleteProduct(args: DeleteProductArgs, scope: StoreScope) {
+    const outcome = await deps.products.deleteProduct(args.product_id, scope.storeId);
     if (outcome.status !== "deleted") {
       return { isError: true, content: [{ type: "text", text: outcome.message }] };
     }
     return toolResult({ deleted: true }, DELETED_MESSAGE);
   }
 
-  register("delete_job", DELETE_JOB_CONFIG, deleteJob);
+  register("delete_product", DELETE_PRODUCT_CONFIG, deleteProduct);
 }
 ```
 

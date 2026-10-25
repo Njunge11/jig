@@ -21,8 +21,8 @@ and the surface mechanics.
   space than a large dialog, it is a page, not a bigger dialog.
 - **A task the user repeats often**, or one needing information or
   navigation outside the surface → **its own page**.
-- **Quick preview or reference beside the page** (peek at a
-  candidate from a list) → **Sheet**. Small direct actions in it
+- **Quick preview or reference beside the page** (peek at an
+  order from a list) → **Sheet**. Small direct actions in it
   are fine; a create/edit form in a sheet is not — that edit is a
   dialog or a page.
 
@@ -38,10 +38,10 @@ and the surface mechanics.
 
    ```tsx
    const [open, setOpen] = useState(false);
-   const mutation = useMutation(trpc.jobs.update.mutationOptions({
+   const mutation = useMutation(trpc.products.update.mutationOptions({
      onSuccess: () => {
-       queryClient.invalidateQueries(trpc.jobs.list.queryFilter());
-       toast.success("Job updated");
+       queryClient.invalidateQueries(trpc.products.list.queryFilter());
+       toast.success("Product updated");
        setOpen(false);
      },
    }));
@@ -67,7 +67,7 @@ and the surface mechanics.
 
 5. **Destructive confirms** are an `AlertDialog`: the body states
    the consequence; the confirm button is the specific verb
-   (`Delete job`), destructive variant — never "OK", "Yes", or
+   (`Delete product`), destructive variant — never "OK", "Yes", or
    "Done". The title and button name the same action.
 
 ## Build order — inline edit

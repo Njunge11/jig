@@ -7,7 +7,7 @@ user-invocable: false
 # Recipe: Live page preview
 
 Use this recipe when the UI shows a live preview of rendered
-output beside an editor — a job posting, an email, a public page
+output beside an editor — a product page, an email, a public page
 being configured.
 
 ## The mechanism
@@ -29,7 +29,7 @@ no network, no `postMessage`, no reload.
 
    ```tsx
    <div className="overflow-y-auto rounded-lg border">
-     <JobPosting {...draftValues} />
+     <ProductPage {...draftValues} />
    </div>
    ```
 
