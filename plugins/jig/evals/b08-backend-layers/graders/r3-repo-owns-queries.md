@@ -1,8 +1,11 @@
 ---
 type: llm
+focus: {source: file, path: .eval/diff-app.txt}
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. The input is the git diff of the change the agent made to the app code, without its tests. If the diff has no code that decides the question, the verdict is FAIL.
 
-PASS if every Drizzle query lives in a repository that receives the `tx` handle (as an argument of the call or of its factory). FAIL if the service or the router writes Drizzle queries.
+Question: does every Drizzle query (`select`, `update`, `insert`, `delete`, `db.query`) live in the repository, which receives the db or tx handle as an argument of its method or of its factory?
+
+PASS if every query is in the repository file and the repository takes the handle as an argument. A `.transaction(...)` call, in the service or in the entry's binding of a `write` dependency, is not a query, and an `sql` fragment inside a repository query is still in the repository. FAIL if the service or the router writes a Drizzle query, or the repository imports the db client instead of receiving the handle.
