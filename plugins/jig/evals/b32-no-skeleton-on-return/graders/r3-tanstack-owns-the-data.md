@@ -1,10 +1,11 @@
 ---
 type: llm
+focus: {source: file, path: .eval/diff-app.txt}
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. The input is the git diff of the change the agent made to the app code, without its tests. A deleted file shows as `deleted file mode` with every line removed.
 
-PASS if the code the answer adds or changes keeps TanStack Query as the only owner of the data's freshness and keeps the loading UI. A file the answer does not show is kept as it is. `experimental.staleTimes` is the router's page cache, not a data cache: setting it does not fail this point. Prose that names `router.refresh()`, `revalidatePath` or `revalidateTag` as advice does not fail this point.
+Question: does the diff delete a `loading.tsx` (or empty it), or does it add a Next.js data cache for the queries — a `fetch` `cache` or `next.revalidate` option, a route `export const revalidate`, a `"use cache"` directive, or `unstable_cache`?
 
-FAIL only if the answer's code deletes a `loading.tsx`, or adds a Next data cache for the queries: a `fetch` `cache` or `next.revalidate` option, a route `export const revalidate`, a `"use cache"` directive, or `unstable_cache`.
+PASS if the diff does none of these. A file the diff does not show is kept as it is. `experimental.staleTimes` is the router's page cache, not a data cache, so setting it is fine. FAIL if the diff deletes or empties a `loading.tsx`, or adds any of those data caches.
