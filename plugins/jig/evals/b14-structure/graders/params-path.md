@@ -1,5 +1,6 @@
 ---
-type: regex
-pattern: 'features/invites/ui/search-params\.ts'
-flags: i
+type: file_exists
+path: "features/invites/ui/search-params.ts"
+exists: true
+weight: 1
 ---

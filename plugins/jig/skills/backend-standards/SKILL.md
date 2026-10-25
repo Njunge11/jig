@@ -180,7 +180,7 @@ Before you write a query, check these options: one query instead of several, one
 
 - Use a transaction when multiple writes must succeed together. Also use one when reads and writes must stay consistent (state transitions, money, anything multi-table).
 - The **service** opens the transaction, and the repository calls inside it run on the `tx` handle. Repositories never start one.
-- **The service opens it through a `write` dependency.** The service takes `write: <T>(run: (repo: Repo) => Promise<T>) => Promise<T>` and writes the steps that must succeed together inside `deps.write(async (repo) => …)`. The composition root binds it once: `write: (run) => db.transaction((tx) => run(makeRepo(tx)))`. Binding the mechanism is composition, not business logic, so the entry holds no transaction of its own. The service imports no Drizzle type, and its test passes `write: (run) => run(fakeRepo)` (`backend-tests`, service tests on a fake repo).
+- **The service opens it through a `write` dependency.** The service takes `write: <T>(run: (repo: Repo) => Promise<T>) => Promise<T>` and writes the steps that must succeed together in one named function and passes it: `deps.write(cancelAndRelease)`. The composition root binds it once: `write: (run) => db.transaction((tx) => run(makeRepo(tx)))`. Binding the mechanism is composition, not business logic, so the entry holds no transaction of its own. The service imports no Drizzle type, and its test passes `write: (run) => run(fakeRepo)` (`backend-tests`, service tests on a fake repo).
 
 ```ts
 // api/cancel-order.service.ts — the service decides what runs inside
@@ -189,14 +189,17 @@ export function makeCancelOrderService(deps: {
   email: EmailClient;
 }) {
   async function cancelOrder(orderId: string, storeId: string) {
-    const order = await deps.write(async (repo) => {
+    // The steps that succeed together: a named function, never inline in the call (Review item 25).
+    async function cancelAndRelease(repo: OrdersRepo) {
       const [cancelled] = await trace("calling repo.cancelOrder to cancel the order", () =>
         repo.cancelOrder(orderId, storeId),
       );
       if (!cancelled) return null;
       await trace("calling repo.releaseStock to put the order's stock back", () => repo.releaseStock(orderId));
       return cancelled;
-    });
+    }
+
+    const order = await deps.write(cancelAndRelease);
     if (!order) return { status: "notFound" as const, message: "No such order." };
     await trace("calling email.send to tell the customer the order is cancelled", () =>
       deps.email.send({ to: order.customerEmail, template: "order-cancelled", data: { orderId } }),

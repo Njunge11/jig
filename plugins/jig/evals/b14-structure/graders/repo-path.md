@@ -1,5 +1,6 @@
 ---
-type: regex
-pattern: 'features/invites/db/(invites|invitations?)\.repo\.ts'
-flags: i
+type: file_exists
+path: "features/invites/db/invitation*.repo.ts"
+exists: true
+weight: 1
 ---

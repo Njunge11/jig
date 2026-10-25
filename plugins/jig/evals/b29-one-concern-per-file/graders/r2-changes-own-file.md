@@ -1,8 +1,11 @@
 ---
 type: llm
+focus: {source: file, path: .eval/diff-app.txt}
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. The input is the git diff of the change the agent made to the app code, without its tests. If the diff has no code that decides the question, the verdict is FAIL.
 
-PASS if `draftChanges` lives in a module of its own (for example `api/draft-changes.ts`) that holds nothing but the change listing and its private helpers. FAIL if `draftChanges` is added to `drafts.service.ts`, or sits in the same file as `publishDraft`.
+Question: is `draftChanges` defined in a file of its own, not in `drafts.service.ts` and not in the file that defines `publishDraft`?
+
+PASS if yes, for example `api/draft-changes.ts`. FAIL if `draftChanges` is added to `drafts.service.ts`, or shares a file with `publishDraft`.
