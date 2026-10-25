@@ -1,4 +1,5 @@
 import { initTRPC, TRPCError } from "@trpc/server";
+import { cookies } from "next/headers";
 import { cache } from "react";
 import { traceBlock } from "@/db/call-trace";
 import { db } from "@/db/client";
@@ -11,8 +12,12 @@ export type Context = { db: Db; session: Session | null; log: (block: string) =>
 /** What a procedure is for, in plain words: the root line of its call trace. */
 export type Meta = { purpose?: string };
 
-// The fixture has no auth provider; a deployed app reads the session from its auth library here.
-export const createTRPCContext = cache(async (): Promise<Context> => ({ db, session: null, log: console.info }));
+// The fixture has no auth provider: the session is the store id in the "store" cookie.
+// Every request reads it, so every page is dynamic.
+export const createTRPCContext = cache(async (): Promise<Context> => {
+  const storeId = (await cookies()).get("store")?.value ?? null;
+  return { db, session: storeId ? { userId: "u1", storeId } : null, log: console.info };
+});
 
 const t = initTRPC.context<Context>().meta<Meta>().create();
 
