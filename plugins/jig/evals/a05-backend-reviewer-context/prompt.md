@@ -1,7 +1,6 @@
 ---
 description: "the backend reviewer holds the test and entry-point rules, and no machine rule until it loads one"
-tags: [delivery]
-runs: 1
+tags: [delivery, regression]
 max_turns: 6
 timeout_seconds: 420
 allowed_tools: [Agent]

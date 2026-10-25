@@ -1,7 +1,6 @@
 ---
 description: "backend-tests: reject a test that asserts internals and restates the formula"
-tags: [obedience, backend]
-runs: 1
+tags: [obedience, backend, regression]
 max_turns: 8
 timeout_seconds: 420
 allowed_tools: [Read, Glob, Grep, Skill]

@@ -1,7 +1,6 @@
 ---
 description: "skill-audit: a rule in references/ fails item 6"
-tags: [obedience, meta]
-runs: 1
+tags: [obedience, meta, regression]
 max_turns: 8
 timeout_seconds: 420
 allowed_tools: [Read, Glob, Grep, Skill]

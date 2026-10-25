@@ -3,6 +3,8 @@ type: llm
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. Ignore every other quality of the answer.
 
-PASS if the review names this fault: the expected total restates the implementation's formula; it must be a literal computed by hand from the spec (13230). FAIL if it does not name it.
+Question: does the review name this fault: the expected total calls `service.computeTotal(...)`, so it restates the implementation's own formula, where it should be a literal worked out by hand from the spec?
+
+PASS if the review names it; the exact number it suggests does not matter. FAIL if the review does not name it.

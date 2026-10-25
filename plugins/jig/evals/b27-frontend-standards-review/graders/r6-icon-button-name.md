@@ -3,6 +3,8 @@ type: llm
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. Ignore every other fault the review names or misses.
 
-PASS if the review names this fault: the icon-only button has no accessible name (`aria-label`), or is not the kit's `Button`. FAIL if it does not name it.
+Question: does the review name the icon-only refresh button's missing accessible name as a fault, with a fix that gives it one (an `aria-label`, or visible text)?
+
+PASS if yes. FAIL if the review does not name this fault.

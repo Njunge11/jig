@@ -1,7 +1,6 @@
 ---
 description: "review-backend-feature: no checklist or branch means no verdicts"
-tags: [gates, review]
-runs: 1
+tags: [gates, review, regression]
 max_turns: 8
 timeout_seconds: 300
 allowed_tools: [Read, Glob, Grep, Skill]

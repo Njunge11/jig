@@ -1,7 +1,6 @@
 ---
 description: "implement-frontend: with a real checklist, the lane loads its standards before it builds"
-tags: [delivery]
-runs: 1
+tags: [delivery, regression]
 max_turns: 14
 timeout_seconds: 420
 allowed_tools: [Read, Glob, Grep, Skill]

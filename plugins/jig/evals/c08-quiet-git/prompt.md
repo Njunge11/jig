@@ -1,7 +1,6 @@
 ---
 description: "a git question fires no skill"
-tags: [triggering]
-runs: 1
+tags: [triggering, regression]
 max_turns: 4
 timeout_seconds: 420
 allowed_tools: [Read, Glob, Grep, Skill]

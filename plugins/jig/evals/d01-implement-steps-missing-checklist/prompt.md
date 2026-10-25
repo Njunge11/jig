@@ -1,7 +1,6 @@
 ---
 description: "implement-steps: a checklist path that does not exist stops the run"
-tags: [gates, delivery]
-runs: 1
+tags: [gates, delivery, regression]
 max_turns: 8
 timeout_seconds: 300
 allowed_tools: [Read, Glob, Grep, Skill]

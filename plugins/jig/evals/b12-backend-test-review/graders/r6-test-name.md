@@ -3,6 +3,8 @@ type: llm
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. Ignore every other quality of the answer.
 
-PASS if the review names this fault: the name "works" does not state the action and the expected outcome. FAIL if it does not name it.
+Question: does the review name this fault: the name "works" does not state the action and the expected outcome?
+
+PASS if the review names it. FAIL if the review does not name it.

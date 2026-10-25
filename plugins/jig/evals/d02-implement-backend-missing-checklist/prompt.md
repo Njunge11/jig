@@ -1,7 +1,6 @@
 ---
 description: "implement-backend: a missing checklist is reported, not guessed"
-tags: [gates, delivery]
-runs: 1
+tags: [gates, delivery, regression]
 max_turns: 8
 timeout_seconds: 300
 allowed_tools: [Read, Glob, Grep, Skill]

@@ -3,6 +3,8 @@ type: llm
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. Ignore every other fault the review names or misses.
 
-PASS if the review names this fault: one query per row (`CandidateRow` fetches by id) is an N+1; the list procedure must return the rows. FAIL if it does not name it.
+Question: does the review name the per-row query (`OrderRow` runs `orders.byId` for each id) as an N+1, and give the fix of one list procedure that returns the rows with their data?
+
+PASS if yes. FAIL if the review does not name this fault, or keeps one query per row as the fix.

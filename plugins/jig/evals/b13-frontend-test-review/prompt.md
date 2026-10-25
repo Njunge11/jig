@@ -1,7 +1,6 @@
 ---
 description: "frontend-tests: mock at the network, never the component's hooks"
-tags: [obedience, frontend]
-runs: 1
+tags: [obedience, frontend, regression]
 max_turns: 8
 timeout_seconds: 420
 allowed_tools: [Read, Glob, Grep, Skill]

@@ -17,7 +17,7 @@ An item with no eval run has no measured cost (—).
 | [x] | b21: recipe-expanded-panel names where the panel file goes (`components/ui/`, as `structure` says); a grader checks the place; run b21 again (2 of 3 runs put it in `components/`) | $1.73 | $0.59 |
 | [x] | b32-no-skeleton-on-return: run | $0.92 | $0.08 |
 | [x] | Verify the 20 uncommitted skill edits in `plugins/jig/skills` | — | — |
-| [ ] | Verify or discard the uncommitted changes in the old cases (a, b, c, d folders not yet committed) | — | — |
+| [x] | Verify or discard the uncommitted changes in the old cases (a, b, c, d folders not yet committed) | $23.00 | $1.57 |
 | [x] | Fixture `tsconfig.json`: ship `"jsx": "react-jsx"` and the `.next/dev/types` include that `next build` writes | — | — |
 | [x] | Fixture `next build` fails: prerendering `/products` throws `UNAUTHORIZED`, because the fixture's session is null | — | — |
 | [ ] | Convert the code cases to the store-app design: b09, b10, b11, b14, b15, b22, b23, b24, b25, b26, b28, b29, b30, b31, b33, b35, b36 | | |
@@ -25,4 +25,4 @@ An item with no eval run has no measured cost (—).
 | [ ] | Remove each converted case's `-ref-good` / `-ref-bad` folders | — | — |
 | [x] | Remove the old `/private/tmp/e-*` workspaces | — | — |
 
-**Total so far:** agent $13.50, judge $3.87, together $17.37.
+**Total so far:** agent $36.50, judge $5.44, together $41.94.

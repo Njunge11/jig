@@ -14,7 +14,7 @@ Type: feat. Branch: `feat/invite-list`.
 
 ### features/invites/db/invitations.repo.ts
 
-- [ ] listInvitations returns the pending invitations of one company, newest first
+- [ ] listInvitations returns the pending invitations of one store, newest first
 
 ## Manual verification
 

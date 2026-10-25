@@ -3,6 +3,8 @@ type: llm
 weight: 1
 ---
 
-Judge only the one point below. Ignore every other quality of the answer. Do not fail the answer for a fault that this point does not name.
+Judge only the one question below. Read only the code in the answer. If the answer has no code that decides the question, the verdict is FAIL.
 
-PASS if the corrected test mocks at the network edge with MSW (msw-trpc handlers) or seeds the QueryClient cache, and renders through a provider wrapper. FAIL if the corrected test still mocks `useSuspenseQuery`, `useQuery` or `useTRPC`.
+Question: in the corrected test, does the real `useSuspenseQuery` run, fed either by an MSW handler at the network edge (`server.use(...)`, an `msw-trpc` handler) or by a seeded QueryClient cache (`setQueryData`)?
+
+PASS if yes. FAIL if the corrected test still mocks `useSuspenseQuery`, `useQuery`, `useTRPC` or `@tanstack/react-query`, or gives the component no data source.
