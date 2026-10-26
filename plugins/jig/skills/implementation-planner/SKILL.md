@@ -156,7 +156,7 @@ Setup (only when this checklist creates a new app or package):
 ## Done
 
 - [ ] Every task box in `## Backend` is checked and shown.
-- [ ] Green suite output pasted.
+- [ ] The full suite is green in the push: its test summary pasted.
 - [ ] `git log` shows one commit per task, or the handoff's Deviations names each commit that holds two tasks.
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
@@ -225,7 +225,7 @@ Transcribed from the mockup images. The builder builds to these statements, and 
 ## Done
 
 - [ ] Every F item above is checked and shown; every V item is checked or listed as browser-check.
-- [ ] Green `vitest` output pasted.
+- [ ] The full suite is green in the push: its test summary pasted.
 - [ ] `git log` shows one commit per task, or the handoff's Deviations names each commit that holds two tasks.
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>

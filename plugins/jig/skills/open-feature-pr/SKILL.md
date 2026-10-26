@@ -7,7 +7,7 @@ description: Owns the branch, title, and body conventions for a pull request, pl
 
 Open the pull request for a completed implementation checklist. The checklist's kind sets the entry conditions. Make sure they are true before you start.
 
-- **TDD implementation checklists:** every task in every section is `[x]`. The suite is green. The file `docs/<project>/handoffs/NN-<slug>.md` exists. The tracker Status is flipped. A checklist with both a `## Backend` and a `## Frontend + Integration` section gets one PR, opened by the frontend run; the backend run only commits locally. The review verdict's `fail` lines are fixed and committed before the push. The branch is pushed once, when the PR opens; a later fix waits in a local commit for the next push.
+- **TDD implementation checklists:** every task in every section is `[x]`. The branch's test files are green; the full suite runs once, in the push. The file `docs/<project>/handoffs/NN-<slug>.md` exists. The tracker Status is flipped. A checklist with both a `## Backend` and a `## Frontend + Integration` section gets one PR, opened by the frontend run; the backend run only commits locally. The review verdict's `fail` lines are fixed and committed before the push. The branch is pushed once, when the PR opens; a later fix waits in a local commit for the next push.
 - **Step implementation checklists:** the transcript shows the output of every `## Done` item. The tracker Status is flipped. These checklists have no handoff file and no task boxes.
 
 ## Branch and title
@@ -33,7 +33,7 @@ each line: can a reviewer see this in the diff? If yes, delete the line.
 Omit this section if there is nothing.
 
 ## Verification
-TDD checklists: the checklist's Manual verification steps, plus the suite command and result.
+TDD checklists: the checklist's Manual verification steps, plus the test summary the push printed.
 Step checklists: one line per Done item — the command, its result, and what it proves.
 ```
 
@@ -85,7 +85,7 @@ Check the title and the body against this list. Fix each failure before you run 
 
 ## Open it
 
-1. Push the branch: `git push -u origin HEAD`.
+1. Push the branch, and send the output to a file: `git push -u origin HEAD > <scratch>/push.log 2>&1`. The repo's pre-push hook runs the full suite. When the repo has no pre-push hook that runs the tests, run the full suite once before the push instead. Copy the test summary into the Verification section.
 2. Run `gh pr create` against the default branch, with the body read from a quoted heredoc. A body passed in `--body "…"` runs every backtick span in it as a shell command.
 
 ```bash
@@ -98,8 +98,8 @@ EOF
 
 ## When a step fails
 
-- **`git push` is rejected as non-fast-forward.** The remote branch moved. Run `git pull --rebase`. Run the suite again. Then push again.
-- **A pre-push hook fails.** The hook failure is part of the work. Diagnose it and fix it. Never pass `--no-verify`.
+- **`git push` is rejected as non-fast-forward.** The remote branch moved. Run `git pull --rebase`. Run the branch's test files again. Then push again: the push runs the full suite.
+- **A pre-push hook fails.** The hook failure is part of the work. Read the cause in the push's output file; never push again only to see the output, because each push runs the full suite. Fix the cause, then push again. Never pass `--no-verify`.
 - **`gh` says to run `gh auth login`.** It is not authenticated. Run `gh auth status`. Ask the developer to run `gh auth login`. Do not open the PR by another route.
 - **`gh` reports "no commits between main and the branch".** You are on `main`, or the branch holds no commit. Run `git log main..HEAD` to confirm. Commit the work on the feature branch, then push again.
 - **`gh` reports that a pull request for the branch already exists.** The PR is open. Run `gh pr view --json url -q .url` and show that URL. Never open a second PR.
