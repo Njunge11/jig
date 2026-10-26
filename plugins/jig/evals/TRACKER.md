@@ -23,8 +23,8 @@ An item with no eval run has no measured cost (—).
 | [x] | Convert the code cases to the store-app design: b09, b10, b11, b14, b15, b22, b23, b24, b25, b26, b28, b29, b30, b31, b33, b35, b36 | $47.01 | $9.69 |
 | [x] | b22: recipe-page-preview names where the shared render component goes (`components/ui/`, as `structure` says: two features use it); a grader checks the place; run b22 again (3 of 3 runs import `features/storefront/ui/` from `features/products/ui/`) | $2.48 | $0.83 |
 | [x] | b28: recipe-search-and-filters names where `search-params.ts` goes (`features/<feature>/ui/`, as `structure` says); a grader checks the place; run b28 again (3 of 3 runs put it in `features/home/`) | $1.39 | $0.07 |
-| [ ] | Decide b17 (planner writes a checklist) and b19 (open-feature-pr): grade the reply, or a written file | — | — |
+| [x] | Decide b17 (planner writes a checklist) and b19 (open-feature-pr): grade the reply, or a written file. Decided: the outcome, per the guide. b17 grades the checklist file the planner writes; b19 pushes to a local remote and a stand-in `gh` records the PR | $8.28 | $0.92 |
 | [ ] | Remove each converted case's `-ref-good` / `-ref-bad` folders | — | — |
 | [x] | Remove the old `/private/tmp/e-*` workspaces | — | — |
 
-**Total so far:** agent $87.38, judge $16.03, together $103.41.
+**Total so far:** agent $95.66, judge $16.95, together $112.61.

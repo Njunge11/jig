@@ -1,0 +1,5 @@
+schema_version: "1.1"
+name: b19-open-feature-pr
+plugins: ["../..", "../../evals-harness"]
+context:
+  scaffold_script: fixture.sh
