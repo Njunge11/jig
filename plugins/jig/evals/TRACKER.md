@@ -24,7 +24,7 @@ An item with no eval run has no measured cost (—).
 | [x] | b22: recipe-page-preview names where the shared render component goes (`components/ui/`, as `structure` says: two features use it); a grader checks the place; run b22 again (3 of 3 runs import `features/storefront/ui/` from `features/products/ui/`) | $2.48 | $0.83 |
 | [x] | b28: recipe-search-and-filters names where `search-params.ts` goes (`features/<feature>/ui/`, as `structure` says); a grader checks the place; run b28 again (3 of 3 runs put it in `features/home/`) | $1.39 | $0.07 |
 | [x] | Decide b17 (planner writes a checklist) and b19 (open-feature-pr): grade the reply, or a written file. Decided: the outcome, per the guide. b17 grades the checklist file the planner writes; b19 pushes to a local remote and a stand-in `gh` records the PR | $8.28 | $0.92 |
-| [ ] | Remove each converted case's `-ref-good` / `-ref-bad` folders | — | — |
+| [x] | Remove each converted case's `-ref-good` / `-ref-bad` folders (the cases that still grade the reply keep theirs) | — | — |
 | [x] | Remove the old `/private/tmp/e-*` workspaces | — | — |
 
 **Total so far:** agent $95.66, judge $16.95, together $112.61.
