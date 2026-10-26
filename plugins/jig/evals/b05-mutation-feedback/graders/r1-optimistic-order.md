@@ -8,4 +8,4 @@ Judge only the one question below. The input is the git diff of the change the a
 
 Question: Does the archive mutation write the cache optimistically in this order: cancel, snapshot, set, roll back on error, invalidate on settle?
 
-PASS if `onMutate` awaits `cancelQueries` for `products.list`, reads the previous data, sets the new data and returns the snapshot; `onError` restores the snapshot; `onSettled` invalidates `products.list`. The QueryClient may be `context.client` or `queryClient`. FAIL if a step is missing, or the invalidation runs only in `onSuccess`.
+PASS if `onMutate` awaits `cancelQueries` for `products.list`, reads the previous data, sets the new data and returns the snapshot; `onError` restores the snapshot; `onSettled` invalidates `products.list`; it may skip the invalidation while another save of the same mutation key is still pending (`isMutating({ mutationKey }) === 1`), so the last save to settle refetches. The QueryClient may be `context.client` or `queryClient`. FAIL if a step is missing, or the invalidation runs only in `onSuccess`.

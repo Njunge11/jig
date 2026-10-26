@@ -402,10 +402,12 @@ export default async function Page() {
     server.
 58. Default: variables-only. Render the pending row from the
     mutation's `variables` + `isPending`; no cache writes; it
-    reconciles itself on settle. An optimistic switch, checkbox or
-    rename field stays enabled and fully drawn while it saves: no
-    `disabled={isPending}`, which dims it. Its handler ignores a
-    second change while the first is pending.
+    reconciles itself on settle. A switch or checkbox is the
+    exception: it follows every click at once, so it is never
+    `disabled={isPending}` (which dims it) and never drops a click.
+    It writes the cache, queues its saves in one `scope`, and
+    refetches only after the last save — the
+    `recipe-mutation-feedback` skill, step 8, has the pattern.
 59. Cache-write optimism only when other components must reflect
     the change immediately, and always in this order: cancel,
     snapshot, set, rollback on error, invalidate in `onSettled`.
