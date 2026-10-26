@@ -25,10 +25,12 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
    procedure takes `q`.
 
 2. **Define the URL state once, shared by both sides.** The URL
-   owns every committed narrowing param. One parsers module:
+   owns every committed narrowing param. One parsers module, in
+   `features/<feature>/ui/search-params.ts`, where the `structure`
+   tree puts it; the server page imports it from there:
 
    ```ts
-   // search-params.ts — one definition; server and client import it
+   // features/products/ui/search-params.ts — one definition; server and client import it
    import {
      createLoader, parseAsInteger, parseAsString, parseAsStringLiteral,
    } from "nuqs/server";
@@ -160,8 +162,8 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
 
 - [ ] Narrowing happens in the list procedure; the client sends
       input, never post-filters.
-- [ ] Every narrowing param lives in one shared parsers module;
-      the server page parses with its loader and prefetches the
+- [ ] Every narrowing param lives in one shared parsers module,
+      `features/<feature>/ui/search-params.ts`; the server page parses with its loader and prefetches the
       identical input.
 - [ ] Typing in the search box fires no query per keystroke; the
       commit is debounced.

@@ -23,7 +23,12 @@ no network, no `postMessage`, no reload.
    one shared component that takes its data as props and fetches
    nothing. The real public page feeds it query data; the preview
    feeds it the live draft (`form.watch()`, editor state). One
-   component — the preview cannot drift from the page.
+   component — the preview cannot drift from the page. When the
+   public page and the editor are two features, the shared
+   component and the theme scope it renders in (step 3) move to
+   `components/ui/`: the `structure` tree puts what two features
+   render in `components/ui/`, and a feature never imports another
+   feature's `ui/`.
 
 2. **Render it in-document:**
 
@@ -107,6 +112,9 @@ no network, no `postMessage`, no reload.
 
 - [ ] The preview and the real page render the same shared
       component; the preview component fetches nothing.
+- [ ] When the page and the editor are two features, the shared
+      component and its theme scope live in `components/ui/`; no
+      feature imports another feature's `ui/`.
 - [ ] Typing updates the preview with zero network requests.
 - [ ] No cross-app iframe or `postMessage` in the draft path.
 - [ ] The preview sits in the target's theme scope; tokens and
