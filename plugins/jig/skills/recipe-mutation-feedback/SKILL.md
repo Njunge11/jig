@@ -40,6 +40,24 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
    </Button>
    ```
 
+   A control that holds a value on an optimistic tier (a switch,
+   a checkbox, a rename field) is the exception. It shows the new
+   value at once and stays enabled and fully drawn while the write
+   runs: never `disabled={isPending}`, because the kit dims a
+   disabled control for the whole save and refetch, and an
+   optimistic control that dims does not feel instant. Its handler
+   ignores a second change while the first is pending:
+
+   ```tsx
+   <Switch
+     checked={toggle.isPending ? toggle.variables.enabled : data.enabled}
+     onCheckedChange={(enabled) => {
+       if (toggle.isPending) return; // one intent at a time
+       toggle.mutate({ id, enabled });
+     }}
+   />
+   ```
+
 3. **The toast contract.** Success names the action and the
    object, past tense: `toast.success("Product archived")`. Failure
    names what failed: `toast.error("Couldn't archive the product")`.
@@ -131,8 +149,12 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
 
 - [ ] Each mutation states its tier; destructive writes confirm
       first and are never optimistic.
-- [ ] The firing control is disabled with a spinner while
-      pending; no double-submit; no global overlay.
+- [ ] A button that fires a write is disabled with a spinner
+      while pending; no double-submit; no global overlay.
+- [ ] A control that holds a value on an optimistic tier (switch,
+      checkbox, rename) shows the new value at once and is never
+      disabled or dimmed while pending; its handler ignores a
+      second change instead.
 - [ ] Success and failure toasts name the action; no boundary
       shows a mutation failure.
 - [ ] Invalidation runs in `onSettled` through the derived
