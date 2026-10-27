@@ -51,25 +51,25 @@ Then write the tracker as `docs/<project>/tracker.md` — fill the **Tracker tem
 For a TDD implementation checklist with both a `## Backend` and a `## Frontend + Integration` section:
 
 ```
-/goal the implement-backend skill was run on docs/<project>/checklists/NN-<slug>.md for its Backend section, then the implement-frontend skill was run on the same checklist for its Frontend + Integration section, and every item in its Done section is shown satisfied in the transcript
+/goal the implement-backend skill was run on docs/<project>/checklists/NN-<slug>.md for its Backend section, then the implement-frontend skill was run on the same checklist for its Frontend + Integration section, and every item in its Done section is shown satisfied in the transcript. A V item listed as browser-check, and every step under Manual verification, is the developer's check and never holds the goal open. The review verdict is the last review run's verdict.
 ```
 
 For a TDD implementation checklist with only a `## Backend` section:
 
 ```
-/goal the implement-backend skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript
+/goal the implement-backend skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript. Every step under Manual verification is the developer's check and never holds the goal open. The review verdict is the last review run's verdict.
 ```
 
 For a TDD implementation checklist with only a `## Frontend + Integration` section:
 
 ```
-/goal the implement-frontend skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript
+/goal the implement-frontend skill was run on docs/<project>/checklists/NN-<slug>.md and every item in its Done section is shown satisfied in the transcript. A V item listed as browser-check, and every step under Manual verification, is the developer's check and never holds the goal open. The review verdict is the last review run's verdict.
 ```
 
 For a step implementation checklist:
 
 ```
-/goal the implement-steps skill was run on docs/<project>/checklists/NN-<slug>.md and every step and every Done item in it is shown satisfied in the transcript; for each Done item the pasted proof is the command, its final summary output, and its exit status — full output is not required
+/goal the implement-steps skill was run on docs/<project>/checklists/NN-<slug>.md and every step and every Done item in it is shown satisfied in the transcript; for each Done item the pasted proof is the command, its final summary output, and its exit status — full output is not required. The review verdict is the last review run's verdict.
 ```
 
 ### Step 5: Check your output
@@ -161,7 +161,7 @@ Setup (only when this checklist creates a new app or package):
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] The `review-backend-feature` verdict pasted: one line per item.
-- [ ] Every `fail` line of the review verdict is fixed in one commit, or the verdict has none.
+- [ ] Every `fail` line of the last review run's verdict is fixed in one commit, or that verdict has none.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 ```
@@ -230,7 +230,7 @@ Transcribed from the mockup images. The builder builds to these statements, and 
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] The `review-frontend-feature` verdict pasted: one line per item.
-- [ ] Every `fail` line of the review verdict is fixed in one commit, or the verdict has none.
+- [ ] Every `fail` line of the last review run's verdict is fixed in one commit, or that verdict has none.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 ```
@@ -280,7 +280,7 @@ Tick each box when you paste its output.
 - [ ] <standing check command> green at baseline counts, output pasted.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] The domain's review verdict pasted (`review-backend-feature` or `review-frontend-feature`): one line per item.
-- [ ] Every `fail` line of the review verdict is fixed in one commit, or the verdict has none.
+- [ ] Every `fail` line of the last review run's verdict is fixed in one commit, or that verdict has none.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 ```
