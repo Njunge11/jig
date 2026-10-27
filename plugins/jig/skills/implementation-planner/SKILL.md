@@ -100,7 +100,7 @@ When every check passes, you are done.
 - **`$ARGUMENTS` is empty, or the spec doc does not exist.** Do not guess a path. Ask the developer for the spec doc's path.
 - **The developer does not resolve a gap from Step 3.** Stop and report the open question. Never design the answer yourself. Never write a checklist over a gap.
 - **`docs/<project>/tracker.md` already exists.** Add this run's rows and run commands to it. Keep every row that is already there, with its number and its Status. Never renumber an existing implementation checklist.
-- **The developer changes a decision after its checklist exists.** The change goes through the spec, never into the checklist by hand: write it into the spec as the rule it sets, then re-run this skill on the spec. Rewrite the checklist that the changed text covers, in place — same file, same number, same tracker row — and run Step 5 on it. Only a checklist whose tracker Status is `Not started` is rewritten; when the covering checklist is already in progress or done, its boxes stay as the builder left them and the change becomes a new checklist with the next number. A checklist edited outside this skill skipped Step 3 and Step 5: its new rows were never checked against the developer's answers and got no recipe walk, so a builder finds the gaps at build time and fills them itself.
+- **The developer changes a decision after its checklist exists.** The change goes through the spec, never into the checklist by hand: write it into the spec as the rule it sets, then re-run this skill on the spec. Rewrite the checklist that the changed text covers, in place — same file, same number, same tracker row — and run Step 5 on it. A checklist whose PR has not merged is rewritten in place, whatever its Status: a `Not started` one on `main`, one with a branch on that branch. Its ticked boxes stay as the builder left them, and each changed row is a new `[ ]` box. Only a checklist whose PR has merged keeps its text, and the change becomes a new checklist with the next number. A checklist edited outside this skill skipped Step 3 and Step 5: its new rows were never checked against the developer's answers and got no recipe walk, so a builder finds the gaps at build time and fills them itself.
 - **A Step 5 check fails twice on the same file.** Stop and report the file, the failing check, and the fix you tried. A tracker with a wrong link or a wrong run command is worse than no tracker.
 
 ## Checklist formats
@@ -161,7 +161,7 @@ Setup (only when this checklist creates a new app or package):
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] The `review-backend-feature` verdict pasted: one line per item.
-- [ ] Every `fail` line of the last review run's verdict is fixed in one commit, or that verdict has none.
+- [ ] Every `fail` line of the last review run's verdict has its fix committed, or that verdict has none.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 ```
@@ -230,7 +230,7 @@ Transcribed from the mockup images. The builder builds to these statements, and 
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] The `review-frontend-feature` verdict pasted: one line per item.
-- [ ] Every `fail` line of the last review run's verdict is fixed in one commit, or that verdict has none.
+- [ ] Every `fail` line of the last review run's verdict has its fix committed, or that verdict has none.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 ```
@@ -280,7 +280,7 @@ Tick each box when you paste its output.
 - [ ] <standing check command> green at baseline counts, output pasted.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
 - [ ] The domain's review verdict pasted (`review-backend-feature` or `review-frontend-feature`): one line per item.
-- [ ] Every `fail` line of the last review run's verdict is fixed in one commit, or that verdict has none.
+- [ ] Every `fail` line of the last review run's verdict has its fix committed, or that verdict has none.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 ```
