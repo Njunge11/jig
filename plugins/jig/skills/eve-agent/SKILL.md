@@ -79,6 +79,7 @@ Three steps, in order. They are the first three steps of your plan, before any o
 
 - **`useEveAgent` from `eve/react` is the client.** Render `data.messages`, steer on `status`, send with `send()`.
 - **Resume a thread with `resume: true` and `initialSession`.** Persist the cursor from `onSessionChange`. Remount the chat on a thread switch with a `key`.
+- **One store holds one eve session.** `initialEvents` "must be an ordered prefix of the same session's stream" (`guides/frontend/overview.mdx`, "Resumable sessions"); a log that is not replays from index 0. eve numbers each session's turns from `turn_0`, so a thread that runs on a second session — a recovery, a new session on the same thread — never puts the first session's events in the store: the store would replay into turns of the same ids and draw the new turn into an old message. The thread's read answers the past sessions apart from the current one, the client folds them through the same reducer outside the store and draws them in front, and the seam that hands events to the store checks them for one session.
 
 ### Evals
 
@@ -118,7 +119,7 @@ Reject the change if any item is true. Walk it against every changed file under 
 6. A hook blocks, injects context, or has an unguarded body.
 7. A value the agent must remember across turns rides `clientContext` instead of `defineState`.
 8. A lane change names no turn for the developer to send under manual verification, or names one without the tool order and the model-call count its trace must show.
-9. A `useEveAgent` client resumes a thread without `initialSession` and `resume: true`, or reuses one store across threads. Gate for the `resume: true` clause: `pnpm lint`, rule `no-restricted-syntax (eve-agent 9)`; walk the rest by hand.
+9. A `useEveAgent` client resumes a thread without `initialSession` and `resume: true`, reuses one store across threads, or passes `initialEvents` that hold more than one session. Gate for the `resume: true` clause: `pnpm lint`, rule `no-restricted-syntax (eve-agent 9)`; walk the rest by hand.
 10. A gate in the Gates section was not run, or its output is not in the proof, or a builder ran the developer's part of one: an eval script, a turn sent to a model, or `eve traces` of a turn the developer did not send.
 12. A tool whose raw output a client, a hook or a mapping reads has no `outputSchema`. Gate: `pnpm lint`, rule `no-restricted-syntax (eve-agent new)`.
 13. A tool's `execute` body runs outside the tool's trace root, or a call under it runs outside `trace`, so the turn's block misses it (`backend-standards` Review item 35).
