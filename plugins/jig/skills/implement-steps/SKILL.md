@@ -17,8 +17,8 @@ Execute a step implementation checklist. The checklist drives the work — the i
 2. **Create the branch before any commit.** The checklist's `## Scope` section names it (`<type>/<slug>`). Create it off an up-to-date `main`. If the session is already on that branch, continue on it. Never commit to `main` or an unrelated branch. **Gate:** `git branch --show-current` prints the checklist's branch.
 3. **Record the baseline.** Run the standing checks (the `test`/`test:run` and `typecheck` scripts) of the affected packages on the fresh branch. Record each command, its final summary counts, and its exit status. The `## Done` items compare against these counts. **Gate:** the baseline runs and their counts are in the transcript.
 4. **Execute the `## Steps` section in order**, one step at a time. Each step is a mechanical rule — do exactly what it names, nothing more. The step list is immutable: never add, remove, or reword a step. The rules of the governing rubric govern every edit. Commit each step that changes files as one commit, message under the **Language rules** of the `open-feature-pr` skill. **Never bypass hooks** (`--no-verify` is banned); a failing hook is part of the work. **Gate:** every step is executed, in order.
-5. **Walk the governing rubric item by item against your diff** (`git diff main`) — backend: the `backend-standards` Review checklist; frontend: the `frontend-standards` `## Rules` and the Verify list of every recipe step 1 loaded. When the diff touches a file that imports `xstate` or a file under a `machine/` folder, walk the Shared items and the domain's items of the `state-machines` Review checklist the same way and run its Gates. Walk the tree and the Placement rules of the `structure` skill over every file the diff adds or moves, and move a misplaced file now. Name each item that the diff violates. Fix each violation. Commit the fixes as one commit. **Gate:** every item and every added or moved file has a recorded verdict, and the standing checks are green at the baseline counts.
-6. **Invoke the domain's review skill** — backend: `review-backend-feature`; frontend: `review-frontend-feature` — with the checklist path and the branch as its arguments. It runs in a forked, read-only subagent that has no access to this session — that separation is what keeps the review independent. It changes no file; it returns a verdict. Never walk its checklists yourself. A diff with no test changes passes the test-skill items trivially; that is expected. The review runs once per checklist: this invocation is its one review, and no later step invokes it again. **Gate:** the invocation returns the per-item verdict.
+5. **Walk the governing rubric item by item against your diff** (`git diff main`) — backend: the `backend-standards` Review checklist; frontend: the `frontend-standards` `## Rules` and the Verify list of every recipe step 1 loaded. When the diff touches a file that imports `xstate` or a file under a `machine/` folder, walk the Shared items and the domain's items of the `state-machines` Review checklist the same way and run its Gates. Walk the tree and the Placement rules of the `structure` skill over every file the diff adds or moves, and move a misplaced file now. Name each item that the diff violates. Fix each violation. Commit the fixes as one commit. **Gate:** the rubric has its count line and one line per fixed item, every added or moved file is in its place, and the standing checks are green at the baseline counts.
+6. **Invoke the domain's review skill** — backend: `review-backend-feature`; frontend: `review-frontend-feature` — with the checklist path and the branch as its arguments. It runs in a forked, read-only subagent that has no access to this session — that separation is what keeps the review independent. It changes no file; it returns a verdict. Never walk its checklists yourself. A diff with no test changes passes the test-skill items trivially; that is expected. The review runs once per checklist: this invocation is its one review, and no later step invokes it again. When the verdict returns, write it into the proof's `review` line at once. **Gate:** the invocation returns the verdict.
 7. **Fix every `fail` line of the verdict, in one round.** Apply the change each line names, then run the standing checks. Only a `fail` line gets a change: a `pass` or `skipped` line, and any remark the reviewer adds beside the lines, change nothing. Commit the fixes as one commit: `refactor(<slug>): fix review-checklist violations`. That commit is this step's proof, and nothing reviews it: never invoke the review again on the fix, and never walk the rubric over it yourself. A second review of a fix finds new lines in the fix, a fix of those invites a third review, and the run never ends (measured: one run made 18 reviews and ran 3 h 15 min after its PR was open). When a `fail` line asks for a change that contradicts a step or the rubric, stop and report the line and the conflict. A verdict with no `fail` line needs no commit. **Gate:** one commit after the review fixes every `fail` line, or the verdict has none, and the standing checks are green at the baseline counts.
 8. **Prove the `## Done` items.** For each item except the PR item: run its command, paste the command with its final summary output and its exit status, and tick the box. Then set this checklist's Status to `Done` in `docs/<project>/tracker.md`. Commit the checklist and the tracker. **Gate:** every non-PR box is `[x]`, with its proof in the transcript.
 9. **Push once and open the PR as the `open-feature-pr` skill specifies.** That skill owns the branch, title, and body format, and the `gh` steps. Then tick the PR box with the URL and commit it locally; the next push carries it — never push for this tick alone. **Gate:** `gh` returns the PR URL, and every `## Done` box is `[x]`.
@@ -32,12 +32,11 @@ skills   structure, open-feature-pr, <the Domain's standards and recipes>
 checklist docs/growth/checklists/07-extract-email-package.md
  steps 1–N executed in order, one line per step
 
-<governing rubric — backend-standards, or frontend-standards Rules>
- 1 pass
+<governing rubric — backend-standards, or frontend-standards Rules> 38 walked, 1 fixed
  2 fixed — packages/email/src/send.ts:12 (row type derived from the schema)
- ... one line per item, first to last
+ ... one count line, then one line per fixed item; a pass is silent
 
-review   <paste the verdict the domain's review run returned: one line per item>
+review   <paste the verdict the domain's review run returned: the count lines and the fail lines>
 fixes    <the commit that fixes every fail line, and the standing checks after it — or: no fail line>
 
 done
@@ -47,6 +46,15 @@ done
 tracker  docs/growth/tracker.md — 07 Status: Done
 PR       https://github.com/<org>/<repo>/pull/<n>
 ```
+
+## Reads
+
+The context is the budget. A build that fills it compacts, and a compacted build forgets what it did (measured: one build compacted 7 times and ran its review 18 times; whole-file reads were 270k–690k characters of it, the skills 31k tokens). So:
+
+- Read the lines a task needs, with Read on a range, never a whole file. `cat <file>` and `sed -n 1,400p <file>` on a source file are whole-file reads: never run them.
+- Read the diff once per step that needs it, and keep what you read: never run `git diff main` twice in one step.
+- A green test run prints its summary, so paste the summary, never the whole output.
+- Write what a later step needs into the handoff file as soon as you have it, never only into the transcript.
 
 ## When a step fails
 

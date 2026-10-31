@@ -17,7 +17,7 @@ Open the pull request for a completed implementation checklist. The checklist's 
 
 ## Body template
 
-State what changed and why. Give enough context for a reader who did not see this session. The language rules below apply to every section. Use exactly these sections:
+State what changed and why. Give enough context for a reader who did not see this session. The language rules below apply to every section. Use exactly these sections. The `manual-qa` skill adds its own section after the PR opens:
 
 ```
 ## What
@@ -95,6 +95,7 @@ EOF
 ```
 
 3. Show the PR URL in your output. A transcript-only watcher (e.g. `/goal`) verifies it.
+4. Invoke the `manual-qa` skill with the Skill tool. It writes the PR's manual QA sheet and adds a `## Manual QA` section to the body. **Gate:** the transcript shows the Skill call, then the sheet link or that skill's line that says why no sheet exists.
 
 ## When a step fails
 

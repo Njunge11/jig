@@ -17,11 +17,11 @@ Build the frontend of a feature test-first. The checklist drives the work. This 
 4. **Name the recipes that apply, and load them.** Walk the catalog of the `frontend-standards` skill row by row against every `F<n>` and `V<n>` item of the checklist, and record one verdict per row: `applies` with the item numbers, or `does not apply`. A recipe that the checklist names does not end the walk. Then invoke the recipe skill of every row that applies with the Skill tool. Follow every recipe that applies — the recipe orders the construction. When an item describes a behavior that the Don't list of an applying recipe forbids, the recipe wins: build to the recipe and record the difference in the handoff's **Deviations**. **Gate:** every catalog row has a recorded verdict, and the transcript shows one Skill call per row that applies.
 5. **The `## Frontend + Integration` section of the checklist is the task list.** If the checklist does not have that section, author it first, split into **Behavior (test-backed)** `F<n>` items and **Visual & responsive (browser-checked, never jsdom tests)** `V<n>` items. Cover error and empty states, not just the happy path. Preserve described copy verbatim; never invent an undecided screen, state, or label — record the open question in the handoff's **Deviations**. Work through the `F<n>` items with [the loop](#the-loop) below. **Gate:** every `F<n>` item is `[x]`, and the test file of each task is green.
 6. **Integrate.** Wire the real tRPC path against the feature's actual router under `features/<name>/api` — never an invented shape. The behavior tests must pass against the real router. A value the UI needs that no procedure returns is a backend gap — use [Backend gaps](#backend-gaps) below. **Gate:** the behavior tests are green against the real router.
-7. **Check the `## Rules` list of the `frontend-standards` skill, plus the Verify list of every recipe that step 4 recorded as `applies`, item by item against your diff** (`git diff main`). When the checklist has a `## Design facts` section, walk it the same way: one verdict per `D<n>` statement against the diff — `pass`, `fixed`, or `browser-check` when only the rendered page can settle it. When the diff touches a client that imports `eve/react`, check the Review checklist of the `eve-agent` skill the same way and run its Gates. When the diff touches a file that imports `xstate` or `@xstate/react`, check the Shared and Frontend items of the Review checklist of the `state-machines` skill the same way and run its Gates for Part A and Part C. Walk the tree and the Placement rules of the `structure` skill over every file the diff adds or moves, and move a misplaced file now. Name each item that the diff violates. Fix each violation. Commit the fixes as one commit. **Gate:** every item and every added or moved file has a recorded verdict, and the branch's test files are green: every test file the diff adds or changes (`git diff --name-only main`), run by name in one `vitest run`. Never run the full suite here: the push runs it once.
+7. **Check the `## Rules` list of the `frontend-standards` skill, plus the Verify list of every recipe that step 4 recorded as `applies`, item by item against your diff** (`git diff main`). When the checklist has a `## Design facts` section, walk it the same way: one verdict per `D<n>` statement against the diff — `pass`, `fixed`, or `browser-check` when only the rendered page can settle it. When the diff touches a client that imports `eve/react`, check the Review checklist of the `eve-agent` skill the same way and run its Gates. When the diff touches a file that imports `xstate` or `@xstate/react`, check the Shared and Frontend items of the Review checklist of the `state-machines` skill the same way and run its Gates for Part A and Part C. Walk the tree and the Placement rules of the `structure` skill over every file the diff adds or moves, and move a misplaced file now. Name each item that the diff violates. Fix each violation. Commit the fixes as one commit. **Gate:** each list has its count line and one line per fixed item, every added or moved file is in its place, and the branch's test files are green: every test file the diff adds or changes (`git diff --name-only main`), run by name in one `vitest run`. Never run the full suite here: the push runs it once.
 8. **Visual & responsive.** Verify each `V<n>` item in the browser at 375, 768, 1024, and 1440, and tick it. A `D<n>` fact recorded `browser-check` in step 7 is settled in the same browser pass. When you cannot run a browser, leave the item unticked and list it in the proof as `browser-check`. Never tick a `V<n>` item from the code alone. **Gate:** every `V<n>` item is ticked or listed as `browser-check`.
-9. **Invoke the `review-frontend-feature` skill** with the checklist path and the branch as its arguments. It runs in a forked, read-only subagent that has no access to this session — that separation is what keeps the review independent. It changes no file; it returns a verdict. Never walk its checklists yourself. The review runs once per section: this invocation is the frontend's one review, and no later step invokes it again. **Gate:** the invocation returns the per-item verdict.
+9. **Invoke the `review-frontend-feature` skill** with the checklist path and the branch as its arguments. It runs in a forked, read-only subagent that has no access to this session — that separation is what keeps the review independent. It changes no file; it returns a verdict. Never walk its checklists yourself. The review runs once per section: this invocation is the frontend's one review, and no later step invokes it again. Before you invoke it, read the handoff file: when its `## Review` section already holds this section's verdict, the review ran and a compaction cut the transcript; do not invoke it again, and go on with that verdict. When the verdict returns, write it into the handoff's `## Review` section at once, before the next step: a compaction cuts the transcript, not the file. **Gate:** the handoff's `## Review` section holds the verdict.
 10. **Fix every `fail` line of the verdict, in one round.** Apply the change each line names. Only a `fail` line gets a change: a `pass`, `skipped`, `browser-check` or `developer-check` line, and any remark the reviewer adds beside the lines, change nothing. A line in the verdict's `backend` block is a backend gap: follow [Backend gaps](#backend-gaps). Run the test files of the fixed files by name. Commit the fixes as one commit: `refactor(<feature>): fix review-checklist violations`. That commit is this step's proof, and nothing reviews it: never invoke the review again on the fix, and never walk the rubric over it yourself. A second review of a fix finds new lines in the fix, a fix of those invites a third review, and the run never ends (measured: one run made 18 reviews and ran 3 h 15 min after its PR was open). When a `fail` line asks for a change that contradicts the spec or the checklist, stop and report the line and the conflict. A verdict with no `fail` line needs no commit. A `browser-check` line joins the step 8 list; a `developer-check` line is already in the checklist's `## Manual verification`. **Gate:** one commit after the review fixes every `fail` line, or the verdict has none, and the branch's test files are green: every test file the diff adds or changes (`git diff --name-only main`), run by name in one `vitest run`. Never run the full suite here: the push runs it once.
-11. **Write the handoff and flip the tracker.** Write `docs/<project>/handoffs/NN-<slug>.md` — the `handoffs/` folder sits beside the checklist's folder. Use the [handoff format](#handoff-format) below. Its `## Review` section holds the step 9 verdict pasted whole, one line per item, then one `Fix:` line that names the step 10 commit or says `No fail line.` The file is the proof a watcher reads: a paste in the transcript is cut by compaction, the file is not. When the backend run of the same checklist already wrote that file, append your lines to its four sections instead of writing a second file; `## Review` then holds both verdicts, each with its `Fix:` line. Then set this checklist's Status to `Done` in `docs/<project>/tracker.md`. **Gate:** both files exist on the branch and are committed.
+11. **Write the handoff and flip the tracker.** Write `docs/<project>/handoffs/NN-<slug>.md` — the `handoffs/` folder sits beside the checklist's folder. Use the [handoff format](#handoff-format) below. Its `## Review` section holds the step 9 verdict, written there in step 9, then one `Fix:` line that names the step 10 commit or says `No fail line.` The file is the proof a watcher reads: a paste in the transcript is cut by compaction, the file is not. When the backend run of the same checklist already wrote that file, append your lines to its four sections instead of writing a second file; `## Review` then holds both verdicts, each with its `Fix:` line. Then set this checklist's Status to `Done` in `docs/<project>/tracker.md`. **Gate:** both files exist on the branch and are committed.
 12. **Close the checklist's `## Done` section.** Tick each Done item whose proof is on the branch or in this transcript, in the same edit, and commit it. Leave the PR item and the full-suite item for step 13: the push runs the full suite. A `V<n>` item left as `browser-check` satisfies the Done line that says "checked or listed as browser-check", so tick that line too. Do this before the proof, never after a watcher asks: a watcher that reads the file counts an unticked Done item as unmet, and an edit made only because it asked reads as a bypass. **Gate:** every Done item that this run can prove, except the PR item, is `[x]` and committed.
 13. **Push once and open the PR as the `open-feature-pr` skill specifies.** That skill owns the branch, title, and body format, and the `gh` steps. Do not make your own format. This is the one push of the slice: the branch carries the backend run's commits too. The push runs the full suite (the repo's pre-push hook, or the one full run that `open-feature-pr` names when the repo has no such hook). Then tick the full-suite item with the push's test summary and the PR item, and commit them locally; the next push carries it — never push for this tick alone. **Gate:** `gh` returns the PR URL.
 14. **Return the proof** in the format under [Proof format](#proof-format) below. Then a watcher that sees only the transcript (e.g. `/goal`) can verify the work. The workflow ends here.
@@ -45,7 +45,7 @@ Build the frontend of a feature test-first. The checklist drives the work. This 
 
 ## Review
 
-<the review-frontend-feature verdict, pasted whole: one line per item>
+<the review-frontend-feature verdict, pasted whole: the count lines and the fail lines>
 Fix: <the one commit that fixes its fail lines> — or: No fail line.
 ```
 
@@ -59,10 +59,9 @@ checklist features/invites/checklist.md
  [x] V2 verified at 375/768/1024/1440 — or: V2 browser-check
  ... one line per F and V item, first to last
 
-frontend-standards
- 1 pass
+frontend-standards 65 walked, 1 fixed
  2 fixed — features/invites/ui/member-picker.tsx:12 (Base UI import replaced with the kit's Popover + Command)
- ... one line per rule, first to last
+ ... one count line per rubric list, then one line per fixed item; a pass is silent
 
 recipes
  recipe-page-with-data applies — F1 F2
@@ -70,23 +69,30 @@ recipes
  recipe-search-and-filters does not apply
  ... one line per catalog row, first to last
 
-recipe-data-table Verify
- 1 pass
- ... one line per item, per recipe that applies
+recipe-data-table Verify 8 walked, 0 fixed
+ ... one count line per recipe that applies, then its fixed lines
 
-design-facts
- D1 pass
+design-facts 9 walked, 1 fixed, 1 browser-check
  D4 fixed — features/invites/ui/day-row.tsx:18 (the toggle sits left of the day name)
  D9 browser-check
- ... one line per fact, when the checklist has a ## Design facts section
+ ... when the checklist has a ## Design facts section
 
-review   <paste the verdict the review-frontend-feature run returned: one line per item>
+review   <paste the verdict the review-frontend-feature run returned: the count lines and the fail lines>
 fixes    <the commit that fixes every fail line, and the test run of the fixed files — or: no fail line>
 handoff  docs/growth/handoffs/NN-<slug>.md
 tracker  docs/growth/tracker.md — NN Status: Done
 tests    <paste the green run of the branch's test files>
 PR       https://github.com/<org>/<repo>/pull/<n>
 ```
+
+## Reads
+
+The context is the budget. A build that fills it compacts, and a compacted build forgets what it did (measured: one build compacted 7 times and ran its review 18 times; whole-file reads were 270k–690k characters of it, the skills 31k tokens). So:
+
+- Read the lines a task needs, with Read on a range, never a whole file. `cat <file>` and `sed -n 1,400p <file>` on a source file are whole-file reads: never run them.
+- Read the diff once per step that needs it, and keep what you read: never run `git diff main` twice in one step.
+- A green test run prints its summary, so paste the summary, never the whole output.
+- Write what a later step needs into the handoff file as soon as you have it, never only into the transcript.
 
 ## The loop
 

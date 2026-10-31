@@ -162,7 +162,7 @@ Setup (only when this checklist creates a new app or package):
 - [ ] `git log` shows one commit per task, or the handoff's Deviations names each commit that holds two tasks.
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
-- [ ] The handoff's `## Review` section holds the one `review-backend-feature` verdict, pasted whole: one line per item.
+- [ ] The handoff's `## Review` section holds the one `review-backend-feature` verdict, pasted whole: its count lines and its fail lines.
 - [ ] The handoff's `## Review` section names the one commit, made after that review, that fixes its `fail` lines, or says `No fail line.` The review ran once; a second review is never run and never required.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
@@ -231,7 +231,7 @@ Transcribed from the mockup images. The builder builds to these statements, and 
 - [ ] `git log` shows one commit per task, or the handoff's Deviations names each commit that holds two tasks.
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
-- [ ] The handoff's `## Review` section holds the one `review-frontend-feature` verdict, pasted whole: one line per item.
+- [ ] The handoff's `## Review` section holds the one `review-frontend-feature` verdict, pasted whole: its count lines and its fail lines.
 - [ ] The handoff's `## Review` section names the one commit, made after that review, that fixes its `fail` lines, or says `No fail line.` The review ran once; a second review is never run and never required.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
@@ -281,7 +281,7 @@ Tick each box when you paste its output.
 
 - [ ] <standing check command> green at baseline counts, output pasted.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
-- [ ] The domain's one review verdict pasted whole (`review-backend-feature` or `review-frontend-feature`): one line per item.
+- [ ] The domain's one review verdict pasted whole (`review-backend-feature` or `review-frontend-feature`): its count lines and its fail lines.
 - [ ] One commit, made after that review, fixes its `fail` lines, or the verdict has none. The review ran once; a second review is never run and never required.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.

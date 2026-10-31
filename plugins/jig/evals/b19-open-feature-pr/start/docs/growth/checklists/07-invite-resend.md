@@ -36,5 +36,5 @@ Type: feat. Branch: `feat/invite-resend`.
 - [x] `git log` shows one commit per task, or the handoff's Deviations names each commit that holds two tasks.
 - [x] `docs/growth/handoffs/07-invite-resend.md` exists.
 - [x] Tracker Status flipped to Done.
-- [x] The `review-backend-feature` and `review-frontend-feature` verdicts pasted: one line per item.
+- [x] The `review-backend-feature` and `review-frontend-feature` verdicts pasted: their count lines and their fail lines.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
