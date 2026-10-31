@@ -34,6 +34,8 @@ Write each resolution into the spec as the rule it sets, in the spec's own words
 
 Split the spec's work into implementation checklists. One implementation checklist is one PR, and one PR is one slice: the smallest change a person can verify on the running app. A slice carries everything that outcome needs — the backend, the frontend, and any migration, agent tool, machine, hook or seed on the path between them. A backend change nobody can see on a screen is not a slice: it belongs inside the slice that makes it visible. Order the checklists so that each one depends only on earlier ones.
 
+A checklist holds at most 15 tasks, its `## Backend` and `## Frontend + Integration` sections together. A builder's context compacts about every 15 commits; each compaction reloads the skills and cuts the proofs a goal watcher reads (measured on four runs: slices of 13 and 14 commits built in 81 and 170 min with 2–3 compactions; a slice of 45 commits took 361 min with 7 compactions and 34 skill loads). A slice that needs more than 15 tasks splits into two checklists in order, at a point where the first is still verifiable on the running app. When no such point exists, keep it whole and write the task count in its tracker row.
+
 A builder is the session that executes one implementation checklist, task by task: the developer starts it with the checklist's /goal command, and it runs the `implement-*` skills itself, with no builder subagent. Only the review runs in a subagent, read-only.
 
 Write each implementation checklist as `docs/<project>/checklists/NN-<slug>.md`. One question decides which checklist to write: **does the work change what the software does?**
@@ -160,8 +162,8 @@ Setup (only when this checklist creates a new app or package):
 - [ ] `git log` shows one commit per task, or the handoff's Deviations names each commit that holds two tasks.
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
-- [ ] The `review-backend-feature` verdict pasted: one line per item.
-- [ ] Every `fail` line of the last review run's verdict has its fix committed, or that verdict has none.
+- [ ] The handoff's `## Review` section holds the one `review-backend-feature` verdict, pasted whole: one line per item.
+- [ ] The handoff's `## Review` section names the one commit, made after that review, that fixes its `fail` lines, or says `No fail line.` The review ran once; a second review is never run and never required.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 ```
@@ -229,8 +231,8 @@ Transcribed from the mockup images. The builder builds to these statements, and 
 - [ ] `git log` shows one commit per task, or the handoff's Deviations names each commit that holds two tasks.
 - [ ] `docs/<project>/handoffs/NN-<slug>.md` exists.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
-- [ ] The `review-frontend-feature` verdict pasted: one line per item.
-- [ ] Every `fail` line of the last review run's verdict has its fix committed, or that verdict has none.
+- [ ] The handoff's `## Review` section holds the one `review-frontend-feature` verdict, pasted whole: one line per item.
+- [ ] The handoff's `## Review` section names the one commit, made after that review, that fixes its `fail` lines, or says `No fail line.` The review ran once; a second review is never run and never required.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 ```
@@ -279,8 +281,8 @@ Tick each box when you paste its output.
 
 - [ ] <standing check command> green at baseline counts, output pasted.
 - [ ] <verification the spec states and the builder can prove, copied word for word>
-- [ ] The domain's review verdict pasted (`review-backend-feature` or `review-frontend-feature`): one line per item.
-- [ ] Every `fail` line of the last review run's verdict has its fix committed, or that verdict has none.
+- [ ] The domain's one review verdict pasted whole (`review-backend-feature` or `review-frontend-feature`): one line per item.
+- [ ] One commit, made after that review, fixes its `fail` lines, or the verdict has none. The review ran once; a second review is never run and never required.
 - [ ] Tracker Status flipped to Done.
 - [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
 ```
