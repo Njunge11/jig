@@ -105,7 +105,7 @@ Run all of these before a commit that touches `agent/` or a `useEveAgent` client
 3. The app's typecheck script exits `0`.
 4. For a lane change, the handoff names one turn for the developer to send from the chat interface, under manual verification, with the count of model calls the trace must show, equal to the lane's budget. No agent sends the turn.
 5. `pnpm lint` exits `0` in the app root. It proves every Review item that ends with `Gate:`; walk the other items by hand.
-6. For a change under `agent/` or in a feature's `api/` that a tool calls: the call-trace test's block, pasted from its green run on the real database, with one line per call the change adds or moves (`backend-standards` § "The call trace", `backend-tests` item 15). The block of a real turn is the developer's, from a turn the developer sends.
+6. No test asserts the call trace (`backend-tests` item 15). The block of a real turn is the developer's, from a turn the developer sends with `TRACE_LOG=1`.
 
 ## Review checklist
 

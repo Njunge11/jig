@@ -253,7 +253,7 @@ calling readProductSuggestions to suggest the product's title, tags and category
 - **The result is read off the call, never written into the line.** A `refused`, `notFound`, `forbidden` or `invalid` return prints `refused: "<message>"`; a throw prints `failed: <message>`; a check prints its own word through `describe` (`yes`, `allowed`, `decided: tool draft, action create`); anything else prints `success`.
 - **A line holds no id and no message text.** The root says what the request does (`save the draft's details`), never what the user wrote.
 - **The trace costs nothing when off.** `TRACE_LOG=1` turns it on. Off, every helper returns `fn()` and builds nothing. On, the tree is built in memory and printed with one write when the root closes. It adds no statement to any call.
-- **The helper lives in the db package beside the client**, because the client is what traces the queries: `trace`, `traceQuery`, `traceLazyQuery`, `traceRoot`, `traceBlock`, `takeTrace`, `renderTrace`. An app that has none writes it once there, never per feature. Every entry point has a call-trace test (`backend-tests`, "The call trace test").
+- **The helper lives in the db package beside the client**, because the client is what traces the queries: `trace`, `traceQuery`, `traceLazyQuery`, `traceRoot`, `traceBlock`, `takeTrace`, `renderTrace`. An app that has none writes it once there, never per feature. No test asserts the trace (`backend-tests` Review item 15): a person reads it on the dev server with `TRACE_LOG=1`.
 
 ```ts
 // WRONG — the handler calls the service bare; every trace line under it records nothing
