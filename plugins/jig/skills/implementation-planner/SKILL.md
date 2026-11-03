@@ -165,7 +165,7 @@ Setup (only when this checklist creates a new app or package):
 - [ ] The handoff's `## Review` section holds the one `review-backend-feature` verdict, pasted whole: its count lines and its fail lines.
 - [ ] The handoff's `## Review` section names the one commit, made after that review, that fixes its `fail` lines, or says `No fail line.` The review ran once; a second review is never run and never required.
 - [ ] Tracker Status flipped to Done.
-- [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
+- [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies, or the commit on main when the repo pushes straight to main.
 ```
 
 ### TDD implementation checklist — frontend
@@ -234,7 +234,7 @@ Transcribed from the mockup images. The builder builds to these statements, and 
 - [ ] The handoff's `## Review` section holds the one `review-frontend-feature` verdict, pasted whole: its count lines and its fail lines.
 - [ ] The handoff's `## Review` section names the one commit, made after that review, that fixes its `fail` lines, or says `No fail line.` The review ran once; a second review is never run and never required.
 - [ ] Tracker Status flipped to Done.
-- [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
+- [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies, or the commit on main when the repo pushes straight to main.
 ```
 
 ### Step implementation checklist
@@ -284,7 +284,7 @@ Tick each box when you paste its output.
 - [ ] The domain's one review verdict pasted whole (`review-backend-feature` or `review-frontend-feature`): its count lines and its fail lines.
 - [ ] One commit, made after that review, fixes its `fail` lines, or the verdict has none. The review ran once; a second review is never run and never required.
 - [ ] Tracker Status flipped to Done.
-- [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies.
+- [ ] PR open with its URL, opened as the `open-feature-pr` skill specifies, or the commit on main when the repo pushes straight to main.
 ```
 
 ## Tracker template

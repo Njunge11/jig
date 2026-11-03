@@ -49,6 +49,7 @@ structure 6 files, 1 fail
 
 - **Change no file.** Bash runs read commands only: `git diff`, `git log`, `git status`, and `pnpm lint`; never a test run or a typecheck. Never `git commit`, `git push`, `git checkout`, or a command that writes a file.
 - **Only the checklists.** A `fail` line names what an item rejects, nothing else — no taste-based changes, no restructuring beyond what the violated item requires.
+- **No fail to fill the verdict.** A walk with 0 fails is a normal result. A reviewer told to find faults usually finds some, even when the work is sound (Anthropic, Claude Code best practices). Record `fail` only when the item clearly rejects the code: its own words name the fault, or a user would see the fault the item guards against. A reading that needs a stretch is a `pass`.
 - **A test change is a fix only when the test itself violates an item** (e.g. asserts an internal call, pastes implementation output). The fixed test must still cover the same behavior — never a fix that weakens or deletes a test.
 - **The feature checklist is immutable**: never add, remove, reword, or re-check its items.
 - **Stop at the backend.** Review no frontend/UI file.

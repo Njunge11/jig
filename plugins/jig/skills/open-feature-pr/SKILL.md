@@ -1,6 +1,6 @@
 ---
 name: open-feature-pr
-description: Owns the branch, title, and body conventions for a pull request, plus the language rules. Use when an implementation checklist's work is complete and its PR must be opened. The skill opens the PR with gh and returns the URL.
+description: Owns the branch, title, and body conventions for a pull request, plus the language rules, and the push straight to main for a repo that has no PRs. Use when an implementation checklist's work is complete and its PR must be opened, or its commits pushed to main. The skill opens the PR with gh and returns the URL, or pushes to main and returns the commit.
 ---
 
 # Open Feature PR
@@ -9,6 +9,18 @@ Open the pull request for a completed implementation checklist. The checklist's 
 
 - **TDD implementation checklists:** every task in every section is `[x]`. The branch's test files are green; the full suite runs once, in the push. The file `docs/<project>/handoffs/NN-<slug>.md` exists. The tracker Status is flipped. A checklist with both a `## Backend` and a `## Frontend + Integration` section gets one PR, opened by the frontend run; the backend run only commits locally. The review verdict's `fail` lines are fixed and committed before the push. The branch is pushed once, when the PR opens; a later fix waits in a local commit for the next push.
 - **Step implementation checklists:** the transcript shows the output of every `## Done` item. The tracker Status is flipped. These checklists have no handoff file and no task boxes.
+
+## Straight to main
+
+When the repo's `CLAUDE.md` says work goes straight to main, no PR opens, and this section replaces **Body template** through **Open it**. The branch name and the language rules still apply to each commit message. The entry conditions above still hold, with "the push" in place of "the PR".
+
+1. Invoke the `manual-qa` skill with the Skill tool before the push. Its **Straight to main** section links the sheet in the handoff file and commits that link, so the one push carries it.
+2. Rebase onto main: `git pull --rebase origin main`. When the rebase conflicts on a drizzle `meta/_journal.json` or `meta/NNNN_snapshot.json`, another task took the same migration number. Keep main's journal and snapshot: during a rebase `--ours` is main, so run `git checkout --ours -- <journal> <snapshot>`. Delete the branch's own `.sql` file of that number with `git rm`, then `git rebase --continue`. When the rebase ends, run the repo's `drizzle-kit generate` and commit the new migration. Never merge two journals by hand: drizzle skips a migration whose `when` is older than one it already ran, with no error.
+3. When the rebase pulled new commits, run this checklist's test files again by name.
+4. Push, and send the output to a file: `git push origin HEAD:main > <scratch>/push.log 2>&1`. The repo's pre-push hook runs the checks. When the push is refused because main moved, go back to step 2.
+5. Show `git log --oneline -1 origin/main` in your output: that commit is the shipped work, and a transcript-only watcher (e.g. `/goal`) verifies it. A checklist's PR Done item is met by this commit.
+6. When the work holds a migration, run the staging migrate command that the repo's `CLAUDE.md` names, after the push succeeds and never before.
+7. Watch the CI run of that commit: `gh run list --branch main --commit <sha> --json databaseId -q '.[0].databaseId'`, then `gh run watch <id> --exit-status`. A run that a newer push replaced shows as cancelled; the newer run covers this commit, so watch that one. A failed run is this task's to fix at once, in a new commit and push: main stays green.
 
 ## Branch and title
 
@@ -99,6 +111,7 @@ EOF
 
 ## When a step fails
 
+- **The pre-push hook says origin/main has new commits.** Another task pushed first. Go back to step 2 of **Straight to main**.
 - **`git push` is rejected as non-fast-forward.** The remote branch moved. Run `git pull --rebase`. Run the branch's test files again. Then push again: the push runs the full suite.
 - **A pre-push hook fails.** The hook failure is part of the work. Read the cause in the push's output file; never push again only to see the output, because each push runs the full suite. Fix the cause, then push again. Never pass `--no-verify`.
 - **`gh` says to run `gh auth login`.** It is not authenticated. Run `gh auth status`. Ask the developer to run `gh auth login`. Do not open the PR by another route.

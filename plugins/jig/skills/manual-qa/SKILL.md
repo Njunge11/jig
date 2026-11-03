@@ -1,6 +1,6 @@
 ---
 name: manual-qa
-description: Writes a pull request's manual QA test cases into a Google Sheet, one row per thing an end user can verify, with a status dropdown and rows coloured by status, and keeps that sheet current as the PR changes. Use after the open-feature-pr skill opens a PR, after a later push to an open PR changes what a user sees, or when the developer asks for manual QA, test cases, or a QA sheet for a PR.
+description: Writes a pull request's manual QA test cases into a Google Sheet, one row per thing an end user can verify, with a status dropdown and rows coloured by status, and keeps that sheet current as the PR changes. Use after the open-feature-pr skill opens a PR, before the push in a repo that pushes straight to main, after a later change alters what a user sees, or when the developer asks for manual QA, test cases, or a QA sheet for a PR or a task.
 ---
 
 # Manual QA
@@ -12,6 +12,16 @@ One PR has one Google Sheet. The agent writes the test cases, and a person runs 
 - **The expected outcome comes from the spec and the user's experience.** So a mismatch between the code and the spec shows as a failed row.
 - **The agent never runs a test case and never sets Pass or Fail.** It sends no model turn and runs no eval. A case that needs a chat turn is written for the tester to run.
 - **A missing connector never blocks the PR.** See [When a step fails](#when-a-step-fails).
+
+## Straight to main
+
+When the repo's `CLAUDE.md` says work goes straight to main, no PR exists. The sheet belongs to the task and comes before the push, once the review fixes are committed. Read "the PR" in the steps below as the task, with these changes:
+
+- **Step 1:** the record is the task's handoff file (`docs/<project>/handoffs/NN-<slug>.md`), or the checklist file for a step checklist. When it has a `## Manual QA` section with a sheet link, go to Step 7. Run no `gh` command.
+- **Step 2:** the diff is `git diff origin/main...HEAD`. The line for a change no user can see goes into the record file.
+- **Step 5:** the title is `<repo> <checklist file name, without .md>: <checklist title>`.
+- **Step 6:** write the `## Manual QA` section at the end of the record file, with the short sha of HEAD, and commit it: `docs(<scope>): link the manual QA sheet`. The push carries that commit.
+- **Step 7:** a later fix is a later commit on main. Read the diff from the commit the section names, and write the new sha into the section in the fix's own commit.
 
 ## Instructions
 
