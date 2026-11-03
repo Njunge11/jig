@@ -21,6 +21,7 @@ When the repo's `CLAUDE.md` says work goes straight to main, no PR opens, and th
 5. Show `git log --oneline -1 origin/main` in your output: that commit is the shipped work, and a transcript-only watcher (e.g. `/goal`) verifies it. A checklist's PR Done item is met by this commit.
 6. When the work holds a migration, run the staging migrate command that the repo's `CLAUDE.md` names, after the push succeeds and never before.
 7. Watch the CI run of that commit: `gh run list --branch main --commit <sha> --json databaseId -q '.[0].databaseId'`, then `gh run watch <id> --exit-status`. A run that a newer push replaced shows as cancelled; the newer run covers this commit, so watch that one. A failed run is this task's to fix at once, in a new commit and push: main stays green.
+8. Deploy when the feature is whole. Read the tracker that lists this checklist. When every row's Status is `Done`, with this checklist's row ticked, run the deploy command the repo's `CLAUDE.md` names (for example `gh workflow run main.yml -f deploy=true`) and show its output. A tracker with an open row deploys nothing: a feature ships once, when its last checklist lands, never checklist by checklist. When `CLAUDE.md` names no deploy command, skip this step. **Gate:** the transcript shows the tracker's Status column and either the deploy command's output or the open row that stopped it.
 
 ## Branch and title
 
