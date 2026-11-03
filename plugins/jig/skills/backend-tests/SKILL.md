@@ -1,6 +1,6 @@
 ---
 name: backend-tests
-description: The quality checklist for backend tests — what an ideal TDD test looks like and what to reject. Repos on PGlite, services with fake repos, entry points (tRPC procedure, MCP tool, eve agent tool, route handler, workflow step and function) driven through their real interfaces. Use when writing, reviewing, or planning backend tests, or creating the backend test setup (Vitest + PGlite). Keeps tests asserting observable behavior so the tests survive refactors.
+description: The quality checklist for backend tests — what an ideal TDD test looks like and what to reject. Repos on PGlite; entry points (tRPC procedure, MCP tool, eve agent tool, route handler, workflow step and function) driven through their real interfaces on the real database, which is where a service's behavior is tested; a service test on a fake only for a branch no entry point reaches; one statement budget per entry-point call. Use when writing, reviewing, or planning backend tests, or creating the backend test setup (Vitest + PGlite). Keeps tests asserting observable behavior so the tests survive refactors.
 ---
 
 # Backend Tests
@@ -16,7 +16,7 @@ Run before a commit. Paste the output in the proof.
 Reject the test if any item is true. This list judges each test's quality, not the suite's breadth — coverage is the implementation checklist's job: its task list states which behaviors need tests.
 
 1. The test asserts that an **internal function was called** instead of observable behavior. Observable behavior is the response (success or thrown error), the DB state after the call, or a side effect. A side effect on an external system (item 6's fakes) is observed through the fake's record — assert its exact contents (`fakePayments.charges`), never through `toHaveBeenCalled` spy assertions. Gate: `pnpm lint`, rule `no-restricted-syntax (backend-tests 1)`.
-2. The test is at the **wrong layer**. Each layer has one test setup: a repo runs on PGlite with the real schema; a service runs on an in-memory fake repo; an entry point is driven through its real interface — a tRPC procedure via `createCaller`, an MCP tool via its registered handler, an eve agent tool through the service it calls (the tool body is entry glue, `backend-entry-points`; no agent writes an eval), a route handler via a real request, a workflow step as a plain function with injected dependencies, a workflow function through the `@workflow/vitest` plugin, which runs it in-process with its real steps.
+2. The test is at the **wrong layer**. Each layer has one test setup: a repo runs on PGlite with the real schema; a service's behavior is tested through the entry point that exposes it, and only a branch no entry point reaches runs the service on an in-memory fake (item 16); an entry point is driven through its real interface — a tRPC procedure via `createCaller`, an MCP tool via its registered handler, an eve agent tool through the service it calls (the tool body is entry glue, `backend-entry-points`; no agent writes an eval), a route handler via a real request, a workflow step as a plain function with injected dependencies, a workflow function through the `@workflow/vitest` plugin, which runs it in-process with its real steps.
 3. The test does not have explicit **setup, invocation, or specific assertions**. Examples: no assertions, or a `toBeDefined()`-grade assertion where an exact value is knowable. Gate for the `toBeDefined` case: `pnpm lint`, rule `no-restricted-syntax (backend-tests 3)`; walk the rest by hand.
 4. The test's expected values are **not computed by hand from the spec**: they are pasted from the implementation's output, or they restate the implementation's formula in the assertion.
 5. The test is **non-deterministic**: it reads the clock or randomness directly instead of the injected `now()` / `uuid()`. Gate: `pnpm lint`, rule `no-restricted-syntax (backend-tests 5)`.
@@ -28,8 +28,9 @@ Reject the test if any item is true. This list judges each test's quality, not t
 11. The test verifies **more than one specified behavior**. One behavior per test; a task with several behaviors gets several tests.
 12. The test targets **code that is not ours or has no behavior of its own**: a third-party library's correctness (Zod parsing, Drizzle SQL generation), a trivial pass-through, or a private helper already covered through its public API.
 13. The test asserts **behavior that lives in the fake**, not in the code under test: the fake re-implements production logic (filtering, stamping, ordering), and the assertion observes that logic. A stateful fake lives in `<source>.repo.fake.ts` beside the real repo, with a contract test that proves it against the real implementation — never inline in one test file.
-14. A **statement-budget test** runs through a fake repo or a mocked client instead of the real database, or asserts a bound (`toBeLessThan`) where the exact count is knowable, or the count it asserts was read off the implementation instead of listed from the behavior (item 4). Gate for the `toBeLessThan` clause: `pnpm lint`, rule `no-restricted-syntax (backend-tests 14)`; walk the rest by hand.
+14. A **statement-budget test** runs through a fake repo or a mocked client instead of the real database, or asserts a bound (`toBeLessThan`) where the exact count is knowable, or the count it asserts was read off the implementation instead of listed from the behavior (item 4), or it is a second budget for a call that has one: one entry-point call has one budget, on its widest path (the input that reads or writes the most row sets), and a repo or service test holds none. Gate for the `toBeLessThan` clause: `pnpm lint`, rule `no-restricted-syntax (backend-tests 14)`; walk the rest by hand.
 15. The test asserts the **call trace** (`TRACE_LOG`): the printed `calling <name> to <purpose>` block, its lines or their order. The trace is a development aid a person reads; a test of it pins the call path, fails on every refactor, and catches no fault that the behavior tests and the statement budget miss.
+16. The test drives a **service on a fake** for a behavior an entry point exposes. The entry-point test runs the real service on the real database, so the service test proves the same behavior a second time, against a fake that is code too (item 13), and the suite grows by a layer with no new fault caught. A service test exists only for a branch no entry-point test reaches: a failure the repo raises, a race the fake stages, a service no entry point exposes yet. It uses the smallest fake the branch needs; a stateful fake repo with a contract test exists only when two such tests share it.
 
 ## A test that fails on and off
 
@@ -159,7 +160,7 @@ await expect(caller.users.register({ email: "no-at-sign" })).rejects.toThrow(
 
 **Checklist item 14 — Statement budget. Count the statements the behavior needs, then assert that the call runs exactly that many.**
 
-The budget is the one test that fails when a call grows a query nobody needs. It runs at the entry-point layer on the real database, with the counter that the "Statement counter" section below describes.
+The budget is the one test that fails when a call grows a query nobody needs. It runs at the entry-point layer on the real database, with the counter that the "Statement counter" section below describes. One call has one budget, on its widest path: the input that reads or writes the most row sets, so an N+1 on any path shows up in the count. A second input shape of the same call gets no budget of its own; its behavior test covers it.
 
 ```ts
 // ❌ a bound hides growth, and a fake counts nothing
@@ -243,6 +244,8 @@ statementCount.reset = () => {
 Pass `countingLogger` to `drizzle(client, { logger: countingLogger })` when the test setup builds the PGlite db, and call `statementCount.reset()` in `beforeEach`. Statements inside a transaction count the same way. The transaction markers (`BEGIN`, `COMMIT`, `ROLLBACK`) do not pass through the logger, so a budget lists only the statements the call runs. Verified on drizzle-orm with the PGlite driver: two plain statements count 2; one statement inside a transaction counts 1, committed or rolled back.
 
 ### Service tests — fake repo
+
+A service test exists only for a branch no entry-point test reaches (Review item 16). The rest of a service's behavior is tested through its entry point on the real database.
 
 Use no DB. Assert the returned values and the data persisted to the fake.
 

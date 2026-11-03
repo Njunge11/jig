@@ -168,7 +168,7 @@ Before you write a query, check these options: one query instead of several, one
 - Reuse hot queries as prepared statements. Call `.prepare()` with `sql.placeholder(...)` for the dynamic values — then the driver reuses precompiled SQL.
 - Index the columns that queries use frequently. Enforce the constraints in the schema.
 - Keep the queries deterministic (a stable order for pagination).
-- Give every entry-point call a statement budget. Before you write a procedure, tool or step, list the statements the behavior needs — one per row set it reads or writes — and write the count into the task. A test on the real database asserts that exact count (`backend-tests`, "Statement budget"). A budget that rises names, in the task, the behavior that needs the extra statement.
+- Give every entry-point call one statement budget, on its widest path. Before you write a procedure, tool or step, list the statements that path needs — one per row set it reads or writes — and write the count into the task. One test on the real database asserts that exact count (`backend-tests`, "Statement budget"); a second input shape gets no budget. A budget that rises names, in the task, the behavior that needs the extra statement.
 
 **Never**
 - No queries inside loops. No duplicate queries for the same data.
@@ -446,7 +446,7 @@ Reject the change if any item is true. Items 5–9 and 26 live in the `backend-e
 26. Moved — `backend-entry-points` Review item 6 (eve tool `execute` shape and failure returns).
 27. Removed — evals are the developer's; no agent writes or requires one (`eve-agent` § Evals).
 28. An entry hands a failure to a client that the server does not log with the procedure or tool name, the ids and the message.
-29. An entry-point call has no statement-budget test, or the diff raises a call's statement count without the behavior that needs the extra statement named in the task.
+29. An entry-point call has no statement-budget test or more than one, or the diff raises a call's statement count without the behavior that needs the extra statement named in the task.
 30. A feature router holds the procedures of more than one resource, or holds input schemas or composition, instead of merging one `<resource>.router.ts` per resource as the `structure` skill lays out.
 31. A non-test file forces a type with `as never` or a double assertion (`as any as T`, `as unknown as T`). Gate: `pnpm lint`, rule `no-restricted-syntax (backend-standards 31)`.
 32. A service moves a stage or status with hand-written conditions on a field, instead of `transition` on the machine and its stored snapshot (`state-machines`).
