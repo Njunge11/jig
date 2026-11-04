@@ -27,7 +27,6 @@ Every skill loads on its own with `/jig:<skill>`. This table shows which ones ca
 | `backend-tests` | Partly — the test-quality rules are structure-free; the harness setup expects tests in `features/**/{api,db}/__tests__/`. |
 | `frontend-tests` | Partly — the test-quality rules are structure-free; the harness setup expects tests in `features/**/ui/__tests__/`. |
 | `open-feature-pr` | No — branch, title, and body conventions only. |
-| `manual-qa` | No — it writes a PR's manual QA test cases into a Google Sheet. It needs the Google Sheets and Google Drive connectors. |
 | `state-machines` | No — XState rules for the machine module, the server that moves it, and the React client that renders it. |
 | `skill-audit` | No — it audits skills, not your code. |
 | `frontend-wiring`, `frontend-authoring-custom` | No — the one-time tRPC wiring and the custom-component rules. The frontend lanes and the frontend review load each one when the work touches it, so they are not in the `/` menu. |
@@ -80,8 +79,7 @@ flowchart TD
     SL --> R
     R --> X[the /goal session fixes every fail line in one commit]
     X --> O[open-feature-pr pushes once and opens the PR]
-    O --> Q[manual-qa writes the PR's test cases into a Google Sheet]
-    Q --> M[you run the sheet, read the verdict and merge]
+    O --> M[you read the review verdict and merge]
 ```
 
 Example: your spec is `docs/growth/spec.md`.

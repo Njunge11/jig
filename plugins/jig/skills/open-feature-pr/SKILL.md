@@ -16,14 +16,13 @@ When the repo's `CLAUDE.md` says work goes straight to main, no PR opens, and th
 
 The flow has three parts, and each runs once. The push is cheap: the pre-push hook only refuses a branch behind main and a migration journal out of order, and runs no lint, typecheck or test. The CI run of the pushed commit is the one check: lint, typecheck and the full suite, for the packages changed since the last green run. A deploy is a separate manual run, when a whole feature is on main: it refuses a commit whose own CI run is not green, migrates production, and asks the host for one deployment per app that changed since the commit the host last built for it; an unchanged app gets no deployment. A push never deploys.
 
-1. Invoke the `manual-qa` skill with the Skill tool before the push. Its **Straight to main** section links the sheet in the handoff file and commits that link, so the one push carries it.
-2. Rebase onto main: `git pull --rebase origin main`. When the rebase conflicts on a drizzle `meta/_journal.json` or `meta/NNNN_snapshot.json`, another task took the same migration number. Keep main's journal and snapshot: during a rebase `--ours` is main, so run `git checkout --ours -- <journal> <snapshot>`. Delete the branch's own `.sql` file of that number with `git rm`, then `git rebase --continue`. When the rebase ends, run the repo's `drizzle-kit generate` and commit the new migration. Never merge two journals by hand: drizzle skips a migration whose `when` is older than one it already ran, with no error.
-3. Run this checklist's test files once more by name, in one `vitest run`. Nothing else runs them before the push: the hook runs no test, and the CI run is the first full suite.
-4. Push, and send the output to a file: `git push origin HEAD:main > <scratch>/push.log 2>&1`. When the push is refused because main moved, go back to step 2.
-5. Show `git log --oneline -1 origin/main` in your output: that commit is the shipped work, and a transcript-only watcher (e.g. `/goal`) verifies it. A checklist's PR Done item is met by this commit.
-6. When the work holds a migration, run the staging migrate command that the repo's `CLAUDE.md` names, after the push succeeds and never before.
-7. Watch the CI run of that commit. Use the full 40-character sha: `gh run list --branch main --event push --commit $(git rev-parse HEAD) --json databaseId -q '.[0].databaseId'`, then `gh run watch <id> --exit-status`. A short sha matches no run. A run that a newer push replaced shows as cancelled; the newer run covers this commit, so watch that one. A failed run is this task's to fix at once, in a new commit and push: main stays green. This run is the proof of the checklist's full-suite Done item: paste its id and `success`.
-8. Deploy when the feature is whole. Read the tracker that lists this checklist. When every row's Status is `Done`, with this checklist's row ticked, run the deploy command the repo's `CLAUDE.md` names (for example `gh workflow run main.yml -f deploy=true`) as one command on its own, never chained with `&&` or `;` to another, and only after step 7 showed `success`: the deploy refuses a commit whose own run is not green. Then watch it the same way, with `--event workflow_dispatch`, and show its per-app lines: each app prints either that it is unchanged and gets no deployment, or the deployment it created. A tracker with an open row deploys nothing: a feature ships once, when its last checklist lands, never checklist by checklist. When `CLAUDE.md` names no deploy command, skip this step. **Gate:** the transcript shows the tracker's Status column and either the deploy run's per-app lines or the open row that stopped it.
+1. Rebase onto main: `git pull --rebase origin main`. When the rebase conflicts on a drizzle `meta/_journal.json` or `meta/NNNN_snapshot.json`, another task took the same migration number. Keep main's journal and snapshot: during a rebase `--ours` is main, so run `git checkout --ours -- <journal> <snapshot>`. Delete the branch's own `.sql` file of that number with `git rm`, then `git rebase --continue`. When the rebase ends, run the repo's `drizzle-kit generate` and commit the new migration. Never merge two journals by hand: drizzle skips a migration whose `when` is older than one it already ran, with no error.
+2. Run this checklist's test files once more by name, in one `vitest run`. Nothing else runs them before the push: the hook runs no test, and the CI run is the first full suite.
+3. Push, and send the output to a file: `git push origin HEAD:main > <scratch>/push.log 2>&1`. When the push is refused because main moved, go back to step 1.
+4. Show `git log --oneline -1 origin/main` in your output: that commit is the shipped work, and a transcript-only watcher (e.g. `/goal`) verifies it. A checklist's PR Done item is met by this commit.
+5. When the work holds a migration, run the staging migrate command that the repo's `CLAUDE.md` names, after the push succeeds and never before.
+6. Watch the CI run of that commit. Use the full 40-character sha: `gh run list --branch main --event push --commit $(git rev-parse HEAD) --json databaseId -q '.[0].databaseId'`, then `gh run watch <id> --exit-status`. A short sha matches no run. A run that a newer push replaced shows as cancelled; the newer run covers this commit, so watch that one. A failed run is this task's to fix at once, in a new commit and push: main stays green. This run is the proof of the checklist's full-suite Done item: paste its id and `success`.
+7. Deploy when the feature is whole. Read the tracker that lists this checklist. When every row's Status is `Done`, with this checklist's row ticked, run the deploy command the repo's `CLAUDE.md` names (for example `gh workflow run main.yml -f deploy=true`) as one command on its own, never chained with `&&` or `;` to another, and only after step 6 showed `success`: the deploy refuses a commit whose own run is not green. Then watch it the same way, with `--event workflow_dispatch`, and show its per-app lines: each app prints either that it is unchanged and gets no deployment, or the deployment it created. A tracker with an open row deploys nothing: a feature ships once, when its last checklist lands, never checklist by checklist. When `CLAUDE.md` names no deploy command, skip this step. **Gate:** the transcript shows the tracker's Status column and either the deploy run's per-app lines or the open row that stopped it.
 
 ## Branch and title
 
@@ -32,7 +31,7 @@ The flow has three parts, and each runs once. The push is cheap: the pre-push ho
 
 ## Body template
 
-State what changed and why. Give enough context for a reader who did not see this session. The language rules below apply to every section. Use exactly these sections. The `manual-qa` skill adds its own section after the PR opens:
+State what changed and why. Give enough context for a reader who did not see this session. The language rules below apply to every section. Use exactly these sections:
 
 ```
 ## What
@@ -110,15 +109,14 @@ EOF
 ```
 
 3. Show the PR URL in your output. A transcript-only watcher (e.g. `/goal`) verifies it.
-4. Invoke the `manual-qa` skill with the Skill tool. It writes the PR's manual QA sheet and adds a `## Manual QA` section to the body. **Gate:** the transcript shows the Skill call, then the sheet link or that skill's line that says why no sheet exists.
 
 ## When a step fails
 
-- **The pre-push hook says origin/main has new commits.** Another task pushed first. Go back to step 2 of **Straight to main**.
+- **The pre-push hook says origin/main has new commits.** Another task pushed first. Go back to step 1 of **Straight to main**.
 - **The pre-push hook refuses the migration journal.** A rebase left a migration whose `when` is older than one main holds. Delete the branch's own migration, run the repo's `drizzle-kit generate` again, commit, and push again. Never edit the journal by hand.
 - **`git push` is rejected as non-fast-forward.** The remote branch moved. Run `git pull --rebase`. Run the branch's test files again. Then push again: the push runs the full suite.
 - **A pre-push hook fails.** The hook failure is part of the work. Read the cause in the push's output file; never push again only to see the output, because each push runs the full suite. Fix the cause, then push again. Never pass `--no-verify`.
-- **The deploy run says main's own run is not `success`.** The pushed commit's CI run has not finished, failed, or was replaced by a newer push's run. Finish step 7 of **Straight to main** first: a green run for the commit at origin/main. Then run the deploy command again, on its own.
+- **The deploy run says main's own run is not `success`.** The pushed commit's CI run has not finished, failed, or was replaced by a newer push's run. Finish step 6 of **Straight to main** first: a green run for the commit at origin/main. Then run the deploy command again, on its own.
 - **The deploy run prints `Vercel refused the deployment` for an app.** The run fails after the migration already ran, so production runs the old code on the new schema until the next deploy. Read the error in the run's log, fix the cause, and run the deploy command again: an app already deployed prints that it is unchanged and gets no second deployment.
 - **`gh` says to run `gh auth login`.** It is not authenticated. Run `gh auth status`. Ask the developer to run `gh auth login`. Do not open the PR by another route.
 - **`gh` reports "no commits between main and the branch".** You are on `main`, or the branch holds no commit. Run `git log main..HEAD` to confirm. Commit the work on the feature branch, then push again.
