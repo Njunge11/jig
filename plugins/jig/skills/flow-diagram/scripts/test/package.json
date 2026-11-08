@@ -1,0 +1,12 @@
+{
+  "name": "flow-diagram-tests",
+  "private": true,
+  "type": "module",
+  "description": "Dev-only Playwright tests for the flow-diagram template. Not needed to build a diagram.",
+  "scripts": {
+    "test": "node run.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.65.0"
+  }
+}

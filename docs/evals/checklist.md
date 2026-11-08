@@ -72,6 +72,8 @@ Each case gives the code in the prompt and one task. The prompt tells the agent 
 | B31 | `backend-standards` | Add `jobs.close` to an app whose db package holds `call-trace.ts` | The entry opens the trace root; every repo call and the email send is one `calling <name> to <purpose>` line; no hand-traced query, no id or result word in a line; a test asserts the block's lines in order |
 | B32 | `frontend-standards` | Every move between Home and Jobs shows the skeleton, also a return to a page just seen | `experimental.staleTimes.dynamic` above 0; the side menu's `Link`s set `prefetch={true}`; every `loading.tsx` stays; no Next data cache on the queries |
 | B33 | `state-machines` | The candidates page's stage tabs and the home page's stage badge, from a stored status column, when the machine still says "Needs review" and the job page keeps its own `STAGE_LABEL` | The machine's `meta` says "Longlisted"; the machine marks the listed stages (a tag); one reader module reads names and sets from the state nodes; no screen, the job page included, keeps a list or map of stages |
+| B38 | `flow-diagram` | Show an agreed seven-stage webhook design as a click-through flow named `webhook-ingest` | `docs/flows/webhook-ingest.json` has `mode: system` and the built HTML exists; one linear path of 7 steps; no sentence over 25 words; the permanent purge delete, the swallowed Redis error, the missing version check and the Slack call are each their own item |
+| B39 | `flow-diagram` | Trace `orders.cancel` through a seeded `cancel.service.ts` and show the path as a click-through flow named `order-cancellation` | `docs/flows/order-cancellation.json` has `mode: code`; every step and the start card cite `file:line`; no sentence over 25 words; the permanent `db.delete`, the swallowed email error and the query in the loop are each their own item |
 
 ## C. Triggering — the description fires on the task and only on the task
 
@@ -89,6 +91,8 @@ Each case repeats a B task with no instruction to load a skill. The only grader 
 | C8 | "How do I rename my git branch?" | No skill fires |
 | C9 | "Explain this regex" | No skill fires |
 | C10 | The B33 task with no skill named: the candidates page's tabs from the status column | `state-machines` fires |
+| C11 | The B38 task with no skill named: show the agreed design as a step-by-step diagram | `flow-diagram` fires |
+| C12 | "How does cancelling an order work here? Walk me through the path" with the code in the prompt | `flow-diagram` fires |
 
 ## D. Waste — text that changes nothing
 

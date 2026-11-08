@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Process flow diagram: how a web page loads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0}
+body{background:#f7f7f8;font-family:'Geist',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+@media (prefers-color-scheme: dark){body{background:#141416}}
+main{max-width:680px;margin:0 auto;padding:56px 20px 64px}
+header{margin:0 0 28px 2px}
+header h1{margin:0;font-size:22px;font-weight:500;letter-spacing:-.02em;color:#1b1c1f}
+header p{margin:6px 0 0;font-size:14px;line-height:1.6;color:#61646c}
+@media (prefers-color-scheme: dark){header h1{color:#ededef}header p{color:#a9acb3}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+</style>
+</head>
+<body>
+<main>
+<header><h1>How a web page loads</h1><p>Click the outlined box to go to the next step. Open "How it works" for the detail.</p></header>
+<h2 class="sr-only">Click-to-reveal process diagram of how a web page loads. Click the outlined box to draw an arrow to the next step; each step has a note with an expandable how-it-works panel, plus back navigation and a toggle to keep or remove later steps.</h2>
+<style>
+.px{--c1:#ffffff;--c3:#f3f3f4;--c4:#ececee;--g8:#b8b9bf;--g9:#8b8d98;--g11:#61646c;--ink:#1b1c1f;
+--s1:0 1px 2px rgba(17,19,24,.06),0 2px 6px rgba(17,19,24,.07);--s2:0 2px 4px rgba(17,19,24,.06),0 8px 20px -4px rgba(17,19,24,.14);
+--fs:drop-shadow(0 1px 1.5px rgba(17,19,24,.08)) drop-shadow(0 6px 14px rgba(17,19,24,.09));
+font-family:'Geist',system-ui,sans-serif;color:var(--ink);-webkit-tap-highlight-color:transparent}
+[data-mode="dark"] .px{--c1:#1d1e21;--c3:#26272b;--c4:#2e2f33;--g8:#55585f;--g9:#6f727a;--g11:#a9acb3;--ink:#ededef;
+--s1:0 0 0 1px rgba(255,255,255,.06),0 1px 3px rgba(0,0,0,.5);--s2:0 0 0 1px rgba(255,255,255,.08),0 8px 20px -4px rgba(0,0,0,.6);
+--fs:drop-shadow(0 0 .5px rgba(255,255,255,.28)) drop-shadow(0 8px 18px rgba(0,0,0,.55))}
+@media (prefers-color-scheme: dark){:root:not([data-mode]) .px{--c1:#1d1e21;--c3:#26272b;--c4:#2e2f33;--g8:#55585f;--g9:#6f727a;--g11:#a9acb3;--ink:#ededef;
+--s1:0 0 0 1px rgba(255,255,255,.06),0 1px 3px rgba(0,0,0,.5);--s2:0 0 0 1px rgba(255,255,255,.08),0 8px 20px -4px rgba(0,0,0,.6);
+--fs:drop-shadow(0 0 .5px rgba(255,255,255,.28)) drop-shadow(0 8px 18px rgba(0,0,0,.55))}}
+.px *{box-sizing:border-box}
+.fit{position:relative;width:100%}
+.stage{position:relative;width:680px;transform-origin:0 0;-webkit-user-select:none;user-select:none}
+.row{position:absolute;left:0;top:0;width:680px;height:0;z-index:1}
+.bx{position:absolute;z-index:2;top:0;width:132px;height:64px;opacity:0;pointer-events:none;cursor:pointer;outline:none}
+.bx.on{pointer-events:auto}
+.bx .in,.bx .sf,.bx .sh{position:absolute;inset:0;border-radius:12px}
+.bx .sf{background:var(--c1);box-shadow:var(--s1)}
+.bx .sh{box-shadow:var(--s2);opacity:0}
+.bx .rg,.bx .pl{position:absolute;inset:-5px;border-radius:17px;box-shadow:0 0 0 1.5px var(--ink);opacity:0;pointer-events:none}
+.bx .lb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:500;letter-spacing:-.01em;color:var(--ink)}
+.bx:focus-visible .sf{box-shadow:var(--s1),0 0 0 2px var(--g9)}
+.seg{position:absolute;left:0;top:0;width:1px;height:1px;background:var(--g8);transform-origin:0 0;transform:scale(0,0)}
+.hd{position:absolute;left:0;top:0;background:var(--g8);opacity:0}
+.hd.r{width:7px;height:9px;clip-path:polygon(0 0,100% 50%,0 100%);transform-origin:0 50%}
+.hd.d{width:9px;height:7px;clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:50% 0}
+.ik{position:absolute;inset:0;background:var(--ink);opacity:0}
+.note,.note *{pointer-events:none}
+.note{position:absolute;z-index:1;left:20px;width:640px}
+.note .ld{position:absolute;top:-15px;height:13px;width:0;border-left:1px dashed var(--g9);transform-origin:0 0;opacity:0}
+.note .ld::before{content:"";position:absolute;left:-3px;top:-6px;width:5px;height:5px;border-radius:50%;background:var(--ink)}
+.note .wr{filter:var(--fs);opacity:0}
+.note .cd{position:relative;width:640px;background:var(--c1);border-radius:12px}
+.note .ca{position:relative;width:280px;padding:14px 16px 16px}
+.note.xp .ca{position:absolute;top:0}
+.note .cb{display:none;position:relative;width:640px;padding:14px 16px 18px}
+.note.xp .cb{display:block}
+.note.show:not(.open) .ca .mo,.note.show.open .cb,.note.show.open .cb *{pointer-events:auto}
+.note.show.open .cb{-webkit-user-select:text;user-select:text}
+.st{font-family:'Geist Mono',ui-monospace,monospace;font-size:11px;color:var(--g9)}
+.tt{font-size:15px;font-weight:500;letter-spacing:-.015em;line-height:1.35;margin:5px 0 4px}
+.ds{font-size:13.5px;line-height:1.6;color:var(--g11)}
+.mo{display:inline-flex;align-items:center;gap:6px;height:28px;margin-top:12px;padding:0 10px;border-radius:8px;font-size:12.5px;font-weight:500;background:var(--c3);cursor:pointer;white-space:nowrap;outline:none}
+.mo:hover{background:var(--c4)}.mo:focus-visible{box-shadow:0 0 0 2px var(--ink)}
+.cb .mo svg{transform:rotate(180deg)}
+.sep{height:1px;background:var(--c4);margin:16px 0 14px}
+.cb ol{list-style:none;margin:0;padding:0;counter-reset:s;display:grid;gap:12px}
+.cb li{counter-increment:s;position:relative;padding-left:22px}
+.cb li::before{content:counter(s) ".";position:absolute;left:0;top:0;font-size:13.5px;line-height:1.45;color:var(--g9);font-variant-numeric:tabular-nums}
+.cb li b{display:block;font-size:13.5px;font-weight:500;line-height:1.45;margin-bottom:1px}
+.cb li span{display:block;font-size:13px;line-height:1.5;color:var(--g11);max-width:560px}
+.exl{margin:16px 0 6px;font-size:11px;font-family:'Geist Mono',ui-monospace,monospace;color:var(--g9)}
+.ex{margin:0;padding:12px 14px;border-radius:8px;background:var(--c3);font-family:'Geist Mono',ui-monospace,monospace;font-size:12px;line-height:1.6;white-space:pre;overflow-x:auto}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px 0;width:680px;-webkit-user-select:none;user-select:none}
+.bar .g{display:flex;align-items:center;gap:8px}
+.btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:8px;background:var(--c1);box-shadow:var(--s1);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;outline:none}
+.btn:focus-visible{box-shadow:var(--s1),0 0 0 2px var(--ink)}
+.ct{font-family:'Geist Mono',ui-monospace,monospace;font-size:12px;color:var(--g9);white-space:nowrap;margin-left:6px}
+.tg{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--g11);cursor:pointer;white-space:nowrap;outline:none}
+.tg:focus-visible .s{box-shadow:0 0 0 2px var(--ink)}
+.stage .bar{position:absolute;left:0;top:0;z-index:3}
+.tg .s{position:relative;width:30px;height:18px;border-radius:9px;background:var(--c4);overflow:hidden}
+.tg .f{position:absolute;inset:0;background:var(--ink)}
+.tg .k{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--c1);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+</style>
+<div class="px">
+<div class="fit" id="fit"><div class="stage" id="stage"></div></div>
+<div class="bar" id="bar">
+<div class="g">
+<span class="btn" role="button" tabindex="0" id="bk"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M8.5 3.5 5 7l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</span>
+<span class="btn" role="button" tabindex="0" id="nx">Next<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M5.5 3.5 9 7l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+<span class="ct" id="ct">1 / 7</span>
+</div>
+<div class="g">
+<span class="tg" role="switch" aria-checked="true" tabindex="0" id="kp"><span class="s"><span class="f"></span><span class="k"></span></span>Keep later steps</span>
+<span class="btn" role="button" tabindex="0" id="rp"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.75 7a4.25 4.25 0 1 0 1.25-3M2.75 2.5V5h2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Replay</span>
+</div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/motion@14.10.1/dist/motion.js"></script>
+<script>
+const L=['You type a URL','DNS lookup','Handshake','HTTP request','Server responds','Browser parses','Page painted'];
+const N=[
+{t:'Find the address',d:'Your browser needs the server’s IP address, so it looks up the domain name.',s:[
+['Browser cache','If you visited the site recently, the browser already has the address and skips the lookup entirely.'],
+['Operating system and router','Next it asks the OS resolver, which checks its own cache and the hosts file. Many home routers cache answers too.'],
+['Recursive resolver','Still nothing? The question goes to a resolver run by your ISP or a public one like 1.1.1.1 or 8.8.8.8, which does the legwork for you.'],
+['Root, TLD, authoritative','The resolver asks a root server, which points to the .com servers, which point to the site’s own nameservers. Those hold the real answer.'],
+['Answer with a TTL','An A record (IPv4) or AAAA record (IPv6) comes back with a time-to-live that says how long everyone may cache it.']],
+ex:'example.com.   300   IN   A   93.184.215.14\n# name          TTL  class type address'},
+{t:'Open a secure line',d:'Browser and server connect and agree on encryption before any data moves.',s:[
+['TCP handshake','SYN, SYN-ACK, ACK. One round trip that confirms both sides can send and receive.'],
+['ClientHello','The browser lists the TLS versions and ciphers it supports and sends its half of a key exchange.'],
+['ServerHello and certificate','The server picks the cipher, sends its half of the key exchange, and proves its identity with a certificate.'],
+['Certificate check','The browser verifies the certificate chains to a trusted authority, matches the domain, and hasn’t expired.'],
+['Session keys','Both sides derive the same secret keys without ever sending them. With TLS 1.3 this takes one round trip; HTTP/3 folds TCP and TLS into a single QUIC handshake.']],
+ex:'client → SYN\nserver ← SYN-ACK\nclient → ACK\nclient → ClientHello      (versions, ciphers, key share)\nserver ← ServerHello      (choice, key share, certificate)\nboth   ↔ encrypted from here on'},
+{t:'Ask for the page',d:'The browser sends an HTTP GET request for the page you asked for.',s:[
+['Method and path','GET asks to read a resource. The path is everything after the domain, here just / for the homepage.'],
+['Headers','Metadata about the request: which host, which formats and languages the browser accepts, what software it is.'],
+['Cookies','If you’ve logged in before, a session cookie rides along so the server knows who you are.'],
+['Over the wire','HTTP/2 and HTTP/3 send the same information as compact binary frames and let many requests share one connection.']],
+ex:'GET / HTTP/1.1\nHost: example.com\nAccept: text/html\nAccept-Language: en\nCookie: session=8f2c…'},
+{t:'Server does the work',d:'The server works out what to send and builds the response.',s:[
+['Edge cache','A CDN close to you may already hold a copy of the page and answer in milliseconds without touching the origin.'],
+['Load balancer','Otherwise the request is routed to one of many identical app servers so no single machine is overwhelmed.'],
+['Application logic','The app matches the path to a route, checks your session, and queries the database for the content it needs.'],
+['Render','The data is poured into a template to produce the final HTML.'],
+['Response','A status code, headers that describe the content and how to cache it, then the body, usually compressed.']],
+ex:'HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Encoding: br\nCache-Control: max-age=60\n\n<!doctype html>…'},
+{t:'Read the blueprint',d:'The browser reads the HTML and gathers everything the page needs.',s:[
+['Build the DOM','HTML is parsed as it streams in, turning tags into a tree of nodes. The browser doesn’t wait for the whole file.'],
+['Preload scanner','A second, lightweight parser skims ahead to find images, styles and scripts so their downloads start early.'],
+['CSS becomes the CSSOM','Stylesheets are parsed into their own tree. Rendering waits for them so you don’t see unstyled content.'],
+['Scripts','A plain script pauses parsing while it downloads and runs. defer and async scripts let parsing continue.'],
+['Everything else','Images and fonts download in parallel and slot in as they arrive.']],
+ex:'<html>\n  <head> <link rel="stylesheet" href="app.css"> </head>\n  <body>\n    <h1>Hello</h1>\n    <script src="app.js" defer><\/script>\n  </body>\n</html>'},
+{t:'Paint the pixels',d:'The page structure and styles combine into what you actually see.',s:[
+['Render tree','DOM and CSSOM are combined into a tree of only what will be visible. Elements with display: none are left out.'],
+['Layout','The browser calculates the exact size and position of every box on the page.'],
+['Paint','Each box is filled in: text, colours, borders, images, drawn into separate layers.'],
+['Composite','The GPU stacks the layers into the final frame. Animating transform or opacity only redoes this step, which is why it’s cheap.'],
+['First paint','The moment content first appears is the first contentful paint, a key measure of how fast a page feels.']]}];
+const START={t:'Start here',d:'Click the outlined box to follow how a web page reaches your screen.'};
+const END={t:'That’s the whole trip',d:'Seven steps, usually finished in under a second. Click any box to revisit it.'};
+const W=132,H=64,STEP=172,X0=20,Y0=16,GAPR=88,CW=280,WIDE=640,li=L.length-1,R=Math.ceil(L.length/4);
+const M=window.Motion,NOM=!M,reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const $=id=>document.getElementById(id);
+const ROW=i=>Math.floor(i/4),COL=i=>i%4,bx=i=>X0+COL(i)*STEP;
+const div=(c,p)=>{const e=document.createElement('div');e.className=c;p&&p.appendChild(e);return e};
+const EO=[.23,1,.32,1],IO=[.645,.045,.355,1],SPR={duration:.25,ease:IO},POP={duration:.2,ease:EO};
+function bez(x1,y1,x2,y2){const cx=3*x1,bx=3*(x2-x1)-cx,ax=1-cx-bx,cy=3*y1,by=3*(y2-y1)-cy,ay=1-cy-by,X=t=>((ax*t+bx)*t+cx)*t,Y=t=>((ay*t+by)*t+cy)*t;return x=>{let lo=0,hi=1,t=x;for(let i=0;i<30;i++){t=(lo+hi)/2;if(X(t)<x)lo=t;else hi=t}return Y(t)}}
+const EOF_=bez(...EO);
+const SHOWN='translateY(0px) scale(1)',HID='translateY(8px) scale(0.96)',FULL='inset(0px 0px calc(0% + 0px) 0px round 12px)';
+const VS=new Map();let SNAP=NOM;
+const gv=el=>{let v=VS.get(el);if(!v){v={};VS.set(el,v)}return v};
+function put(el,p){const v=gv(el);for(const k in p){const t=Array.isArray(p[k])?p[k][1]:p[k];v[k]=t;el.style[k]=t}}
+function Seq(){const a=[];return{a,put,go(el,p,o){if(SNAP){put(el,p);return}const v=gv(el),kf={};let ch=false;
+for(const k in p){let f,t;if(Array.isArray(p[k]))[f,t]=p[k];else{t=p[k];f=v[k]??t}
+if(reduce&&k!=='opacity'){v[k]=t;el.style[k]=t;continue}
+if(f!==t)ch=true;kf[k]=[f,t];v[k]=t}
+if(!ch){for(const k in kf)el.style[k]=kf[k][1];return}
+a.push([el,kf,reduce?{at:o.at||0,duration:.15}:o])},raw(el,kf,o){const v=gv(el);for(const k in kf){const t=kf[k][kf[k].length-1];v[k]=t;if(SNAP||reduce)el.style[k]=t}if(!(SNAP||reduce))a.push([el,kf,o])}}}
+let act=null,stH=0,hT=0,sc=1;const BARH=44;
+function finish(){if(act){const c=act;act=null;c.complete()}}
+function run(build){finish();stopPulse();const s=Seq();build(s);controls();const h=stageH();if(h>stH)setH(h);
+if(!s.a.length){after();return}
+const c=M.animate(s.a);act=c;c.finished.then(()=>{if(act===c){act=null;after()}})}
+function vis(){allN.forEach(o=>{o.el.style.visibility=o===shown?'visible':'hidden';if(!o.open&&o.el.classList.contains('xp')){o.el.classList.remove('xp');put(o.cd,{clipPath:clip0(o)})}});boxes.forEach((b,i)=>{b.el.style.visibility=b.on?'visible':'hidden';const r=b.on&&!done&&i===cur;b.rg.style.visibility=r?'visible':'hidden';b.pl.style.visibility=r?'visible':'hidden'});arrows.forEach(o=>{o.segs.concat(o.hd).forEach(e=>e.style.visibility=o.drawn?'visible':'hidden')})}
+function after(){setH(stageH(),true);vis();startPulse()}
+function setH(h,force){if(h>=stH||force){stH=h;$('fit').style.height=Math.ceil((h+BARH)*sc)+'px'}}
+function fitS(w){if(w==null)w=$('fit').clientWidth;sc=Math.min(1,w/680);$('stage').style.transform=sc<1?`scale(${sc})`:'none';$('fit').style.height=Math.ceil((stH+BARH)*sc)+'px'}
+const stage=$('stage'),rows=[...Array(R)].map(()=>div('row',stage)),bar=$('bar');stage.appendChild(bar);
+const boxes=[],arrows=[],notes=[];
+let tops=[...Array(R)].map((_,r)=>Y0+r*(H+GAPR)),shown=null,cur=0,max=0,done=false,keep=true;
+L.forEach((t,i)=>{const el=div('bx',rows[ROW(i)]);el.style.left=bx(i)+'px';el.tabIndex=-1;el.setAttribute('role','button');el.setAttribute('aria-label',t);
+el.innerHTML=`<div class="in"><div class="sf"></div><div class="sh"></div><span class="lb">${t}</span><div class="rg"></div><div class="pl"></div></div>`;
+const b={el,i,on:false,inn:el.querySelector('.in'),sh:el.querySelector('.sh'),rg:el.querySelector('.rg'),pl:el.querySelector('.pl'),h:0,p:0};
+el.addEventListener('click',()=>boxClick(i));el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();boxClick(i)}});
+put(el,{opacity:0,transform:HID});put(b.rg,{opacity:0});boxes.push(b)});
+for(let k=0;k<li;k++){const same=ROW(k)===ROW(k+1),host=same?rows[ROW(k)]:stage,o={k,same,drawn:false,segs:[],iks:[]};
+const n=same?1:3;for(let j=0;j<n;j++){const s=div('seg',host);o.segs.push(s);o.iks.push(div('ik',s))}
+o.hd=div('hd '+(same?'r':'d'),host);o.iks.push(div('ik',o.hd));
+if(!same)o.segs.concat(o.hd).forEach(e=>e.style.zIndex=0);
+arrows.push(o)}
+function geo(o){if(o.same){const x1=bx(o.k)+W+8,x2=bx(o.k+1)-8;return{x1,len:x2-7-x1,hx:x2-7}}
+const xa=bx(o.k)+W/2,xb=bx(o.k+1)+W/2,y1=tops[ROW(o.k)]+H+8,yc=tops[ROW(o.k+1)]-24,y2=tops[ROW(o.k+1)]-8;return{xa,xb,y1,yc,y2,v1:yc-y1,h:xa+1-xb,v2:y2-7-yc}}
+function segT(o,drawn){const g=geo(o);
+if(o.same)return{segs:[`translate(${g.x1}px,32px) scale(${drawn?g.len:0},1)`],hd:`translate(${g.hx}px,28px) scale(${drawn?1:.4})`,g};
+return{segs:drawn?[`translate(${g.xa}px,${g.y1}px) scale(1,${g.v1})`,`translate(${g.xb}px,${g.yc}px) scale(${g.h},1)`,`translate(${g.xb}px,${g.yc}px) scale(1,${g.v2})`]
+:[`translate(${g.xa}px,${g.y1}px) scale(1,0)`,`translate(${g.xa+1}px,${g.yc}px) scale(0,1)`,`translate(${g.xb}px,${g.yc}px) scale(1,0)`],hd:`translate(${g.xb-4}px,${g.y2-7}px) scale(${drawn?1:.4})`,g}}
+function drawArrow(s,o,t){const z=segT(o,false),d=segT(o,true),g=d.g;o.segs.concat(o.hd).forEach(e=>e.style.visibility='visible');
+if(o.same){s.go(o.segs[0],{transform:[z.segs[0],d.segs[0]]},{at:t,duration:.2,ease:EO});s.go(o.hd,{opacity:[0,1],transform:[z.hd,d.hd]},{at:t+.08,duration:.12,ease:EO});return t+.12}
+const D=.32,NS=24,tot=g.v1+g.h+g.v2,st=[0,g.v1,g.v1+g.h],ln=[g.v1,g.h,g.v2],times=[],kfs=[[],[],[]];let tH=1;
+for(let k=0;k<=NS;k++){const u=k/NS,P=EOF_(u)*tot;times.push(u);for(let j=0;j<3;j++){const L=Math.max(0,Math.min(1,(P-st[j])/ln[j]));
+kfs[j].push(j===0?`translate(${g.xa}px,${g.y1}px) scale(1,${g.v1*L})`:j===1?`translate(${g.xa+1-g.h*L}px,${g.yc}px) scale(${g.h*L},1)`:`translate(${g.xb}px,${g.yc}px) scale(1,${g.v2*L})`);if(j===2&&L>=.85&&tH===1)tH=u}}
+for(let j=0;j<3;j++)s.raw(o.segs[j],{transform:kfs[j]},{at:t,duration:D,times,ease:'linear'});
+s.go(o.hd,{opacity:[0,1],transform:[z.hd,d.hd]},{at:t+tH*D-.04,duration:.12,ease:EO});return t+tH*D}
+function retractArrow(s,o,t){const z=segT(o,false),g=z.g;s.go(o.hd,{opacity:0,transform:z.hd},{at:t,duration:.08,ease:EO});
+if(o.same){s.go(o.segs[0],{transform:z.segs[0]},{at:t,duration:.15,ease:EO});return}
+const tot=g.v1+g.h+g.v2,u=.18/tot;let tt=t;
+[[2,g.v2],[1,g.h],[0,g.v1]].forEach(([j,l])=>{s.go(o.segs[j],{transform:z.segs[j]},{at:tt,duration:l*u,ease:'linear'});tt+=l*u})}
+const I=p=>`<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="${p}" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const esc=v=>v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function mkNote(n,st,box){const r=ROW(box),el=div('note',rows[r]),ox=Math.max(X0,Math.min(680-X0-CW,bx(box)))-X0;el.style.top=(H+28)+'px';
+const hdr=`<div class="st">${st}</div><div class="tt">${n.t}</div><div class="ds">${n.d}</div>`,chev=I('M3 4.5 6 7.5 9 4.5');
+el.innerHTML=`<div class="ld" style="left:${bx(box)+W/2-X0}px"></div><div class="wr"><div class="cd"><div class="ca" style="margin-left:${ox}px">${hdr}${n.s?`<span class="mo" role="button" tabindex="0">How it works${chev}</span>`:''}</div>`+
+(n.s?`<div class="cb"><div class="hd2">${hdr}<span class="mo" role="button" tabindex="0">Show less${chev}</span></div><div class="sep"></div><ol>${n.s.map(v=>`<li><b>${v[0]}</b><span>${v[1]}</span></li>`).join('')}</ol>${n.ex?`<div class="exl">Example</div><pre class="ex">${esc(n.ex)}</pre>`:''}</div>`:'')+`</div></div>`;
+const o={el,box,row:r,ox,open:false,ld:el.querySelector('.ld'),wr:el.querySelector('.wr'),cd:el.querySelector('.cd'),ca:el.querySelector('.ca'),cb:el.querySelector('.cb'),ch:0,eh:0};
+o.parts=o.cb?[...o.cb.querySelectorAll('.hd2,.sep,li,.exl,.ex')]:[];
+el.querySelectorAll('.mo').forEach(m=>{const f=()=>toggleOpen(o);m.addEventListener('click',f);m.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f()}})});
+put(o.wr,{opacity:0,transform:'translateY(6px)'});put(o.ld,{opacity:0,transform:'scaleY(0)'});put(o.ca,{opacity:1});o.parts.forEach(p=>put(p,{opacity:0,transform:'translateY(6px)'}));
+return o}
+N.forEach((n,i)=>notes.push(mkNote(n,`Step ${i+1} → ${i+2}`,i+1)));
+const startN=mkNote(START,'Begin',0),endN=mkNote(END,'Complete',li),allN=[...notes,startN,endN];
+const clipC=o=>`inset(0px ${WIDE-o.ox-CW}px calc(100% - ${o.ch}px) ${o.ox}px round 12px)`,clip0=clipC;
+let FW=680;function measure(){allN.forEach(o=>{if(o.cb)o.el.classList.add('xp')});FW=$('fit').clientWidth;for(let r=0;r<R;r++)rowCh[r]=0;allN.forEach(o=>{o.ch=o.ca.offsetHeight;o.eh=o.cb?o.cd.offsetHeight:o.ch;rowCh[o.row]=Math.max(rowCh[o.row],o.ch)});allN.forEach(o=>{if(!o.open){o.el.classList.remove('xp');put(o.cd,{clipPath:clip0(o)})}})}
+const rowCh=[];function computeTops(){let y=Y0;for(let r=0;r<R;r++){tops[r]=y;y+=H+(shown&&shown.row===r?Math.max(GAPR,28+rowCh[r]+36):GAPR)}}
+function stageH(){const vis=ROW(Math.max(max,shown?shown.box:0));let h=tops[vis]+H+8;if(shown)h=Math.max(h,tops[shown.row]+H+28+(shown.open?shown.eh:rowCh[shown.row])+24);return h}
+const focusNote=()=>done?endN:(cur===0?startN:notes[cur-1]);
+function noteOut(s,o,t){o.el.classList.remove('show');s.go(o.wr,{opacity:0,transform:'translateY(-4px)'},{at:t,duration:.12,ease:EO});s.go(o.ld,{opacity:0},{at:t,duration:.1,ease:EO});
+if(o.open){o.open=false;o.el.classList.remove('open');s.go(o.cd,{clipPath:clipC(o)},{at:t+.13,duration:.01});s.go(o.ca,{opacity:1},{at:t+.13,duration:.01});o.parts.forEach(p=>s.go(p,{opacity:0},{at:t+.13,duration:.01}))}}
+function noteIn(s,o,t){o.el.classList.add('show');o.el.style.visibility='visible';s.go(o.ld,{opacity:[1,1],transform:['scaleY(0)','scaleY(1)']},{at:t,duration:.12,ease:EO});
+s.go(o.wr,{opacity:[0,1],transform:['translateY(6px)','translateY(0px)']},{at:t+.04,duration:.2,ease:EO})}
+function render(P){run(s=>{const ns=focusNote(),os=shown;if(os&&os!==ns)noteOut(s,os,0);shown=ns;computeTops();
+rows.forEach((g,r)=>{const vis=r<=ROW(Math.min(P.om,max));s.go(g,{transform:`translateY(${tops[r]}px)`},vis?{at:P.tRows,...SPR}:{at:0,duration:.01});g.style.zIndex=ns&&ns.row===r?2:1});
+arrows.forEach(o=>{const want=o.k<max;
+if(want&&!o.drawn)drawArrow(s,o,P.tArrow);else if(!want&&o.drawn)retractArrow(s,o,P.tRet(o.k));
+else if(!o.same){const T=segT(o,want);o.segs.forEach((e,j)=>s.go(e,{transform:T.segs[j]},want?{at:P.tRows,...SPR}:{at:0,duration:.01}));s.go(o.hd,{transform:T.hd},want?{at:P.tRows,...SPR}:{at:0,duration:.01})}
+o.drawn=want;const dim=!done&&o.k>=cur,ink=!done&&o.k===cur-1&&want;
+o.segs.forEach(e=>s.go(e,{opacity:dim?.38:1},{at:P.tDim,duration:.2,ease:EO}));if(want&&o.k<P.om)s.go(o.hd,{opacity:dim?.38:1},{at:P.tDim,duration:.2,ease:EO});
+o.iks.forEach(e=>{gv(e).opacity=ink?1:0;e.style.opacity=ink?1:0})});
+boxes.forEach((b,i)=>{const on=i<=max,op=!done&&i>cur?.38:1;b.el.classList.toggle('on',on);b.el.tabIndex=on?0:-1;
+if(on&&!b.on)b.el.style.visibility='visible';if(on&&!b.on)s.go(b.el,{opacity:[0,op],transform:[HID,SHOWN]},{at:P.tBoxIn,...POP});
+else if(!on&&b.on)s.go(b.el,{opacity:0,transform:HID},{at:P.tRet(i-1),duration:.12,ease:EO});
+else if(on)s.go(b.el,{opacity:op},{at:P.tDim,duration:.2,ease:EO});
+b.on=on;const r=!done&&i===cur;if(r)b.rg.style.visibility='visible';
+s.go(b.rg,{opacity:r?1:0},r?{at:P.tRing,duration:.2,ease:EO}:{at:0,duration:.2,ease:EO})});
+s.go(bar,{transform:`translateY(${stageH()}px)`},{at:P.tBar,...SPR});if(ns&&ns!==os)noteIn(s,ns,P.tNote)})}
+const Pst=om=>({om,tBar:0,tRows:0,tDim:0,tArrow:0,tBoxIn:0,tRing:.04,tNote:.06,tRet:()=>0});
+function Pfwd(same,om){const ta=0,tb=same?.12:.2;return{om,tBar:0,tRows:0,tDim:0,tArrow:ta,tBoxIn:tb,tRing:tb,tNote:tb+.06,tRet:()=>0}}
+function Pret(om,to){const T=(om-to-1)*.05+.15;return{om,tBar:T,tRows:T,tDim:T,tRing:T,tNote:T+.04,tArrow:0,tBoxIn:0,tRet:k=>(om-1-k)*.05}}
+function toggleOpen(o){if(o!==shown)return;finish();if(!o.open){o.el.classList.add('xp');put(o.cd,{clipPath:clipC(o)})}run(s=>{o.open=!o.open;o.el.classList.toggle('open',o.open);
+if(o.open){s.go(o.ca,{opacity:0},{at:0,duration:.08,ease:EO});s.go(o.cd,{clipPath:FULL},{at:0,duration:.3,ease:IO});
+o.parts.forEach((p,j)=>s.go(p,{opacity:[0,1],transform:['translateY(6px)','translateY(0px)']},{at:.06+Math.min(j,8)*.03,duration:.2,ease:EO}))}
+else{o.parts.forEach(p=>s.go(p,{opacity:0},{at:0,duration:.1,ease:EO}));s.go(o.cd,{clipPath:clipC(o)},{at:.04,duration:.22,ease:IO});s.go(o.ca,{opacity:[0,1]},{at:.14,duration:.12,ease:EO})}s.go(bar,{transform:`translateY(${stageH()}px)`},o.open?{at:0,duration:.3,ease:IO}:{at:.04,duration:.22,ease:IO})});
+const f=o.el.querySelector(o.open?'.cb .mo':'.ca .mo');f&&document.activeElement&&document.activeElement.classList.contains('mo')&&f.focus({preventScroll:true})}
+let pul=null,pulEl=null;const PSX=(W+10+14)/(W+10),PSY=(H+10+14)/(H+10);
+let pulF=null;function stopPulse(){if(pul&&pulEl){const c=getComputedStyle(pulEl),o=+c.opacity,t=c.transform;pul.cancel();pul=null;pulEl.style.transform=t;pulF=o>0.01?M.animate(pulEl,{opacity:[o,0]},{duration:.2,ease:EO}):null;if(!pulF)pulEl.style.opacity=0}else if(pulEl)pulEl.style.opacity=0;pulEl=null}
+function startPulse(){stopPulse();if(pulF){pulF.cancel();pulF=null}if(done||reduce||NOM)return;pulEl=boxes[cur].pl;pulEl.style.visibility='visible';
+pul=M.animate(pulEl,{opacity:[0,.5,0,0],transform:['scale(1,1)','scale(1,1)',`scale(${PSX},${PSY})`,`scale(${PSX},${PSY})`]},{duration:2.2,times:[0,.05,.65,1],ease:['linear',[.2,.6,.35,1],'linear'],repeat:Infinity})}
+function next(){if(done)return;const om=max;
+if(cur===li){done=true;render(Pst(om))}else if(cur<max){cur++;render(Pst(om))}
+else{const same=ROW(cur)===ROW(cur+1);cur++;max=cur;render(Pfwd(same,om))}}
+function back(to){const om=max;if(done){done=false;if(to==null)to=cur}else{if(to==null)to=cur-1;if(to<0||to===cur)return}
+if(keep||to>=max){cur=to;render(Pst(om))}else{cur=to;max=to;render(Pret(om,to))}}
+function boxClick(i){if(done){back(i);return}if(i===cur)next();else if(i<cur)back(i);else if(i<=max){const om=max;cur=i;render(Pst(om))}}
+function setKeep(v){keep=v;const kp=$('kp');kp.setAttribute('aria-checked',v);
+if(!NOM){M.animate(kp.querySelector('.k'),{transform:v?'translateX(12px)':'translateX(0px)'},{duration:.2,ease:[.2,.8,.2,1]});M.animate(kp.querySelector('.f'),{opacity:v?1:0},{duration:.18})}
+else{kp.querySelector('.k').style.transform=v?'translateX(12px)':'none';kp.querySelector('.f').style.opacity=v?1:0}
+if(!v&&max>cur&&!done){const om=max;max=cur;render(Pret(om,cur))}}
+function replay(){run(s=>{const os=shown;if(os)noteOut(s,os,0);shown=null;
+boxes.forEach(b=>{if(b.on){s.go(b.el,{opacity:0},{at:0,duration:.15,ease:EO});s.go(b.el,{transform:HID},{at:.16,duration:.01})}b.on=false;b.el.classList.remove('on');s.go(b.rg,{opacity:0},{at:0,duration:.15,ease:EO})});
+arrows.forEach(o=>{if(o.drawn){o.segs.concat(o.hd).forEach(e=>s.go(e,{opacity:0},{at:0,duration:.15,ease:EO}))}o.drawn=false});
+cur=0;max=0;done=false;computeTops();
+arrows.forEach(o=>{const T=segT(o,false);o.segs.forEach((e,j)=>s.go(e,{transform:T.segs[j],opacity:1},{at:.16,duration:.01}));s.go(o.hd,{transform:T.hd},{at:.16,duration:.01});o.iks.forEach(e=>{gv(e).opacity=0;e.style.opacity=0})});
+rows.forEach((g,r)=>s.go(g,{transform:`translateY(${tops[r]}px)`},{at:.16,duration:.01}));
+const b=boxes[0];b.on=true;b.el.classList.add('on');b.el.tabIndex=0;b.el.style.visibility='visible';s.go(b.el,{opacity:[0,1],transform:[HID,SHOWN]},{at:.2,...POP});
+b.rg.style.visibility='visible';s.go(b.rg,{opacity:1},{at:.2,duration:.2,ease:EO});
+shown=startN;rows[0].style.zIndex=2;s.go(bar,{transform:`translateY(${stageH()}px)`},{at:.2,...SPR});noteIn(s,startN,.26)})}
+function controls(){$('ct').textContent=done?'Done':`${cur+1} / ${L.length}`;const a=cur===0&&!done?.4:1,b2=done?.4:1;
+[[$('bk'),a],[$('nx'),b2]].forEach(([e,v])=>NOM?e.style.opacity=v:M.animate(e,{opacity:v},{duration:.15}))}
+const actn=(id,f)=>{$(id).addEventListener('click',f);$(id).addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f()}})};
+actn('bk',()=>back());actn('nx',()=>next());actn('rp',()=>replay());actn('kp',()=>setKeep(!keep));
+if(!NOM){
+boxes.forEach(b=>{M.hover(b.el,()=>{M.animate(b.sh,{opacity:1},{duration:.15,ease:'easeOut'});return()=>M.animate(b.sh,{opacity:0},{duration:.2,ease:'easeOut'})});
+});
+const pz=(e,t,d)=>{const c=getComputedStyle(e).transform,k=c&&c!=='none'?new DOMMatrix(c).a:1;M.animate(e,{transform:[`scale(${k})`,t]},{duration:d,ease:EO})};
+document.querySelectorAll('.px .btn').forEach(e=>M.press(e,()=>{pz(e,'scale(0.97)',.1);return()=>pz(e,'scale(1)',.15)}))}
+put($('kp').querySelector('.k'),{transform:'translateX(12px)'});
+measure();fitS(FW);rows.forEach((g,r)=>put(g,{transform:`translateY(${tops[r]}px)`}));arrows.forEach(o=>{const T=segT(o,false);o.segs.forEach((e,j)=>put(e,{transform:T.segs[j],opacity:1}));put(o.hd,{transform:T.hd,opacity:0})});
+vis();put(bar,{transform:`translateY(${stageH()}px)`});render({om:0,tBar:0,tRows:0,tDim:0,tArrow:0,tBoxIn:.05,tRing:.12,tNote:.2,tRet:()=>0});
+addEventListener('resize',()=>fitS());
+document.fonts&&document.fonts.ready.then(()=>{finish();measure();if(shown){computeTops();SNAP=true;rows.forEach((g,r)=>put(g,{transform:`translateY(${tops[r]}px)`}));arrows.forEach(o=>{const T=segT(o,o.drawn);o.segs.forEach((e,j)=>put(e,{transform:T.segs[j]}));put(o.hd,{transform:T.hd})});SNAP=NOM}put(bar,{transform:`translateY(${stageH()}px)`});after()});
+</script>
+
+</main>
+</body>
+</html>

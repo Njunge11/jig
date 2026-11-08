@@ -1,0 +1,181 @@
+{
+ "title": "How a web page loads",
+ "mode": "system",
+ "intro": "Click the outlined box to go to the next step. Open \"How it works\" for the detail.",
+ "start": {
+  "title": "Start here",
+  "summary": "Click the outlined box to follow how a web page reaches your screen."
+ },
+ "end": {
+  "title": "That’s the whole trip",
+  "summary": "Seven steps, usually finished in under a second. Click any box to revisit it."
+ },
+ "steps": [
+  {
+   "label": "You type a URL"
+  },
+  {
+   "label": "DNS lookup",
+   "title": "Find the address",
+   "summary": "Your browser needs the server’s IP address, so it looks up the domain name.",
+   "items": [
+    {
+     "heading": "Browser cache",
+     "text": "If you visited the site recently, the browser already has the address and skips the lookup entirely."
+    },
+    {
+     "heading": "Operating system and router",
+     "text": "Next it asks the OS resolver, which checks its own cache and the hosts file. Many home routers cache answers too."
+    },
+    {
+     "heading": "Recursive resolver",
+     "text": "Still nothing? The question goes to a resolver run by your ISP or a public one like 1.1.1.1 or 8.8.8.8, which does the legwork for you."
+    },
+    {
+     "heading": "Root, TLD, authoritative",
+     "text": "The resolver asks a root server, which points to the .com servers, which point to the site’s own nameservers. Those hold the real answer."
+    },
+    {
+     "heading": "Answer with a TTL",
+     "text": "An A record (IPv4) or AAAA record (IPv6) comes back with a time-to-live that says how long everyone may cache it."
+    }
+   ],
+   "example": "example.com.   300   IN   A   93.184.215.14\n# name          TTL  class type address"
+  },
+  {
+   "label": "Handshake",
+   "title": "Open a secure line",
+   "summary": "Browser and server connect and agree on encryption before any data moves.",
+   "items": [
+    {
+     "heading": "TCP handshake",
+     "text": "SYN, SYN-ACK, ACK. One round trip that confirms both sides can send and receive."
+    },
+    {
+     "heading": "ClientHello",
+     "text": "The browser lists the TLS versions and ciphers it supports and sends its half of a key exchange."
+    },
+    {
+     "heading": "ServerHello and certificate",
+     "text": "The server picks the cipher, sends its half of the key exchange, and proves its identity with a certificate."
+    },
+    {
+     "heading": "Certificate check",
+     "text": "The browser verifies the certificate chains to a trusted authority, matches the domain, and hasn’t expired."
+    },
+    {
+     "heading": "Session keys",
+     "text": "Both sides derive the same secret keys without ever sending them. With TLS 1.3 this takes one round trip. HTTP/3 folds TCP and TLS into a single QUIC handshake."
+    }
+   ],
+   "example": "client → SYN\nserver ← SYN-ACK\nclient → ACK\nclient → ClientHello      (versions, ciphers, key share)\nserver ← ServerHello      (choice, key share, certificate)\nboth   ↔ encrypted from here on"
+  },
+  {
+   "label": "HTTP request",
+   "title": "Ask for the page",
+   "summary": "The browser sends an HTTP GET request for the page you asked for.",
+   "items": [
+    {
+     "heading": "Method and path",
+     "text": "GET asks to read a resource. The path is everything after the domain, here just / for the homepage."
+    },
+    {
+     "heading": "Headers",
+     "text": "Metadata about the request: which host, which formats and languages the browser accepts, what software it is."
+    },
+    {
+     "heading": "Cookies",
+     "text": "If you’ve logged in before, a session cookie rides along so the server knows who you are."
+    },
+    {
+     "heading": "Over the wire",
+     "text": "HTTP/2 and HTTP/3 send the same information as compact binary frames and let many requests share one connection."
+    }
+   ],
+   "example": "GET / HTTP/1.1\nHost: example.com\nAccept: text/html\nAccept-Language: en\nCookie: session=8f2c…"
+  },
+  {
+   "label": "Server responds",
+   "title": "Server does the work",
+   "summary": "The server works out what to send and builds the response.",
+   "items": [
+    {
+     "heading": "Edge cache",
+     "text": "A CDN close to you may already hold a copy of the page and answer in milliseconds without touching the origin."
+    },
+    {
+     "heading": "Load balancer",
+     "text": "Otherwise the request is routed to one of many identical app servers so no single machine is overwhelmed."
+    },
+    {
+     "heading": "Application logic",
+     "text": "The app matches the path to a route, checks your session, and queries the database for the content it needs."
+    },
+    {
+     "heading": "Render",
+     "text": "The data is poured into a template to produce the final HTML."
+    },
+    {
+     "heading": "Response",
+     "text": "A status code, headers that describe the content and how to cache it, then the body, usually compressed."
+    }
+   ],
+   "example": "HTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\nContent-Encoding: br\nCache-Control: max-age=60\n\n<!doctype html>…"
+  },
+  {
+   "label": "Browser parses",
+   "title": "Read the blueprint",
+   "summary": "The browser reads the HTML and gathers everything the page needs.",
+   "items": [
+    {
+     "heading": "Build the DOM",
+     "text": "HTML is parsed as it streams in, turning tags into a tree of nodes. The browser doesn’t wait for the whole file."
+    },
+    {
+     "heading": "Preload scanner",
+     "text": "A second, lightweight parser skims ahead to find images, styles and scripts so their downloads start early."
+    },
+    {
+     "heading": "CSS becomes the CSSOM",
+     "text": "Stylesheets are parsed into their own tree. Rendering waits for them so you don’t see unstyled content."
+    },
+    {
+     "heading": "Scripts",
+     "text": "A plain script pauses parsing while it downloads and runs. defer and async scripts let parsing continue."
+    },
+    {
+     "heading": "Everything else",
+     "text": "Images and fonts download in parallel and slot in as they arrive."
+    }
+   ],
+   "example": "<html>\n  <head> <link rel=\"stylesheet\" href=\"app.css\"> </head>\n  <body>\n    <h1>Hello</h1>\n    <script src=\"app.js\" defer></script>\n  </body>\n</html>"
+  },
+  {
+   "label": "Page painted",
+   "title": "Paint the pixels",
+   "summary": "The page structure and styles combine into what you actually see.",
+   "items": [
+    {
+     "heading": "Render tree",
+     "text": "DOM and CSSOM are combined into a tree of only what will be visible. Elements with display: none are left out."
+    },
+    {
+     "heading": "Layout",
+     "text": "The browser calculates the exact size and position of every box on the page."
+    },
+    {
+     "heading": "Paint",
+     "text": "Each box is filled in: text, colours, borders, images, drawn into separate layers."
+    },
+    {
+     "heading": "Composite",
+     "text": "The GPU stacks the layers into the final frame. Animating transform or opacity only redoes this step, which is why it’s cheap."
+    },
+    {
+     "heading": "First paint",
+     "text": "The moment content first appears is the first contentful paint, a key measure of how fast a page feels."
+    }
+   ]
+  }
+ ]
+}
