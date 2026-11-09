@@ -56,10 +56,12 @@ F.special.steps[1].example = '</script><script>alert(1)</script>\n<!-- comment -
 F.longline = base('Long code line', 2);
 F.longline.steps[1].example = 'SELECT ' + Array.from({ length: 40 }, (_, k) => `column_${k}`).join(', ') + ' FROM a_very_long_table_name WHERE id = 1;';
 F.code = base('How an order is cancelled', 4, 'code');
-F.code.start.summary = 'The procedure orders.cancel starts the path (features/orders/api/orders.router.ts:12).';
-F.code.steps[1] = card(2, { label: 'Load the order', title: 'The service reads the order row', summary: 'cancelOrder reads the order by id (features/orders/api/orders.service.ts:18).', items: [{ heading: 'Read', text: 'ordersRepo.byId runs one SELECT (features/orders/db/orders.repo.ts:9).' }] });
-F.code.steps[2] = card(3, { label: 'Delete the row', title: 'The service deletes the order', summary: 'The service deletes the order row with no confirmation step (features/orders/api/orders.service.ts:24).', items: [{ heading: 'Irreversible delete', text: 'ordersRepo.remove runs DELETE with no soft-delete flag and no undo (features/orders/db/orders.repo.ts:21). The row is gone for good.' }] });
-F.code.steps[3] = card(4, { label: 'Send the email', title: 'The service emails the customer', summary: 'email.send goes to an external provider (lib/email.ts:7).', items: [{ heading: 'No retry', text: 'A failed send throws and the procedure returns an error after the delete (features/orders/api/orders.service.ts:30).' }] });
+// Code mode: a card reads like a trace line (the function, what it does, what came back). The file:line proof sits in "code" and never reaches the page.
+F.code.start.summary = 'The procedure orders.cancel starts the path when the customer presses Cancel.';
+F.code.start.code = ['features/orders/api/orders.router.ts:12'];
+F.code.steps[1] = card(2, { label: 'Load the order', title: 'The service reads the order row', summary: 'cancelOrder reads the order by its id. Found.', items: [{ heading: 'Read', text: 'ordersRepo.byId runs one SELECT on orders.' }], code: ['features/orders/api/orders.service.ts:18', 'features/orders/db/orders.repo.ts:9'] });
+F.code.steps[2] = card(3, { label: 'Delete the row', title: 'The service deletes the order', summary: 'cancelOrder deletes the order row with no confirmation step. Success.', items: [{ heading: 'Irreversible delete', text: 'ordersRepo.remove runs DELETE on orders with no soft-delete flag and no undo. The row is gone for good.' }], code: ['features/orders/api/orders.service.ts:24', 'features/orders/db/orders.repo.ts:21'] });
+F.code.steps[3] = card(4, { label: 'Send the email', title: 'The service emails the customer', summary: 'email.send calls the external email provider. Success.', items: [{ heading: 'No retry', text: 'A failed send throws, and the procedure returns an error after the delete.' }], code: ['lib/email.ts:7', 'features/orders/api/orders.service.ts:30'] });
 
 // invalid fixtures: each must fail validation
 const BAD = {};
@@ -69,7 +71,11 @@ BAD.labelwide = base('Label wide line', 2); BAD.labelwide.steps[1].label = 'Ackn
 BAD.ste30 = base('STE 30 words', 2); BAD.ste30.steps[1].summary = 'This summary sentence goes on and on with many words so that it passes the limit of twenty five words that the rule gives for a descriptive sentence and fails.';
 BAD.semicolon = base('Semicolon', 2); BAD.semicolon.steps[1].summary = 'First part; second part.';
 BAD.intro21 = base('Intro 21', 2); BAD.intro21.intro = 'Click the outlined box to go to the next step and then open the How it works panel to read every detail of it.';
-BAD.nocite = base('No cite', 2, 'code'); BAD.nocite.start.summary = 'The procedure starts here (features/orders/api/orders.router.ts:12).';
+BAD.nocite = base('No code', 2, 'code'); BAD.nocite.start.code = ['features/orders/api/orders.router.ts:12']; // steps[1] has no code
+BAD.badcite = base('Bad code', 2, 'code'); BAD.badcite.start.code = ['features/orders/api/orders.router.ts:12']; BAD.badcite.steps[1].code = ['orders.service.ts'];
+BAD.pathinprose = base('Path in prose', 2, 'code'); BAD.pathinprose.start.code = ['features/orders/api/orders.router.ts:12']; BAD.pathinprose.steps[1].code = ['features/orders/api/orders.service.ts:18']; BAD.pathinprose.steps[1].summary = 'cancelOrder reads the order (features/orders/api/orders.service.ts:18).';
+BAD.fileinprose = base('File in prose', 2); BAD.fileinprose.steps[1].items[0].text = 'The handler in orders.router.ts reads the order.';
+BAD.codeinsystem = base('Code in system', 2); BAD.codeinsystem.steps[1].code = ['features/orders/api/orders.service.ts:18'];
 BAD.firstcard = base('First has card', 2); BAD.firstcard.steps[0].title = 'Not allowed';
 BAD.nosteps = base('No steps', 1); BAD.nosteps.steps = [];
 BAD.badmode = base('Bad mode', 2); BAD.badmode.mode = 'flow';

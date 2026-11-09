@@ -1,5 +1,5 @@
 ---
-description: "flow-diagram: a code path becomes one linear data file where every step cites file:line and each seeded second-look detail is its own item"
+description: "flow-diagram: a code path becomes one linear data file where every card tells what happens with no file names, every step proves itself with file:line in code, and each seeded second-look detail is its own item"
 tags: [obedience, docs, regression, flow-diagram]
 max_turns: 40
 timeout_seconds: 1200

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Builds a flow diagram page from a data file.
 //   node build.mjs <flow.json> [--out <file.html>] [--force] [--open] [--check] [--motion cdn|inline]
-// Validates the data (schema, label fit, STE sentence length, code-mode citations), then
+// Validates the data (schema, label fit, STE sentence length, no file names in a card, the code-mode proof), then
 // injects it into assets/template.html and writes the HTML beside the data file.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -23,7 +23,13 @@ const MAX_STEPS = 40;
 // ASD-STE100 Issue 9: Rule 5.1 (procedure: 20 words), Rule 6.3 (description: 25 words).
 const WORDS_PROCEDURE = 20;
 const WORDS_DESCRIPTION = 25;
-const CITE = /(?:^|[\s(`'"])((?:[\w.-]+\/)*[\w.-]+\.[a-z]{1,5}:\d+(?:-\d+)?)(?=$|[\s)`'",.;])/;
+// A "code" entry is one file:line (or file:line-line) the builder read. It is the builder's proof and never reaches the page.
+const CITE = /^(?:[\w.-]+\/)*[\w.-]+\.[a-z]{1,5}:\d+(?:-\d+)?$/;
+// A card tells what happens and which function does it. A file name or a path in a card is a build error: the reader
+// follows the story, not the tree. A path has a slash and a lowercase letter, a file name has a source extension.
+// "Node.js" is a product, "HTTP/2" a protocol and "and/or" a word: none is a file.
+const PRODUCTS = /\b(?:Node|Next|Nest|Nuxt|Vue|Three|D3|React|Alpine|Ember|Express)\.js\b|\b(?:and\/or|w\/o|I\/O|[A-Z0-9.-]+\/[A-Z0-9.-]+)\b/g;
+const PATHISH = /(?:[\w.@-]+\/)+[\w.-]*[a-z][\w.-]*|\b[\w-]+\.(?:tsx?|jsx?|mjs|cjs|json|mdx?|sql|css|html?|ya?ml|toml|py|rb|go|rs|java|kt|php|sh|prisma)\b/;
 
 const args = process.argv.slice(2);
 const flag = (n) => args.includes(n);
@@ -53,7 +59,7 @@ else fail([`--motion must be cdn or inline, got ${motionMode}`]);
 const html = fs.readFileSync(TEMPLATE, 'utf8')
   .replace(/__TITLE__/g, escHtml(data.title))
   .replace(/__INTRO__/g, escHtml(data.intro))
-  .replace('__DATA__', safeJson(data))
+  .replace('__DATA__', safeJson(withoutCode(data)))
   .replace('__MOTION__', () => motionTag);
 fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, html);
@@ -70,46 +76,62 @@ function validate(d) {
   if (!d || typeof d !== 'object' || Array.isArray(d)) return ['the root must be an object'];
   if (!nonEmpty(d.title)) E.push('title: required, a non-empty string');
   else if (d.title.length > 80) E.push(`title: ${d.title.length} characters, maximum 80`);
+  else E.push(...noFiles('title', d.title));
   if (d.mode !== 'system' && d.mode !== 'code') E.push(`mode: must be "system" or "code", got ${JSON.stringify(d.mode)}`);
   if (!nonEmpty(d.intro)) E.push('intro: required, one instruction sentence');
-  else E.push(...sentences('intro', d.intro, WORDS_PROCEDURE));
+  else E.push(...sentences('intro', d.intro, WORDS_PROCEDURE), ...noFiles('intro', d.intro));
   for (const k of ['start', 'end']) {
     const c = d[k];
     if (!c || typeof c !== 'object') { E.push(`${k}: required, an object {title, summary}`); continue; }
-    if (!nonEmpty(c.title)) E.push(`${k}.title: required`); else if (c.title.length > 60) E.push(`${k}.title: ${c.title.length} characters, maximum 60`);
-    if (!nonEmpty(c.summary)) E.push(`${k}.summary: required`); else E.push(...sentences(`${k}.summary`, c.summary, WORDS_DESCRIPTION));
-    for (const extra of Object.keys(c)) if (!['title', 'summary'].includes(extra)) E.push(`${k}.${extra}: unknown field`);
+    if (!nonEmpty(c.title)) E.push(`${k}.title: required`); else if (c.title.length > 60) E.push(`${k}.title: ${c.title.length} characters, maximum 60`); else E.push(...noFiles(`${k}.title`, c.title));
+    if (!nonEmpty(c.summary)) E.push(`${k}.summary: required`); else E.push(...sentences(`${k}.summary`, c.summary, WORDS_DESCRIPTION), ...noFiles(`${k}.summary`, c.summary));
+    const allowed = k === 'start' && d.mode === 'code' ? ['title', 'summary', 'code'] : ['title', 'summary'];
+    for (const extra of Object.keys(c)) if (!allowed.includes(extra)) E.push(`${k}.${extra}: ${extra === 'code' ? (d.mode === 'code' ? 'the end card has no code: nothing runs there' : 'system mode has no code field: a design has no file to cite') : 'unknown field'}`);
+    if (k === 'start' && d.mode === 'code') E.push(...proof('start', c.code, 'the entry point'));
   }
   if (!Array.isArray(d.steps) || d.steps.length < 1) { E.push('steps: required, an array of at least 1 step'); return E; }
   if (d.steps.length > MAX_STEPS) E.push(`steps: ${d.steps.length} steps, maximum ${MAX_STEPS}`);
-  if (d.mode === 'code' && d.start && nonEmpty(d.start.summary) && !CITE.test(d.start.summary)) E.push('start.summary: code mode needs a file:line citation of the entry point');
   d.steps.forEach((s, i) => {
     const p = `steps[${i}]`;
     if (!s || typeof s !== 'object') { E.push(`${p}: must be an object`); return; }
     if (!nonEmpty(s.label)) E.push(`${p}.label: required`);
     else E.push(...labelFit(p, s.label));
-    const allowed = i === 0 ? ['label'] : ['label', 'title', 'summary', 'items', 'example'];
-    for (const k of Object.keys(s)) if (!allowed.includes(k)) E.push(`${p}.${k}: ${i === 0 ? 'the first step has a label only; its card is "start"' : 'unknown field'}`);
+    const allowed = i === 0 ? ['label'] : ['label', 'title', 'summary', 'items', 'example', ...(d.mode === 'code' ? ['code'] : [])];
+    for (const k of Object.keys(s)) if (!allowed.includes(k)) E.push(`${p}.${k}: ${i === 0 ? 'the first step has a label only; its card is "start"' : k === 'code' ? 'system mode has no code field: a design has no file to cite' : 'unknown field'}`);
+    E.push(...noFiles(`${p}.label`, s.label));
     if (i === 0) return;
-    if (!nonEmpty(s.title)) E.push(`${p}.title: required`); else if (s.title.length > 60) E.push(`${p}.title: ${s.title.length} characters, maximum 60`);
-    if (!nonEmpty(s.summary)) E.push(`${p}.summary: required`); else E.push(...sentences(`${p}.summary`, s.summary, WORDS_DESCRIPTION));
+    if (!nonEmpty(s.title)) E.push(`${p}.title: required`); else if (s.title.length > 60) E.push(`${p}.title: ${s.title.length} characters, maximum 60`); else E.push(...noFiles(`${p}.title`, s.title));
+    if (!nonEmpty(s.summary)) E.push(`${p}.summary: required`); else E.push(...sentences(`${p}.summary`, s.summary, WORDS_DESCRIPTION), ...noFiles(`${p}.summary`, s.summary));
     if (s.items !== undefined) {
       if (!Array.isArray(s.items)) E.push(`${p}.items: must be an array of {heading, text}`);
       else s.items.forEach((it, j) => {
         const q = `${p}.items[${j}]`;
         if (!it || typeof it !== 'object') { E.push(`${q}: must be an object {heading, text}`); return; }
-        if (!nonEmpty(it.heading)) E.push(`${q}.heading: required`); else if (it.heading.length > 80) E.push(`${q}.heading: ${it.heading.length} characters, maximum 80`);
-        if (!nonEmpty(it.text)) E.push(`${q}.text: required`); else E.push(...sentences(`${q}.text`, it.text, WORDS_DESCRIPTION));
+        if (!nonEmpty(it.heading)) E.push(`${q}.heading: required`); else if (it.heading.length > 80) E.push(`${q}.heading: ${it.heading.length} characters, maximum 80`); else E.push(...noFiles(`${q}.heading`, it.heading));
+        if (!nonEmpty(it.text)) E.push(`${q}.text: required`); else E.push(...sentences(`${q}.text`, it.text, WORDS_DESCRIPTION), ...noFiles(`${q}.text`, it.text));
         for (const k of Object.keys(it)) if (!['heading', 'text'].includes(k)) E.push(`${q}.${k}: unknown field`);
       });
     }
     if (s.example !== undefined && !isStr(s.example)) E.push(`${p}.example: must be a string`);
-    if (d.mode === 'code') {
-      const texts = [s.title, s.summary, ...(Array.isArray(s.items) ? s.items.flatMap((it) => [it?.heading, it?.text]) : []), s.example].filter(isStr);
-      if (!texts.some((t) => CITE.test(t))) E.push(`${p}: code mode needs a file:line citation in the title, the summary, an item or the example`);
-    }
+    if (d.mode === 'code') E.push(...proof(p, s.code, 'each call the card describes'));
   });
   return E;
+}
+
+// Code mode: a card's "code" lists the file:line of what the builder read. Missing or malformed, the card is unproven.
+function proof(field, code, what) {
+  if (!Array.isArray(code) || code.length === 0) return [`${field}.code: code mode needs the file:line of ${what}, as an array of strings`];
+  return code.flatMap((c, j) => (typeof c === 'string' && CITE.test(c.trim()) ? [] : [`${field}.code[${j}]: ${JSON.stringify(c)} is not a file:line`]));
+}
+// A card never names a file or a path: it says what happens and which function does it. The proof goes in "code".
+function noFiles(field, text) {
+  const m = text.replace(PRODUCTS, ' ').match(PATHISH);
+  return m ? [`${field}: "${m[0]}" is a file name or a path. Say what happens and which function does it, and put the file:line in "code"`] : [];
+}
+// The page carries the story only. The proof stays in the data file.
+function withoutCode(d) {
+  const { code: _c, ...start } = d.start;
+  return { ...d, start, steps: d.steps.map(({ code: _k, ...s }) => s) };
 }
 
 // Rule 8.1: no semicolon. Rules 8.4-8.7: how to count words. Rule 5.1 / 6.3: the limits.

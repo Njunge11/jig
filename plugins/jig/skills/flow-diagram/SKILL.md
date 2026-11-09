@@ -14,12 +14,14 @@ Turn one process into one HTML page that the developer clicks through, box by bo
 
 Pick one mode:
 
-- **System mode.** The source is a design the developer agreed to, in this session or in a doc. Each box is a component or a stage of that design.
-- **Code mode.** The source is the code. Start at the entry point the developer names: a route, a handler, a job, or a UI event. Read every file on the path before you write. Each box is one step on that path.
+- **System mode.** The source is a design the developer agreed to, in this session or in a doc. There is often no code yet. Each box is a component or a stage of that design, and its card explains the design itself: what the component is responsible for, how it talks to the next one (a request, an event, a queue), where its state lives, what happens when it fails or is slow, and why this choice over the alternative.
+- **Code mode.** The source is the code. Start at the entry point the developer names: a route, a handler, a job, or a UI event. Read every file on the path before you write. Each box is one step on that path, and its card tells the step the way a call trace tells it: which function runs, what it does, and what came back, with the calls it made under it.
+
+The page exists so the developer understands how the system or the feature works, one step at a time, without reading the code. A card never names a file or a path. A function, a method, a table, a service, a stage or a status is a name the developer knows, so it stays. In code mode the `file:line` of what you read goes in the card's `code` field, which is your proof: the script checks it and leaves it out of the page.
 
 The diagram is one linear path with no branch. A condition, a business rule, or an alternate path is a "How it works" item on the step where the code decides it. Use 3 to 12 boxes. When a path needs more than 12 boxes, stop and ask the developer where to cut it into two diagrams.
 
-**Gate (code mode):** you have read the code of every step, and you can give a `file:line` for each one. A step you did not read is not in the diagram.
+**Gate (code mode):** you have read the code of every step, and you can give a `file:line` for each call its card describes. A step you did not read is not in the diagram.
 
 ### Step 2: Write the data file
 
@@ -30,19 +32,20 @@ Write `docs/flows/<slug>.json`, where `<slug>` is the title in kebab-case (`orde
   "title": "How an order is cancelled",
   "mode": "code",
   "intro": "Click the outlined box to go to the next step. Open \"How it works\" for the detail.",
-  "start": { "title": "Start here", "summary": "The procedure orders.cancel starts the path (features/orders/api/orders.router.ts:12)." },
+  "start": { "title": "Start here", "summary": "The procedure orders.cancel starts the path when the customer presses Cancel.", "code": ["features/orders/api/orders.router.ts:12"] },
   "end": { "title": "The order is cancelled", "summary": "Four steps. Click any box to see it again." },
   "steps": [
     { "label": "orders.cancel" },
     {
       "label": "Load the order",
       "title": "The service reads the order",
-      "summary": "cancelOrder reads the order by id and stops when it is not open (features/orders/api/cancel.service.ts:18).",
+      "summary": "cancelOrder reads the order by its id and stops when the order is not open. Found.",
       "items": [
-        { "heading": "Read", "text": "ordersRepo.byId runs one SELECT on orders (features/orders/db/orders.repo.ts:9)." },
-        { "heading": "Rule: only open orders", "text": "A status other than open throws NOT_FOUND (features/orders/api/cancel.service.ts:21)." }
+        { "heading": "Read", "text": "ordersRepo.byId runs one SELECT on orders." },
+        { "heading": "Rule: only open orders", "text": "A status other than open throws NOT_FOUND, and the customer sees \"Order not found\"." }
       ],
-      "example": "const order = await ordersRepo.byId(db, input.id);\nif (order.status !== \"open\") throw new TRPCError({ code: \"NOT_FOUND\" });"
+      "example": "const order = await ordersRepo.byId(db, input.id);\nif (order.status !== \"open\") throw new TRPCError({ code: \"NOT_FOUND\" });",
+      "code": ["features/orders/api/cancel.service.ts:18-21", "features/orders/db/orders.repo.ts:9"]
     }
   ]
 }
@@ -55,15 +58,17 @@ Field rules:
 | `title` | The process, as a noun phrase or a "How ..." phrase. 80 characters maximum. |
 | `mode` | `system` or `code`. |
 | `intro` | One instruction sentence, 20 words maximum. Keep the default text unless the page needs a different instruction. |
-| `start` | The card under the first box. `title` 60 characters maximum, `summary` 1 to 3 sentences. In code mode the summary cites the entry point as `file:line`. |
+| `start` | The card under the first box. `title` 60 characters maximum, `summary` 1 to 3 sentences. In code mode it also has `code`, with the `file:line` of the entry point. |
 | `end` | The card shown when the last step is done. Same limits as `start`. |
 | `steps[0]` | `label` only. Its card is `start`. |
-| `steps[i]`, i ≥ 1 | `label`, `title` (60 characters maximum), `summary` (1 to 3 sentences), `items` (0 or more `{heading, text}`), and an optional `example` (a code or data sample, as a string with `\n` line breaks). |
+| `steps[i]`, i ≥ 1 | `label`, `title` (60 characters maximum), `summary` (1 to 3 sentences), `items` (0 or more `{heading, text}`), an optional `example` (a code or data sample, as a string with `\n` line breaks), and in code mode `code`. |
+| `code` | Code mode only. An array of `file:line` or `file:line-line` strings: one for each call the card describes, in the order the card tells them. It is your proof of what you read. The script checks it and leaves it out of the page. System mode has no `code`: a design has no file to cite. |
+| every text | No file name and no path, in any mode: not `cancel.service.ts`, not `features/orders/api`. Say what happens and which function does it. The `example` is the one field that may hold code as it is. |
 | `label` | 1 to 3 words. It fits a 132 px box in Geist 14px: 2 lines maximum, each line 120 px maximum. `Send email` fits. `Send confirmation email` fits on 2 lines. `Write the order row and release the stock` does not. |
 | `items[].heading` | 2 to 6 words. 80 characters maximum. |
 | `items[].text` | 1 to 4 sentences. |
 
-Write every text field in Simplified Technical English (the section below). The script rejects a sentence over the limit, a semicolon, a label that does not fit, and a code-mode step with no citation.
+Write every text field in Simplified Technical English (the section below). The script rejects a sentence over the limit, a semicolon, a label that does not fit, a file name or a path in a card, a code-mode card with no `code`, and a `code` entry that is not `file:line`.
 
 ### Step 3: Build the page
 
@@ -85,7 +90,7 @@ Reply with these items, in this order:
 
 1. The path of the HTML file and the `file://` URL the script printed. When the browser did not open (a remote or headless session), say so and give the path.
 2. The steps, one line each: the label and the title.
-3. Every second-look item (the Content rules below), one line each, with its `file:line` in code mode.
+3. Every second-look item (the Content rules below), one line each, with its `file:line` from `code` in code mode.
 
 Do not paste the data file or the HTML into the reply.
 
@@ -102,10 +107,12 @@ Do not paste the data file or the HTML into the reply.
    - a performance trap, for example a query inside a loop
    - an assumption the code does not check
    - a TODO or FIXME on the path
-4. **Code mode states only what you read in the code.** Each step cites `file:line` in its title, summary, an item, or the example. The `start` summary cites the entry point. "How it works" lists the methods called, the reads, the writes and mutations, the third-party services, and the business logic.
-5. **Mark an inference.** When you state what the code is likely to do but did not read, start the item text with "Inference:" and say what you did not read.
-6. **Redact secrets.** A key, a token, a password, or a connection string in an example becomes `<redacted>`.
-7. **The visual design and the animation are final.** They live in the template and the script. You change neither.
+4. **Code mode states only what you read in the code, and tells it like a call trace.** The summary is the step's own line: the function that runs, what it does, and what came back ("runDraftCreate creates the draft and moves the chat. Success."). "How it works" lists the calls under it in the order they ran, service, then repo, then query: the methods called, the reads, the writes and mutations ("query insert job_drafts"), the model calls, the third-party services, and the business rules. A refusal or a failure is its own item, in the words the code returns. A stage change sits on the call that makes it. The `code` field holds the `file:line` of each of those calls, and the `start` card's `code` holds the entry point.
+5. **System mode explains the design, not an implementation.** There is often no code. The summary says what the component or the stage is responsible for and what it hands to the next one. "How it works" says how it talks to the next one (a request, an event, a queue), where its state lives, what happens when it fails or is slow, and why this choice over the alternative. No function names, no files, no `code`.
+6. **No file names and no paths in a card, in either mode.** The developer reads the page to understand the system without reading the code. A function, a method, a table, a service, a stage or a status is part of the story and stays. A file or a folder is where the code lives, and it goes in `code` or nowhere.
+7. **Mark an inference.** When you state what the code is likely to do but did not read, start the item text with "Inference:" and say what you did not read.
+8. **Redact secrets.** A key, a token, a password, or a connection string in an example becomes `<redacted>`.
+9. **The visual design and the animation are final.** They live in the template and the script. You change neither.
 
 ## Simplified Technical English
 
@@ -113,7 +120,7 @@ Every text field obeys these rules of ASD-STE100 Issue 9 (Part 1, Writing rules)
 
 | Rule | Text |
 | --- | --- |
-| 1.1, 1.3 | Use approved words only, with their approved meanings. A technical name from the code (a file, a function, a table, a service) is an approved technical noun. Write it as the code spells it. |
+| 1.1, 1.3 | Use approved words only, with their approved meanings. A technical name from the code or the design (a function, a method, a table, a service, a stage) is an approved technical noun. Write it as the code spells it. A file name is not one: it never appears in a card. |
 | 2.1 | Write multi-word nouns of no more than three words. Break a longer cluster with a preposition. |
 | 3.2, 3.5 | Use only the infinitive, the imperative, the simple present, the simple past, the simple future, and the past participle as an adjective. Do not use an "-ing" form as a verb. |
 | 3.6 | Use the active voice. Say who or what does the action. |
@@ -124,12 +131,12 @@ Every text field obeys these rules of ASD-STE100 Issue 9 (Part 1, Writing rules)
 | 6.3 | A descriptive sentence (every `summary` and item `text`) has 25 words maximum. |
 | 6.5, 6.6 | One topic per item. No item has more than six sentences. |
 | 8.1 | No semicolon. |
-| 8.5 to 8.7 | A number, a number with its unit, an abbreviation, a `file:line` identifier, quoted text, and a hyphenated word each count as one word. Text in parentheses counts as one word. |
+| 8.5 to 8.7 | A number, a number with its unit, an abbreviation, a technical name such as `ordersRepo.byId`, quoted text, and a hyphenated word each count as one word. Text in parentheses counts as one word. |
 
 Before and after:
 
 - Before (34 words, passive, a noun for an action, a semicolon): "Validation of the payload is performed by the handler; in the event that the signature cannot be verified, the request will be rejected and a 401 response is returned to the caller."
-- After (12 + 11 words, active, one topic per sentence): "The handler validates the payload signature (lib/webhooks/verify.ts:14). When the signature does not match, the handler returns 401."
+- After (10 + 11 words, active, one topic per sentence, the proof in `code`): "verifySignature checks the payload signature. Valid. When the signature does not match, the handler returns 401." with `"code": ["lib/webhooks/verify.ts:14"]`.
 
 ## Where the files live
 
@@ -143,8 +150,11 @@ Before and after:
 | `...: "..." has N words, maximum 25 (Rule 6.3)` | Split the sentence into two. Each sentence keeps one topic. |
 | `intro: "..." has N words, maximum 20 (Rule 5.1)` | Shorten the instruction, or use the default intro. |
 | `...: a semicolon` | Replace the semicolon with a period and start a new sentence. |
-| `steps[i]: code mode needs a file:line citation` | Add the citation to the item that states what the code does. Read the code first when you do not have the line. |
-| `start.summary: code mode needs a file:line citation of the entry point` | Cite the route, handler, job, or event handler that starts the path. |
+| `...: "<name>" is a file name or a path` | Rewrite the text: say what happens and which function does it. Move the `file:line` into that card's `code`. |
+| `steps[i].code: code mode needs the file:line of each call the card describes` | Add `code` with one `file:line` per call the card tells. Read the code first when you do not have the line. |
+| `start.code: code mode needs the file:line of the entry point` | Add `code` to `start` with the route, handler, job, or event handler that starts the path. |
+| `....code[j]: "..." is not a file:line` | Each entry is `path/to/file.ts:12` or `path/to/file.ts:12-20`. A file with no line is not proof. |
+| `....code: system mode has no code field` | A design has no file to cite. Remove `code`, or pick code mode when the source is the code. |
 | `steps[0].title: the first step has a label only` | Move that card's content into `start`. |
 | `could not open a browser (...)` | Not an error: the page is written. A sandbox or a remote session has no browser. Give the path and the `file://` URL in the report. |
 | `<path> exists. Pass --force to replace it` | A different process: pick a new slug. The same process, on the developer's request: add `--force`. |
@@ -154,6 +164,8 @@ Before and after:
 
 - [ ] One mode, one linear path, 3 to 12 boxes.
 - [ ] Every second-look detail on the path is its own item with its own heading.
-- [ ] Code mode: every step and the `start` card cite `file:line`, each inference is marked, and no secret is in an example.
+- [ ] No card names a file or a path. Functions, methods, tables, services and stages are the names it uses.
+- [ ] Code mode: every card reads like a trace line (the function, what it does, what came back), every step and the `start` card hold `code` with one `file:line` per call, each inference is marked, and no secret is in an example.
+- [ ] System mode: every card explains the design (responsibility, how it talks to the next component, where state lives, failure and slowness, why this choice), with no function names and no `code`.
 - [ ] The script printed `wrote docs/flows/<slug>.html` and the `file://` URL.
 - [ ] The reply gives the path, the steps, and the second-look items, and nothing else from the files.
