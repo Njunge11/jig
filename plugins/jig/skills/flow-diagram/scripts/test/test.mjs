@@ -81,8 +81,6 @@ const invariants = (page) => page.evaluate(() => {
   });
   allN.forEach((o, i) => { if (o !== shown && cs(o.el).visibility !== 'hidden') E.push(`card ${i} not hidden`); });
   arrows.forEach((o) => { if (!o.drawn) o.segs.concat(o.hd).forEach((e) => { if (cs(e).visibility !== 'hidden') E.push(`arrow ${o.k} undrawn but visible`); }); });
-  const ct = document.getElementById('ct').textContent;
-  if (ct !== (done ? 'Done' : `${cur + 1} / ${L.length}`)) E.push('counter text ' + ct);
   const se = document.scrollingElement;
   if (se.scrollWidth > se.clientWidth + 1) E.push(`horizontal overflow ${se.scrollWidth} > ${se.clientWidth}`);
   return E;
@@ -103,7 +101,8 @@ async function click(page, expr) {
   await page.mouse.click(r.x, r.y);
   return true;
 }
-const EXPR = { next: "document.getElementById('nx')", back: "document.getElementById('bk')", keep: "document.getElementById('kp')", replay: "document.getElementById('rp')", how: "shown && shown.el.querySelector(shown.open ? '.cb .mo' : '.ca .mo')", box: (i) => `boxes[${i}].el`, curBox: 'boxes[cur].el' };
+// next: the current box; back: the box before it (the bar has no Back or Next button)
+const EXPR = { next: 'boxes[cur].el', back: 'boxes[Math.max(0, cur - 1)].el', keep: "document.getElementById('kp')", replay: "document.getElementById('rp')", how: "shown && shown.el.querySelector(shown.open ? '.cb .mo' : '.ca .mo')", box: (i) => `boxes[${i}].el`, curBox: 'boxes[cur].el' };
 
 async function shot(page, name) { await page.screenshot({ path: SHOTS + name + '.png', fullPage: true }); }
 
@@ -182,9 +181,9 @@ async function regress() {
     fails.push(...(await invariants(page)).map((e) => `next+back: ${e}`));
     // button press interrupted mid-animation
     for (const hold of [20, 60, 120]) {
-      const r = await rectOf(page, EXPR.next);
+      const r = await rectOf(page, EXPR.replay);
       await page.mouse.move(r.x, r.y); await page.mouse.down(); await sleep(hold); await page.mouse.up(); await sleep(350);
-      const sc = await page.evaluate(() => { const t = getComputedStyle(document.getElementById('nx')).transform; return t === 'none' ? 1 : new DOMMatrix(t).a; });
+      const sc = await page.evaluate(() => { const t = getComputedStyle(document.getElementById('rp')).transform; return t === 'none' ? 1 : new DOMMatrix(t).a; });
       if (Math.abs(sc - 1) > 0.01) fails.push(`button scale after press held ${hold}ms: ${sc}`);
     }
     await settle(page);
@@ -399,7 +398,7 @@ async function nav() {
   if (!s.done) fails.push('not done after clicking every box');
   s = await go(EXPR.box(2), 'box click when done');
   if (s.done || s.cur !== 2) fails.push(`box click when done: cur ${s.cur} done ${s.done}`);
-  // 10 fast clicks in 1 second on Next, Back, and a box
+  // 10 fast clicks in 1 second on the current box, the box before it, and a box
   for (const [expr, label] of [[EXPR.next, 'next'], [EXPR.back, 'back'], [EXPR.box(1), 'box 1']]) {
     for (let i = 0; i < 10; i++) { await click(page, expr); await sleep(85); }
     await settle(page);

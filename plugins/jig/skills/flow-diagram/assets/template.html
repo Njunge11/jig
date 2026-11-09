@@ -12,17 +12,17 @@ html,body{margin:0}
 body{background:#f7f7f8;font-family:'Geist',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
 @media (prefers-color-scheme: dark){body{background:#141416}}
 main{max-width:680px;margin:0 auto;padding:56px 20px 64px}
-header{margin:0 0 28px 2px}
-header h1{margin:0;font-size:22px;font-weight:500;letter-spacing:-.02em;color:#1b1c1f}
-header p{margin:6px 0 0;font-size:14px;line-height:1.6;color:#61646c}
+header{margin:0 0 20px;padding:0 12px 0 20px}
+header h1{margin:0;font-size:22px;line-height:1.3;font-weight:500;letter-spacing:-.02em;text-wrap:pretty;color:#1b1c1f}
+header p{margin:4px 0 0;font-size:14px;line-height:1.6;text-wrap:pretty;color:#61646c}
+header .bar{margin-top:16px}
 @media (prefers-color-scheme: dark){header h1{color:#ededef}header p{color:#a9acb3}}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 </style>
 </head>
 <body>
 <main>
-<header><h1>__TITLE__</h1><p>__INTRO__</p></header>
-<h2 class="sr-only">Click-to-reveal process diagram of __TITLE__. Click the outlined box to draw an arrow to the next step; each step has a note with an expandable how-it-works panel, plus back navigation and a toggle to keep or remove later steps.</h2>
+<h2 class="sr-only">Click-to-reveal process diagram of __TITLE__. Click the outlined box to draw an arrow to the next step, and an earlier box to go back; each step has a note with an expandable how-it-works panel, plus a toggle to keep or remove later steps and a replay.</h2>
 <style>
 .px{--c1:#ffffff;--c3:#f3f3f4;--c4:#ececee;--g8:#b8b9bf;--g9:#8b8d98;--g11:#61646c;--ink:#1b1c1f;
 --s1:0 1px 2px rgba(17,19,24,.06),0 2px 6px rgba(17,19,24,.07);--s2:0 2px 4px rgba(17,19,24,.06),0 8px 20px -4px rgba(17,19,24,.14);
@@ -77,31 +77,22 @@ font-family:'Geist',system-ui,sans-serif;color:var(--ink);-webkit-tap-highlight-
 .cb li span{display:block;font-size:13px;line-height:1.5;color:var(--g11);max-width:560px}
 .exl{margin:16px 0 6px;font-size:11px;font-family:'Geist Mono',ui-monospace,monospace;color:var(--g9)}
 .ex{margin:0;padding:12px 14px;border-radius:8px;background:var(--c3);font-family:'Geist Mono',ui-monospace,monospace;font-size:12px;line-height:1.6;white-space:pre;overflow-x:auto}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 2px 0;width:680px;-webkit-user-select:none;user-select:none}
-.bar .g{display:flex;align-items:center;gap:8px}
+.bar{display:flex;align-items:center;gap:12px;flex:none;height:30px;-webkit-user-select:none;user-select:none}
 .btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 11px;border-radius:8px;background:var(--c1);box-shadow:var(--s1);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;outline:none}
 .btn:focus-visible{box-shadow:var(--s1),0 0 0 2px var(--ink)}
-.ct{font-family:'Geist Mono',ui-monospace,monospace;font-size:12px;color:var(--g9);white-space:nowrap;margin-left:6px}
 .tg{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--g11);cursor:pointer;white-space:nowrap;outline:none}
 .tg:focus-visible .s{box-shadow:0 0 0 2px var(--ink)}
-.stage .bar{position:absolute;left:0;top:0;z-index:3}
 .tg .s{position:relative;width:30px;height:18px;border-radius:9px;background:var(--c4);overflow:hidden}
 .tg .f{position:absolute;inset:0;background:var(--ink)}
 .tg .k{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--c1);box-shadow:0 1px 2px rgba(0,0,0,.25)}
 </style>
 <div class="px">
-<div class="fit" id="fit"><div class="stage" id="stage"></div></div>
+<header><h1>__TITLE__</h1><p>__INTRO__</p>
 <div class="bar" id="bar">
-<div class="g">
-<span class="btn" role="button" tabindex="0" id="bk"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M8.5 3.5 5 7l3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</span>
-<span class="btn" role="button" tabindex="0" id="nx">Next<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M5.5 3.5 9 7l-3.5 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-<span class="ct" id="ct"></span>
-</div>
-<div class="g">
 <span class="tg" role="switch" aria-checked="true" tabindex="0" id="kp"><span class="s"><span class="f"></span><span class="k"></span></span>Keep later steps</span>
 <span class="btn" role="button" tabindex="0" id="rp"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M2.75 7a4.25 4.25 0 1 0 1.25-3M2.75 2.5V5h2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Replay</span>
-</div>
-</div>
+</div></header>
+<div class="fit" id="fit"><div class="stage" id="stage"></div></div>
 </div>
 <script id="flow-data" type="application/json">__DATA__</script>
 __MOTION__
@@ -128,16 +119,16 @@ if(reduce&&k!=='opacity'){v[k]=t;el.style[k]=t;continue}
 if(f!==t)ch=true;kf[k]=[f,t];v[k]=t}
 if(!ch){for(const k in kf)el.style[k]=kf[k][1];return}
 a.push([el,kf,reduce?{at:o.at||0,duration:.15}:o])},raw(el,kf,o){const v=gv(el);for(const k in kf){const t=kf[k][kf[k].length-1];v[k]=t;if(SNAP||reduce)el.style[k]=t}if(!(SNAP||reduce))a.push([el,kf,o])}}}
-let act=null,stH=0,hT=0,sc=1;const BARH=44;
+let act=null,stH=0,hT=0,sc=1;
 function finish(){if(act){const c=act;act=null;c.complete()}}
-function run(build){finish();stopPulse();const s=Seq();build(s);controls();const h=stageH();if(h>stH)setH(h);
+function run(build){finish();stopPulse();const s=Seq();build(s);const h=stageH();if(h>stH)setH(h);
 if(!s.a.length){after();return}
 const c=M.animate(s.a);act=c;c.finished.then(()=>{if(act===c){act=null;after()}})}
 function vis(){allN.forEach(o=>{o.el.style.visibility=o===shown?'visible':'hidden';if(!o.open&&o.el.classList.contains('xp')){o.el.classList.remove('xp');put(o.cd,{clipPath:clip0(o)})}});boxes.forEach((b,i)=>{b.el.style.visibility=b.on?'visible':'hidden';const r=b.on&&!done&&i===cur;b.rg.style.visibility=r?'visible':'hidden';b.pl.style.visibility=r?'visible':'hidden'});arrows.forEach(o=>{o.segs.concat(o.hd).forEach(e=>e.style.visibility=o.drawn?'visible':'hidden')})}
 function after(){setH(stageH(),true);vis();startPulse()}
-function setH(h,force){if(h>=stH||force){stH=h;$('fit').style.height=Math.ceil((h+BARH)*sc)+'px'}}
-function fitS(w){if(w==null)w=$('fit').clientWidth;sc=Math.min(1,w/680);$('stage').style.transform=sc<1?`scale(${sc})`:'none';$('fit').style.height=Math.ceil((stH+BARH)*sc)+'px'}
-const stage=$('stage'),rows=[...Array(R)].map(()=>div('row',stage)),bar=$('bar');stage.appendChild(bar);
+function setH(h,force){if(h>=stH||force){stH=h;$('fit').style.height=Math.ceil(h*sc)+'px'}}
+function fitS(w){if(w==null)w=$('fit').clientWidth;sc=Math.min(1,w/680);$('stage').style.transform=sc<1?`scale(${sc})`:'none';$('fit').style.height=Math.ceil(stH*sc)+'px'}
+const stage=$('stage'),rows=[...Array(R)].map(()=>div('row',stage));
 const boxes=[],arrows=[],notes=[];
 let tops=[...Array(R)].map((_,r)=>Y0+r*(H+GAPR)),shown=null,cur=0,max=0,done=false,keep=true;
 const esc=v=>String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -182,7 +173,8 @@ N.forEach((n,i)=>notes.push(mkNote(n,`Step ${i+1} → ${i+2}`,i+1)));
 const startN=mkNote(START,'Begin',0),endN=mkNote(END,'Complete',li),allN=[...notes,startN,endN];
 const clipC=o=>`inset(0px ${WIDE-o.ox-CW}px calc(100% - ${o.ch}px) ${o.ox}px round 12px)`,clip0=clipC;
 let FW=680;function measure(){allN.forEach(o=>{if(o.cb)o.el.classList.add('xp')});FW=$('fit').clientWidth;for(let r=0;r<R;r++)rowCh[r]=0;allN.forEach(o=>{o.ch=o.ca.offsetHeight;o.eh=o.cb?o.cd.offsetHeight:o.ch;rowCh[o.row]=Math.max(rowCh[o.row],o.ch)});allN.forEach(o=>{if(!o.open){o.el.classList.remove('xp');put(o.cd,{clipPath:clip0(o)})}})}
-const rowCh=[];function computeTops(){let y=Y0;for(let r=0;r<R;r++){tops[r]=y;y+=H+(shown&&shown.row===r?Math.max(GAPR,28+rowCh[r]+36):GAPR)}}
+// A shown card never moves the row below it: the rows keep one gap, and the card paints over the next row from its own row, which render gives the higher z-index.
+const rowCh=[];function computeTops(){for(let r=0;r<R;r++)tops[r]=Y0+r*(H+GAPR)}
 function stageH(){const vis=ROW(Math.max(max,shown?shown.box:0));let h=tops[vis]+H+8;if(shown)h=Math.max(h,tops[shown.row]+H+28+(shown.open?shown.eh:rowCh[shown.row])+24);return h}
 const focusNote=()=>done?endN:(cur===0?startN:notes[cur-1]);
 function noteOut(s,o,t){o.el.classList.remove('show');s.go(o.wr,{opacity:0,transform:'translateY(-4px)'},{at:t,duration:.12,ease:EO});s.go(o.ld,{opacity:0},{at:t,duration:.1,ease:EO});
@@ -203,14 +195,14 @@ else if(!on&&b.on)s.go(b.el,{opacity:0,transform:HID},{at:P.tRet(i-1),duration:.
 else if(on)s.go(b.el,{opacity:op},{at:P.tDim,duration:.2,ease:EO});
 b.on=on;const r=!done&&i===cur;if(r)b.rg.style.visibility='visible';
 s.go(b.rg,{opacity:r?1:0},r?{at:P.tRing,duration:.2,ease:EO}:{at:0,duration:.2,ease:EO})});
-s.go(bar,{transform:`translateY(${stageH()}px)`},{at:P.tBar,...SPR});if(ns&&ns!==os)noteIn(s,ns,P.tNote)})}
+if(ns&&ns!==os)noteIn(s,ns,P.tNote)})}
 const Pst=om=>({om,tBar:0,tRows:0,tDim:0,tArrow:0,tBoxIn:0,tRing:.04,tNote:.06,tRet:()=>0});
 function Pfwd(same,om){const ta=0,tb=same?.12:.2;return{om,tBar:0,tRows:0,tDim:0,tArrow:ta,tBoxIn:tb,tRing:tb,tNote:tb+.06,tRet:()=>0}}
 function Pret(om,to){const T=(om-to-1)*.05+.15;return{om,tBar:T,tRows:T,tDim:T,tRing:T,tNote:T+.04,tArrow:0,tBoxIn:0,tRet:k=>(om-1-k)*.05}}
 function toggleOpen(o){if(o!==shown)return;finish();if(!o.open){o.el.classList.add('xp');put(o.cd,{clipPath:clipC(o)})}run(s=>{o.open=!o.open;o.el.classList.toggle('open',o.open);
 if(o.open){s.go(o.ca,{opacity:0},{at:0,duration:.08,ease:EO});s.go(o.cd,{clipPath:FULL},{at:0,duration:.3,ease:IO});
 o.parts.forEach((p,j)=>s.go(p,{opacity:[0,1],transform:['translateY(6px)','translateY(0px)']},{at:.06+Math.min(j,8)*.03,duration:.2,ease:EO}))}
-else{o.parts.forEach(p=>s.go(p,{opacity:0},{at:0,duration:.1,ease:EO}));s.go(o.cd,{clipPath:clipC(o)},{at:.04,duration:.22,ease:IO});s.go(o.ca,{opacity:[0,1]},{at:.14,duration:.12,ease:EO})}s.go(bar,{transform:`translateY(${stageH()}px)`},o.open?{at:0,duration:.3,ease:IO}:{at:.04,duration:.22,ease:IO})});
+else{o.parts.forEach(p=>s.go(p,{opacity:0},{at:0,duration:.1,ease:EO}));s.go(o.cd,{clipPath:clipC(o)},{at:.04,duration:.22,ease:IO});s.go(o.ca,{opacity:[0,1]},{at:.14,duration:.12,ease:EO})}});
 const f=o.el.querySelector(o.open?'.cb .mo':'.ca .mo');f&&document.activeElement&&document.activeElement.classList.contains('mo')&&f.focus({preventScroll:true})}
 let pul=null,pulEl=null;const PSX=(W+10+14)/(W+10),PSY=(H+10+14)/(H+10);
 let pulF=null;function stopPulse(){if(pul&&pulEl){const c=getComputedStyle(pulEl),o=+c.opacity,t=c.transform;pul.cancel();pul=null;pulEl.style.transform=t;pulF=o>0.01?M.animate(pulEl,{opacity:[o,0]},{duration:.2,ease:EO}):null;if(!pulF)pulEl.style.opacity=0}else if(pulEl)pulEl.style.opacity=0;pulEl=null}
@@ -226,7 +218,8 @@ function setKeep(v){keep=v;const kp=$('kp');kp.setAttribute('aria-checked',v);
 if(!NOM){M.animate(kp.querySelector('.k'),{transform:v?'translateX(12px)':'translateX(0px)'},{duration:.2,ease:[.2,.8,.2,1]});M.animate(kp.querySelector('.f'),{opacity:v?1:0},{duration:.18})}
 else{kp.querySelector('.k').style.transform=v?'translateX(12px)':'none';kp.querySelector('.f').style.opacity=v?1:0}
 if(!v&&max>cur&&!done){const om=max;max=cur;render(Pret(om,cur))}}
-function replay(){run(s=>{const os=shown;if(os)noteOut(s,os,0);shown=null;
+// A replay restarts at the first box, so it scrolls the page to the top first. The diagram gets shorter when the sequence ends, and a scroll position above the new maximum would make the browser clamp it in one jump.
+function replay(){if(scrollY>0)scrollTo({top:0,behavior:reduce?'instant':'smooth'});run(s=>{const os=shown;if(os)noteOut(s,os,0);shown=null;
 boxes.forEach(b=>{if(b.on){s.go(b.el,{opacity:0},{at:0,duration:.15,ease:EO});s.go(b.el,{transform:HID},{at:.16,duration:.01})}b.on=false;b.el.classList.remove('on');s.go(b.rg,{opacity:0},{at:0,duration:.15,ease:EO})});
 arrows.forEach(o=>{if(o.drawn){o.segs.concat(o.hd).forEach(e=>s.go(e,{opacity:0},{at:0,duration:.15,ease:EO}))}o.drawn=false});
 cur=0;max=0;done=false;computeTops();
@@ -234,11 +227,9 @@ arrows.forEach(o=>{const T=segT(o,false);o.segs.forEach((e,j)=>s.go(e,{transform
 rows.forEach((g,r)=>s.go(g,{transform:`translateY(${tops[r]}px)`},{at:.16,duration:.01}));
 const b=boxes[0];b.on=true;b.el.classList.add('on');b.el.tabIndex=0;b.el.style.visibility='visible';s.go(b.el,{opacity:[0,1],transform:[HID,SHOWN]},{at:.2,...POP});
 b.rg.style.visibility='visible';s.go(b.rg,{opacity:1},{at:.2,duration:.2,ease:EO});
-shown=startN;rows[0].style.zIndex=2;s.go(bar,{transform:`translateY(${stageH()}px)`},{at:.2,...SPR});noteIn(s,startN,.26)})}
-function controls(){$('ct').textContent=done?'Done':`${cur+1} / ${L.length}`;const a=cur===0&&!done?.4:1,b2=done?.4:1;
-[[$('bk'),a],[$('nx'),b2]].forEach(([e,v])=>NOM?e.style.opacity=v:M.animate(e,{opacity:v},{duration:.15}))}
+shown=startN;rows[0].style.zIndex=2;noteIn(s,startN,.26)})}
 const actn=(id,f)=>{$(id).addEventListener('click',f);$(id).addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f()}})};
-actn('bk',()=>back());actn('nx',()=>next());actn('rp',()=>replay());actn('kp',()=>setKeep(!keep));
+actn('rp',()=>replay());actn('kp',()=>setKeep(!keep));
 if(!NOM){
 boxes.forEach(b=>{M.hover(b.el,()=>{M.animate(b.sh,{opacity:1},{duration:.15,ease:'easeOut'});return()=>M.animate(b.sh,{opacity:0},{duration:.2,ease:'easeOut'})});
 });
@@ -246,9 +237,9 @@ const pz=(e,t,d)=>{const c=getComputedStyle(e).transform,k=c&&c!=='none'?new DOM
 document.querySelectorAll('.px .btn').forEach(e=>M.press(e,()=>{pz(e,'scale(0.97)',.1);return()=>pz(e,'scale(1)',.15)}))}
 put($('kp').querySelector('.k'),{transform:'translateX(12px)'});
 measure();fitS(FW);rows.forEach((g,r)=>put(g,{transform:`translateY(${tops[r]}px)`}));arrows.forEach(o=>{const T=segT(o,false);o.segs.forEach((e,j)=>put(e,{transform:T.segs[j],opacity:1}));put(o.hd,{transform:T.hd,opacity:0})});
-vis();put(bar,{transform:`translateY(${stageH()}px)`});render({om:0,tBar:0,tRows:0,tDim:0,tArrow:0,tBoxIn:.05,tRing:.12,tNote:.2,tRet:()=>0});
+vis();render({om:0,tBar:0,tRows:0,tDim:0,tArrow:0,tBoxIn:.05,tRing:.12,tNote:.2,tRet:()=>0});
 addEventListener('resize',()=>fitS());
-document.fonts&&document.fonts.ready.then(()=>{finish();measure();if(shown){computeTops();SNAP=true;rows.forEach((g,r)=>put(g,{transform:`translateY(${tops[r]}px)`}));arrows.forEach(o=>{const T=segT(o,o.drawn);o.segs.forEach((e,j)=>put(e,{transform:T.segs[j]}));put(o.hd,{transform:T.hd})});SNAP=NOM}put(bar,{transform:`translateY(${stageH()}px)`});after()});
+document.fonts&&document.fonts.ready.then(()=>{finish();measure();if(shown){computeTops();SNAP=true;rows.forEach((g,r)=>put(g,{transform:`translateY(${tops[r]}px)`}));arrows.forEach(o=>{const T=segT(o,o.drawn);o.segs.forEach((e,j)=>put(e,{transform:T.segs[j]}));put(o.hd,{transform:T.hd})});SNAP=NOM}after()});
 </script>
 </main>
 </body>
