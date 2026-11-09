@@ -47,7 +47,7 @@ git add -A && git commit -m "chore: scaffold the repo root"
 Invoke `jig:structure` with the Skill tool before you place a file. Then:
 
 1. `packages/eslint-config`: copy `assets/eslint-config/` whole, with `{{SCOPE}}` replaced. Every app's `eslint.config.mjs` is one line: `export { default } from "{{SCOPE}}/eslint-config/next";`. A package's config imports `gates(["src"])` from `{{SCOPE}}/eslint-config/gates`.
-2. `packages/db`: Drizzle + postgres.js, `src/schema/`, `src/client.ts`, `drizzle.config.ts`, the PGlite test harness from the **Backend test setup** section of `jig:backend-tests` (invoke it). Scripts: `with-env` (`dotenv -e ../../.env --`), `db:generate`, `db:migrate`, `db:push`, `db:studio`, `db:check` (`pnpm with-env node scripts/db-check.mjs`, from `assets/db/db-check.mjs`), `test`, `test:run`, `lint`, `typecheck`.
+2. `packages/db`: Drizzle + postgres.js, `src/schema/`, `src/client.ts`, `drizzle.config.ts`, the PGlite test harness from the **Backend test setup** section of `jig:backend-tests` (invoke it). Scripts: `with-env` (`dotenv -e ../../.env --`), `db:generate`, `db:migrate`, `db:push` (`pnpm with-env drizzle-kit push --force`: no prompt, so a builder runs it unattended), `db:studio`, `db:check` (`pnpm with-env node scripts/db-check.mjs`, from `assets/db/db-check.mjs`), `test`, `test:run`, `lint`, `typecheck`.
 3. `packages/trpc`: `init.ts` with `createTRPCRouter`, `baseProcedure`, `createCallerFactory` and the `Context` type, per `jig:backend-standards` (invoke it).
 4. `packages/ui`: `npx shadcn@latest init` with the theme the project names, or the default; every app imports from `{{SCOPE}}/ui`.
 
@@ -72,7 +72,7 @@ Then, per app: name it `{{SCOPE}}/<app>`, set `dev` to `next dev --port <port>`,
 This step exists because an unreachable database or a missing login surfaces at the developer's first manual check, after a whole checklist is built. Prove each one now:
 
 1. `.env`: copy `.env.example` to `.env`, generate `AUTH_SECRET` with `openssl rand -base64 32`. Ask the developer for the Supabase session-pooler URI (dashboard → Connect → Session pooler, port 5432) when `DATABASE_URL` is empty. Never probe a local Postgres or Docker: the database is the Supabase project.
-2. `pnpm --filter {{SCOPE}}/db db:check` prints `db ok`. Then `pnpm --filter {{SCOPE}}/db db:push`; it asks for a confirmation on a terminal, so when your shell has no TTY, give the developer the command to run with `!`.
+2. `pnpm --filter {{SCOPE}}/db db:check` prints `db ok`. Then `pnpm --filter {{SCOPE}}/db db:push` prints `Changes applied`. The script carries `--force`, so it never waits on a prompt: you run it, and never hand it to the developer.
 3. `gh auth status` shows a logged-in account.
 
 **Gate:** the transcript shows `db ok`, the push's table list, and the `gh` login line.
@@ -105,6 +105,7 @@ When the folder already holds code, Step 2 and Step 3 add only what is missing a
 - Don't run the CI only on pull requests. There are none; it runs on every push to main.
 - Don't hand-edit a convention in the repo without the same change in `assets/`.
 - Don't use the transaction pooler URI (port 6543) for `DATABASE_URL`: postgres.js prepared statements fail on it.
+- Don't write `db:push` without `--force`, and don't hand a database command to the developer. A builder runs unattended: a prompt or a hand-off stops the goal until someone returns to the screen.
 
 ## Verify
 

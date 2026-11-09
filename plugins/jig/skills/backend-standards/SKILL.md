@@ -384,7 +384,7 @@ export function registerDeleteProduct(register: RegisterTool, deps: DeleteProduc
 - The schema is the single source of truth.
 - Generate the migrations with the Drizzle tooling (`db:generate`). Custom SQL (DDL that drizzle-kit cannot express, data seeding) goes through `drizzle-kit generate --custom` — never through a file created by hand.
 - Never edit an applied migration. Add a new migration for every schema change.
-- **Never apply migrations.** To generate the migration file is part of a schema change. To run it (`db:migrate`, `db:push`, or any command that alters a real database) is the developer's job — the developer does this manually. Tests are not affected: the PGlite test setup pushes the schema into an in-memory instance, not into a database.
+- **Apply the schema to the dev database yourself when a checklist item needs it.** The repo has one database, the dev database, and `db:push` carries `--force` so it runs with no prompt. A Done item that needs the schema or the seed on that database (`db:push`, then `db:seed`) is yours to run, in the transcript. Never hand the command to the developer: a builder runs unattended, and a hand-off stops the goal until someone returns to the screen. A production database is a different matter and is not in scope here. Tests are not affected: the PGlite test setup pushes the schema into an in-memory instance.
 
 ## Types & reuse
 

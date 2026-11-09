@@ -16,8 +16,10 @@ Run from the repo root: `pnpm dev`, `pnpm build`, `pnpm lint`,
 
 - Tests run on PGlite and need no database.
 - `pnpm --filter {{SCOPE}}/db db:check` proves `DATABASE_URL` answers;
-  `db:push` pushes the schema to it; `db:generate` and `db:migrate` write and
-  apply migrations.
+  `db:push` pushes the schema to it with no prompt (`--force`: the one
+  database is the dev database, and a builder runs it unattended);
+  `db:seed` writes the seed account; `db:generate` and `db:migrate` write
+  and apply migrations.
 - `.env` at the repo root holds `DATABASE_URL` (the Supabase session-pooler
   URI, port 5432), `AUTH_SECRET` and `AUTH_URL`. Git ignores it;
   `.env.example` lists every key.
