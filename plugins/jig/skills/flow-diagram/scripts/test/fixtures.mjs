@@ -76,9 +76,13 @@ BAD.badcite = base('Bad code', 2, 'code'); BAD.badcite.start.code = ['features/o
 BAD.pathinprose = base('Path in prose', 2, 'code'); BAD.pathinprose.start.code = ['features/orders/api/orders.router.ts:12']; BAD.pathinprose.steps[1].code = ['features/orders/api/orders.service.ts:18']; BAD.pathinprose.steps[1].summary = 'cancelOrder reads the order (features/orders/api/orders.service.ts:18).';
 BAD.fileinprose = base('File in prose', 2); BAD.fileinprose.steps[1].items[0].text = 'The handler in orders.router.ts reads the order.';
 BAD.codeinsystem = base('Code in system', 2); BAD.codeinsystem.steps[1].code = ['features/orders/api/orders.service.ts:18'];
+BAD.codeinspec = base('Code in spec', 2, 'spec'); BAD.codeinspec.steps[1].code = ['features/orders/api/orders.service.ts:18'];
+BAD.labelor = base('Label or', 2); BAD.labelor.steps[1].label = 'Refund or reject';
 BAD.firstcard = base('First has card', 2); BAD.firstcard.steps[0].title = 'Not allowed';
 BAD.nosteps = base('No steps', 1); BAD.nosteps.steps = [];
 BAD.badmode = base('Bad mode', 2); BAD.badmode.mode = 'flow';
+// spec mode: a product spec with no code field, should pass
+F.spec3 = base('A customer asks for a refund', 3, 'spec'); F.spec3.steps[1].items = [{ heading: 'Open question', text: 'The spec does not say if a partial refund is in scope.' }];
 // label at the limit: should pass
 F.labelmax = base('Label at the limit', 2); F.labelmax.steps[1].label = 'Send confirmation email';
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Builds a flow diagram page from a data file.
 //   node build.mjs <flow.json> [--out <file.html>] [--force] [--open] [--check] [--motion cdn|inline]
-// Validates the data (schema, label fit, STE sentence length, no file names in a card, the code-mode proof), then
+// Validates the data (schema, mode system|spec|code, label fit, STE sentence length, no file names in a card, the code-mode proof), then
 // injects it into assets/template.html and writes the HTML beside the data file.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -77,7 +77,7 @@ function validate(d) {
   if (!nonEmpty(d.title)) E.push('title: required, a non-empty string');
   else if (d.title.length > 80) E.push(`title: ${d.title.length} characters, maximum 80`);
   else E.push(...noFiles('title', d.title));
-  if (d.mode !== 'system' && d.mode !== 'code') E.push(`mode: must be "system" or "code", got ${JSON.stringify(d.mode)}`);
+  if (!['system', 'spec', 'code'].includes(d.mode)) E.push(`mode: must be "system", "spec" or "code", got ${JSON.stringify(d.mode)}`);
   if (!nonEmpty(d.intro)) E.push('intro: required, one instruction sentence');
   else E.push(...sentences('intro', d.intro, WORDS_PROCEDURE), ...noFiles('intro', d.intro));
   for (const k of ['start', 'end']) {
@@ -86,7 +86,7 @@ function validate(d) {
     if (!nonEmpty(c.title)) E.push(`${k}.title: required`); else if (c.title.length > 60) E.push(`${k}.title: ${c.title.length} characters, maximum 60`); else E.push(...noFiles(`${k}.title`, c.title));
     if (!nonEmpty(c.summary)) E.push(`${k}.summary: required`); else E.push(...sentences(`${k}.summary`, c.summary, WORDS_DESCRIPTION), ...noFiles(`${k}.summary`, c.summary));
     const allowed = k === 'start' && d.mode === 'code' ? ['title', 'summary', 'code'] : ['title', 'summary'];
-    for (const extra of Object.keys(c)) if (!allowed.includes(extra)) E.push(`${k}.${extra}: ${extra === 'code' ? (d.mode === 'code' ? 'the end card has no code: nothing runs there' : 'system mode has no code field: a design has no file to cite') : 'unknown field'}`);
+    for (const extra of Object.keys(c)) if (!allowed.includes(extra)) E.push(`${k}.${extra}: ${extra === 'code' ? (d.mode === 'code' ? 'the end card has no code: nothing runs there' : 'only code mode has a code field: a design or a spec has no file to cite') : 'unknown field'}`);
     if (k === 'start' && d.mode === 'code') E.push(...proof('start', c.code, 'the entry point'));
   }
   if (!Array.isArray(d.steps) || d.steps.length < 1) { E.push('steps: required, an array of at least 1 step'); return E; }
@@ -97,7 +97,7 @@ function validate(d) {
     if (!nonEmpty(s.label)) E.push(`${p}.label: required`);
     else E.push(...labelFit(p, s.label));
     const allowed = i === 0 ? ['label'] : ['label', 'title', 'summary', 'items', 'example', ...(d.mode === 'code' ? ['code'] : [])];
-    for (const k of Object.keys(s)) if (!allowed.includes(k)) E.push(`${p}.${k}: ${i === 0 ? 'the first step has a label only; its card is "start"' : k === 'code' ? 'system mode has no code field: a design has no file to cite' : 'unknown field'}`);
+    for (const k of Object.keys(s)) if (!allowed.includes(k)) E.push(`${p}.${k}: ${i === 0 ? 'the first step has a label only; its card is "start"' : k === 'code' ? 'only code mode has a code field: a design or a spec has no file to cite' : 'unknown field'}`);
     E.push(...noFiles(`${p}.label`, s.label));
     if (i === 0) return;
     if (!nonEmpty(s.title)) E.push(`${p}.title: required`); else if (s.title.length > 60) E.push(`${p}.title: ${s.title.length} characters, maximum 60`); else E.push(...noFiles(`${p}.title`, s.title));
@@ -159,6 +159,7 @@ function labelFit(field, label) {
   const adv = (ch) => (GLYPHS.advances[ch] ?? 10) + GLYPHS.letterSpacingPx;
   const width = (s) => KERN * [...s].reduce((a, ch) => a + adv(ch), 0);
   if (/\n/.test(label)) E.push(`${field}: no line break in a label`);
+  if (/(?:^|\s)or(?:\s|$)/i.test(label)) E.push(`${field}: "${label}" names two paths. A box is one step: name it for the decision, and make each outcome a "How it works" item (Content rule 1)`);
   const words = label.trim().split(/\s+/);
   const lines = [];
   let cur = '';

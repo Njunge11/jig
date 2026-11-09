@@ -74,6 +74,7 @@ Each case gives the code in the prompt and one task. The prompt tells the agent 
 | B33 | `state-machines` | The candidates page's stage tabs and the home page's stage badge, from a stored status column, when the machine still says "Needs review" and the job page keeps its own `STAGE_LABEL` | The machine's `meta` says "Longlisted"; the machine marks the listed stages (a tag); one reader module reads names and sets from the state nodes; no screen, the job page included, keeps a list or map of stages |
 | B38 | `flow-diagram` | Show an agreed seven-stage webhook design as a click-through flow named `webhook-ingest` | `docs/flows/webhook-ingest.json` has `mode: system` and the built HTML exists; one linear path of 7 steps; no sentence over 25 words; the permanent purge delete, the swallowed Redis error, the missing version check and the Slack call are each their own item |
 | B39 | `flow-diagram` | Trace `orders.cancel` through a seeded `cancel.service.ts` and show the path as a click-through flow named `order-cancellation` | `docs/flows/order-cancellation.json` has `mode: code`; every step and the start card cite `file:line`; no sentence over 25 words; the permanent `db.delete`, the swallowed email error and the query in the loop are each their own item |
+| B40 | `flow-diagram` | Turn a product manager's non-technical refund PRD into a click-through flow named `refund-request` | `docs/flows/refund-request.json` has `mode: spec` and the built HTML exists; one linear path of 5 to 7 steps; no sentence over 25 words; the open partial-refund decision, the photo rule that the form cannot meet, the manual ops review and the bank-dependent timing are each their own item; no card adds a technical part the spec does not name |
 
 ## C. Triggering — the description fires on the task and only on the task
 
@@ -93,6 +94,7 @@ Each case repeats a B task with no instruction to load a skill. The only grader 
 | C10 | The B33 task with no skill named: the candidates page's tabs from the status column | `state-machines` fires |
 | C11 | The B38 task with no skill named: show the agreed design as a step-by-step diagram | `flow-diagram` fires |
 | C12 | "How does cancelling an order work here? Walk me through the path" with the code in the prompt | `flow-diagram` fires |
+| C13 | A product manager's six-step refund spec with no technical words: "draw me the process step by step so I can click through it" | `flow-diagram` fires |
 
 ## D. Waste — text that changes nothing
 
