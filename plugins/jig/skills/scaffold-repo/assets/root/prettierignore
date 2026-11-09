@@ -1,0 +1,8 @@
+pnpm-lock.yaml
+**/.next/**
+**/dist/**
+**/coverage/**
+# Drizzle generates these; keep them byte for byte.
+**/drizzle/**
+docs/designs/**
+docs/flows/*.html

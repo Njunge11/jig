@@ -15,7 +15,9 @@ The spec is the doc at `$ARGUMENTS`. Read the full document.
 
 ### Step 2: Audit the repo
 
-Read the codebase and collect the context this spec's implementation checklists need: what already exists, what must be added, what must change to implement the spec. Every fact about the repo that you write into an implementation checklist must be verified against the repo in this session, not from memory.
+First check the repo's baseline: `CLAUDE.md`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `.husky/commit-msg` and `.env.example` exist, and `CLAUDE.md` says whether work goes straight to main. When one is missing, stop and tell the developer to run `/jig:scaffold-repo` on the repo first: a checklist built on a repo with no CI check, no hooks or no git-flow rule fails at its Done items, not at build time. Write the Done items in the form that matches `CLAUDE.md`: the straight-to-main form when it says so, the PR form otherwise.
+
+Then read the codebase and collect the context this spec's implementation checklists need: what already exists, what must be added, what must change to implement the spec. Every fact about the repo that you write into an implementation checklist must be verified against the repo in this session, not from memory.
 
 ### Step 3: Resolve gaps with the developer
 

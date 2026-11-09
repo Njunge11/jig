@@ -1,0 +1,16 @@
+{
+  "name": "{{SCOPE}}/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./next": "./next.mjs",
+    "./gates": "./gates.mjs"
+  },
+  "dependencies": {
+    "eslint-config-next": "^16.0.0"
+  },
+  "peerDependencies": {
+    "eslint": "^9"
+  }
+}

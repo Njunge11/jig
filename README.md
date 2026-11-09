@@ -15,6 +15,7 @@ Every skill loads on its own with `/jig:<skill>`. This table shows which ones ca
 
 | Skill | Imposes jig's structure? |
 | --- | --- |
+| `scaffold-repo` | Yes — it creates the repo in it: the workspace, the hooks, the CI check, `CLAUDE.md`, the lint gates, the test harnesses, and it proves the database and pushes main. Its `assets/` are the source of every repo convention. |
 | `structure` | Yes — it is the structure. |
 | `backend-standards` | Yes — places every file by the structure tree. |
 | `frontend-standards` | Yes — places every file by the structure tree. |
@@ -85,6 +86,7 @@ flowchart TD
 
 Example: your spec is `docs/growth/spec.md`.
 
+0. **Scaffold** (a new repo only). Run `/jig:scaffold-repo <name> --apps web`. It writes the workspace, the hooks, the CI workflow and `CLAUDE.md`, proves the database answers, and pushes main with a green first run.
 1. **Plan.** Run `/jig:implementation-planner docs/growth/spec.md`. The planner audits the repo, asks you about the spec's open decisions, then writes `docs/growth/tracker.md` and one checklist per PR. Each tracker row carries a `/goal` run command.
 2. **Build.** Copy one checklist's `/goal` command from the tracker and run it. The command starts the right lane — `implement-backend`, `implement-frontend`, or `implement-steps` — and keeps it working until every Done item is proven in the transcript. The lane runs in the `/goal` session itself: it loads its standards, builds test-first, and runs an independent, read-only review in a subagent that reports a per-item verdict. The session fixes every `fail` line, then pushes the branch once and opens the PR. A slice with a Backend and a Frontend section builds both in the same session and opens one PR.
 3. **Merge.** Read the PR and the review verdict, then merge.
