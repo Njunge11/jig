@@ -230,6 +230,7 @@ Errors flow up: Repository → Service → Entry → the global handler (tRPC) o
 - Catch **only** for these purposes: to add context, to convert an infrastructure error into a domain error, or to recover from an expected failure.
 - Never discard an error — let it propagate.
 - **Log every failure an entry hands to a client.** A `refused`, `notFound` or `forbidden` return and a thrown mutation error reach the server log with the procedure or tool name, the ids and the message. A failure the server does not log cannot be read when the user reports a dead screen.
+- **A client never gets the text of a failure nobody threw on purpose.** A failed query, a driver error or a bug reaches the handler as `INTERNAL_SERVER_ERROR`, and its message holds SQL, params and file paths. The tRPC `errorFormatter` in `init.ts` answers one fixed sentence for that code and removes `data.stack`; the server log keeps the real message and its root cause. An error a service throws on purpose (`TRPCError` with another code) keeps its message: the screen shows it.
 
 ## The call trace
 
@@ -453,3 +454,4 @@ Reject the change if any item is true. Items 5–9 and 26 live in the `backend-e
 33. An external call (email, HTTP API, LLM, queue) runs inside an open transaction, or a send that must not be lost has no outbox row written with the business writes, or an outbox row has no step that sends it.
 34. A file holds more than one concern: what it owns cannot be stated in one sentence without "and", or a change to one decision it holds would touch code that another decision owns. Line count is never the test.
 35. An entry-point call opens no trace root where the request enters, or the diff relies on a root middleware it does not show, or a call a service makes (a repo method, another service, a model, a workflow start, the machine move) runs outside `trace`, or a trace line names no purpose, holds an id or message text, or writes its result by hand instead of reading it off the call (The call trace).
+36. The tRPC `errorFormatter` hands a client the message or the stack of an `INTERNAL_SERVER_ERROR` (query text, params, a driver error) instead of one fixed sentence, or no test proves it through `fetchRequestHandler`.

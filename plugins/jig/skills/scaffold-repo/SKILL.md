@@ -48,7 +48,7 @@ Invoke `jig:structure` with the Skill tool before you place a file. Then:
 
 1. `packages/eslint-config`: copy `assets/eslint-config/` whole, with `{{SCOPE}}` replaced. Every app's `eslint.config.mjs` is one line: `export { default } from "{{SCOPE}}/eslint-config/next";`. A package's config imports `gates(["src"])` from `{{SCOPE}}/eslint-config/gates`.
 2. `packages/db`: Drizzle + postgres.js, `src/schema/`, `src/client.ts`, `drizzle.config.ts`, the PGlite test harness from the **Backend test setup** section of `jig:backend-tests` (invoke it). Scripts: `with-env` (`dotenv -e ../../.env --`), `db:generate`, `db:migrate`, `db:push` (`pnpm with-env drizzle-kit push --force`: no prompt, so a builder runs it unattended), `db:studio`, `db:check` (`pnpm with-env node scripts/db-check.mjs`, from `assets/db/db-check.mjs`), `test`, `test:run`, `lint`, `typecheck`.
-3. `packages/trpc`: `init.ts` with `createTRPCRouter`, `baseProcedure`, `createCallerFactory` and the `Context` type, per `jig:backend-standards` (invoke it).
+3. `packages/trpc`: `init.ts` with `createTRPCRouter`, `baseProcedure`, `createCallerFactory`, the `Context` type and the `errorFormatter` that answers one fixed sentence for an `INTERNAL_SERVER_ERROR`, per `jig:backend-standards` (invoke it).
 4. `packages/ui`: `npx shadcn@latest init` with the theme the project names, or the default; every app imports from `{{SCOPE}}/ui`.
 
 Each package has `package.json` with `lint`, `typecheck`, `test:run` (where it has tests), a `tsconfig.json` that extends `../../tsconfig.base.json`, and a `vitest.config.ts` where it has tests.
