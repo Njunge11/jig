@@ -63,7 +63,7 @@ For each app in `{{APPS}}`, in order:
 pnpm create next-app@latest apps/<app> --ts --tailwind --eslint --app --no-src-dir --import-alias "@/*" --use-pnpm
 ```
 
-Then, per app: name it `{{SCOPE}}/<app>`, set `dev` to `next dev --port <port>`, add `typecheck` (`tsc --noEmit`), `test` and `test:run`; replace its ESLint config with the one line of Step 3; install the tRPC + TanStack wiring from `jig:frontend-wiring` (invoke it) against `{{SCOPE}}/trpc`; install the jsdom + MSW harness from the **Frontend test setup** section of `jig:frontend-tests` (invoke it); add one smoke test that renders the home page. Every app's `next.config.ts` sets `experimental: { staleTimes: { dynamic: 300 } }` (frontend-standards 47).
+Then, per app: name it `{{SCOPE}}/<app>`, set `dev` to `dotenv -e ../../.env -- next dev --port <port>` and `start` to the same with `next start` (Next reads `.env` only from the app's own folder, so without `dotenv` a dev server has no `DATABASE_URL` and every query fails; an app whose address is not the one in `AUTH_URL` puts its own before the command, `AUTH_URL=http://localhost:<port> dotenv …`, because `dotenv` keeps a variable that is already set), add `typecheck` (`tsc --noEmit`), `test` and `test:run`; replace its ESLint config with the one line of Step 3; install the tRPC + TanStack wiring from `jig:frontend-wiring` (invoke it) against `{{SCOPE}}/trpc`; install the jsdom + MSW harness from the **Frontend test setup** section of `jig:frontend-tests` (invoke it); add one smoke test that renders the home page. Every app's `next.config.ts` sets `experimental: { staleTimes: { dynamic: 300 } }` (frontend-standards 47).
 
 **Gate:** `pnpm build` and `pnpm test` pass for every app and package. Commit: `chore: scaffold the apps and packages`.
 
