@@ -53,6 +53,10 @@ before the work, and every change must pass their Review checklists:
   only the run of its own commit: never `gh run rerun` or `gh run cancel` on
   the run of another commit. A run that shows `cancelled` is re-run once; a
   second `cancelled` goes to the developer, not to a third run.
+- A `ci` job that reaches its time limit also shows as `cancelled`
+  (`The job has exceeded the maximum execution time`). The fix is more
+  shards in the workflow's `test` matrix, never a re-run and never a higher
+  limit.
 - The commit hooks run lint-staged and commitlint. A subject starts in lower
   case and carries no attribution trailer.
 - Migrations stay in order: a second task that adds a migration deletes its

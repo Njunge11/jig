@@ -27,4 +27,29 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm build
-      - run: pnpm test
+
+  # The full suite. Each matrix entry is one machine: `args` goes to
+  # `turbo run test:run`. A job that reaches its time limit shows as
+  # cancelled, so a suite that takes more than 5 minutes on one machine is
+  # split, never given a higher limit: one entry for the other packages
+  # (`--filter=!{{SCOPE}}/<app>`) and one entry for each shard of the slow one
+  # (`--filter={{SCOPE}}/<app> -- --shard=1/4` to `--shard=4/4`).
+  test:
+    name: test (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: all
+            args: ""
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec turbo run test:run --concurrency=1 ${{ matrix.args }}
