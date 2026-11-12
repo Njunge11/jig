@@ -7,9 +7,10 @@ on:
   push:
     branches: [main]
 
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+# No concurrency group: builders push from parallel worktrees, and each one
+# waits for the run of its own commit. A group for the branch with
+# cancel-in-progress made each push, and each re-run, cancel another
+# builder's run. Never add one to this workflow.
 
 jobs:
   check:

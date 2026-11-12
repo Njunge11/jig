@@ -85,7 +85,7 @@ id=$(gh run list --branch main --event push --commit $(git rev-parse HEAD) --jso
 gh run watch "$id" --exit-status
 ```
 
-A run cancelled by a newer push is covered by that newer run: watch the newest. A failed run is this skill's to fix, in a new commit and push, before the report.
+Each pushed commit has its own run: the `ci` workflow has no `concurrency` group, so no later push cancels it. A failed run is this skill's to fix, in a new commit and push, before the report.
 
 **Gate:** the run's conclusion is `success`.
 

@@ -47,6 +47,12 @@ before the work, and every change must pass their Review checklists:
   run `git pull --rebase origin main` and push again. The `ci` workflow on
   the pushed commit is the one check: lint, typecheck, build and the full
   suite.
+- Each pushed commit has its own `ci` run. The workflow has no `concurrency`
+  group, and no change adds one: builders push in parallel, and a group
+  makes one builder's push cancel another builder's run. A builder touches
+  only the run of its own commit: never `gh run rerun` or `gh run cancel` on
+  the run of another commit. A run that shows `cancelled` is re-run once; a
+  second `cancelled` goes to the developer, not to a third run.
 - The commit hooks run lint-staged and commitlint. A subject starts in lower
   case and carries no attribution trailer.
 - Migrations stay in order: a second task that adds a migration deletes its
