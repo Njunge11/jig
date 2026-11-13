@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: 04-outcome-of-the-run
+context:
+  scaffold_script: fixture.sh

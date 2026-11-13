@@ -92,3 +92,9 @@ already answers on its port.
   refuses the push on a failure. Never push with `--no-verify` or `HUSKY=0`.
 - Each test makes its own data and takes it away at its end. Data that it
   cannot take away carries one fixed marked name.
+- Built screens that keep their look: none yet. When the developer changes
+  a built screen after its design, name the screen here. No builder then
+  changes its look to equal the design, and no flow uses `expectDesign` on
+  it.
+- A service that lists the origins it accepts (a bucket's CORS) also lists
+  the e2e origins, `http://localhost:3100` and up.

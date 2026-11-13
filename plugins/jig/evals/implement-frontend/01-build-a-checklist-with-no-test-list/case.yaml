@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: 01-build-a-checklist-with-no-test-list
+context:
+  scaffold_script: fixture.sh

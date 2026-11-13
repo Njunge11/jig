@@ -1,6 +1,6 @@
 ---
 name: e2e-tests
-description: The standard for end-to-end tests and for the design check. Playwright tests drive the built app in a real browser on the real database, one test per step, failure path and edge case that a person can cause. The design check draws each design source file beside the built screen and fails on each difference of look. Gives the list a checklist carries, the quality checklist for an e2e test, the rules for a test that fails, the design check, and the one setup (the e2e package, a server per run, parallel workers, a signed-in setup project, the HTML report, the pre-push gate). Use when writing, reviewing, or planning an end-to-end test, an e2e test, a Playwright test, a browser test of a user flow or journey, a frontend, UI or component test (the standard has none: a flow proves the screen), a check of a built screen against its design, mockup or design file, a design that must be implemented 1:1, or when creating the e2e test setup.
+description: The standard for end-to-end tests and for the design check. Playwright tests drive the built app in a real browser on the real database, one test per step, failure path and edge case that a person can cause. The design check compares each built screen with its design source file. Gives the list of tests a checklist carries, the review checklist for a test, the rules for a test that fails, the report of a run, the design check, and the one setup. Use when writing, reviewing, or planning an end-to-end test, an e2e test, a Playwright test, or a browser test of a user flow; when asked to make sure that a user flow or a screen works, to map the flows and edge cases of a spec, or to fix a flow that is broken; when reporting the outcome of an e2e run; for a frontend, UI or component test (the standard has none: a flow proves the screen); when a built screen is checked against its design or the design check fails on it, also for a screen that must keep its look; or when creating the e2e test setup.
 ---
 
 # End-to-end tests
@@ -19,6 +19,8 @@ description: The standard for end-to-end tests and for the design check. Playwri
 There is no third layer. No test draws a component in jsdom, and no test mocks the network. The recipes state the correct build of a component, the review checks each recipe item, and the e2e tests prove what a person sees.
 
 A case that a browser cannot cause has its test in the backend layer only: the server time, a provider that fails, two people on one row, a cron job.
+
+A rule with many value combinations (each role with each permission) has its full table in the backend tests. The flows prove one allowed action and one refused action per role, through the real screens. Never write one line per cell of the table.
 
 ## Gates
 
@@ -41,9 +43,12 @@ The list holds:
 - one line per failure path that the spec states: a refused sign-in, a missing permission, an expired link, a session that ended, a message of a field, a save that a reload must keep
 - one line per edge case that a person can cause: an empty list, a second click, Back, a reload in the middle of the flow, a link opened a second time
 - for a screen that a state machine drives: one line per event that a person can send in each state, read from the machine file
+- for each sign-in flow of the app: its own lines, with each failure path that a person can cause (a wrong code, a link that was used, a link that a newer one replaced). The sign-in of the `session` project is the setup of the run: it proves no line. A code or a link that expires by time alone is a case of the server time
 - no line for a case that a browser cannot cause
 
 An agent writes the tests, so the cost of a test is its run time, not its text. Do not drop a line to save work.
+
+**A spec that is built and has no list gets the list first.** Write the `## E2E tests` list from the spec, per flow across its checklists, before you read a flow file. It holds each kind of line above: the steps, the failure paths, and the edge cases that a person can cause and the spec does not state. Then read the flow files and mark each line that an existing test proves, with the name of that test. Do the two in one answer: a person who asks where a spec stands gets the list with its marks. Put the list in the checklist files of the spec and commit it (`docs(<feature>): the e2e list`) before you write a test. Then write a test for each line that is left. Never write the list from the screens or from the tests that exist: such a list states what the builder made.
 
 A flow has one file, `flows/<app>/<flow>.spec.ts`. The name of a test, or of a `test.step`, states the step and its outcome in the person's words (`"a forgotten password is set again from the emailed link"`). The developer reads the names in the report as the list of what works.
 
@@ -83,6 +88,8 @@ The design is the standard for a screen: the built screen looks like it. Each th
 **The app is built with stock Tailwind classes only.** A size of the design that no stock class gives (13 px of type, a radius of 12 px, a line height of 21 px) is built with the nearest stock class. Never add a size token to the theme and never write an arbitrary value (`text-[13px]`) to equal a design. A color is different: each color of the design is a token of the theme.
 
 **The design is its source file**, `docs/designs/<Screen>.dc.html`: the HTML and CSS of the design artifact, which a browser draws as it is. `docs/designs/canvas.json` gives each design its title, its app and its size. The repo holds no picture of a design: a picture has no values, and the source file has each one. A design that exists only as a picture is a gap for the planner to resolve: ask for the source.
+
+**A built screen that the developer changed after the design keeps its look.** The repo's `CLAUDE.md` names those screens. A difference on one is not a fault: no builder changes its look to equal the design, no flow calls `expectDesign` on it (`shot` records the screen and does not fail), and no `pnpm screens` gate lists it. On such a screen a builder fixes a fault of behavior only.
 
 ### Build from the source
 
@@ -129,6 +136,8 @@ A full-page screenshot is taller than the window, so a side nav ends at the wind
 ## The report
 
 Each run writes the Playwright HTML report: `.output/report/<app>-flows/index.html` lists each test and each step, pass or fail, with the screen it ended on, and `.output/report/<app>-screens/index.html` shows each built screen beside its design (the "Side by side" tab) with the list of differences. The builder's last message names the two files. The report is the evidence of the run for the developer. It is never a task for the developer.
+
+**The last message reports the lines of the list, by name.** It gives how many `E<n>` lines pass, and each line that fails, is blocked or has no test, with its name and the cause. It says that a flow or a feature works only when each line of that flow's list passed in this run. A count of tests (`13 passed`) is the output of the gate, never a statement about a feature.
 
 ## E2E test setup
 
@@ -190,6 +199,7 @@ export default defineConfig({
 
 - The console sender of the app prints an email as `email to <address>: <subject>` with its text on the lines below, and an SMS as `sms to <phone>: <text>`. `support/inbox.ts` reads that form: a sender that prints a different form gives the test no message.
 - Each app has its own port, and none is a dev port. The developer's dev server keeps running.
+- **A service that lists the origins it accepts also lists the origins of the run.** The CORS of a storage bucket and the redirect list of a sign-in provider name the dev origins. Add the origin of each e2e port (`http://localhost:3100` …) beside each dev origin before the first run. Without it the browser refuses the upload, and the flow fails on a step that works on the dev port.
 - The `session` project signs in once through the real sign-in screens and saves the browser state. A saved state that still opens the app is kept. (Playwright, Authentication, "Basic: shared account in all tests".) The state file holds cookies: it stays under the git-ignored `.output/`.
 - A flow starts with that state. `test.use({ storageState: signedOut })` starts a file signed out, and `browser.newContext({ storageState: signedOut })` opens the browser of a second person. (Authentication, "Avoid authentication in some tests".)
 - **The server of the run takes only the connections that the dev servers leave.** The developer's dev servers keep running, and each holds its pool on the one pooler. The db client reads `DATABASE_POOL_MAX` (`packages/db/src/client.ts`), and the config sets it: the pooler's limit minus the pools of the dev servers. In the repo that proved this setup that is 15 − 3 × 4 = 3. A run with the full pool takes connections from a dev server: its session check fails, and the developer is signed out in the middle of their work. A client with a fixed `max` is changed to read the variable before the first run.
