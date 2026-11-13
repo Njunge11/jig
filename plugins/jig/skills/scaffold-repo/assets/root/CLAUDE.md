@@ -96,5 +96,6 @@ already answers on its port.
   a built screen after its design, name the screen here. No builder then
   changes its look to equal the design, and no flow uses `expectDesign` on
   it.
-- A service that lists the origins it accepts (a bucket's CORS) also lists
-  the e2e origins, `http://localhost:3100` and up.
+- A flow that uploads a file calls `carryUploads(page)`
+  (`packages/e2e/support/file-store.ts`): the run sends the upload to the
+  real store itself. No port of a run goes into the CORS of a bucket.

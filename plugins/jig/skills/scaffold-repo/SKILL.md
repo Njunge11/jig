@@ -77,7 +77,7 @@ Invoke `jig:e2e-tests` with the Skill tool. Copy its `assets/e2e/` to `packages/
 3. `flows/web/home.spec.ts` is the first flow: move it to `flows/<app>/home.spec.ts` for each app.
 4. `mkdir -p docs/designs`: the design source files of the screens go there (`<Screen>.dc.html`, `canvas.json`).
 5. `pnpm install`, then `pnpm exec playwright install chromium` in `packages/e2e`: only the browser the suite uses.
-6. A service of the repo that lists the origins it accepts (the CORS of a storage bucket, the redirect list of a sign-in provider) gets the origin of each e2e port beside each dev origin: `http://localhost:3100` and up. A repo with no such service yet gets them when the service is set up.
+6. The redirect list of a sign-in provider gets the origin of each e2e port beside each dev origin: `http://localhost:3100` and up. A repo with no such provider yet gets them when the provider is set up. The CORS of a storage bucket gets no e2e port: a flow that uploads carries the upload itself (`carryUploads`, the `e2e-tests` skill).
 
 **Gate:** `pnpm lint` and `pnpm typecheck` pass with `packages/e2e` in the list, and `grep -r '{{' packages/e2e` prints nothing. Commit: `chore: scaffold the e2e package`.
 

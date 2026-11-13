@@ -48,7 +48,7 @@ The list holds:
 
 An agent writes the tests, so the cost of a test is its run time, not its text. Do not drop a line to save work.
 
-**A spec that is built and has no list gets the list first.** Write the `## E2E tests` list from the spec, per flow across its checklists, before you read a flow file. It holds each kind of line above: the steps, the failure paths, and the edge cases that a person can cause and the spec does not state. Then read the flow files and mark each line that an existing test proves, with the name of that test. Do the two in one answer: a person who asks where a spec stands gets the list with its marks. Put the list in the checklist files of the spec and commit it (`docs(<feature>): the e2e list`) before you write a test. Then write a test for each line that is left. Never write the list from the screens or from the tests that exist: such a list states what the builder made.
+**A spec that is built and has no list gets the list first.** Write the `## E2E tests` list from the spec, per flow across its checklists, before you read a flow file. It holds each kind of line above: the steps, the failure paths, and the edge cases that a person can cause and the spec does not state. Then read the flow files and mark each line that an existing test proves, with the name of that test. Do the two in one answer: a person who asks where a spec stands gets the list with its marks. Put the list in the checklist files of the spec and commit it (`docs(<feature>): the e2e list`) before you write a test. Then write a test for each line that is left. A line that the built app cannot pass shows a fault of the app: fix the app in the same work, and never close the list with such a line open. Never write the list from the screens or from the tests that exist: such a list states what the builder made.
 
 A flow has one file, `flows/<app>/<flow>.spec.ts`. The name of a test, or of a `test.step`, states the step and its outcome in the person's words (`"a forgotten password is set again from the emailed link"`). The developer reads the names in the report as the list of what works.
 
@@ -61,7 +61,7 @@ Reject the test if any item is true. Each item names its source.
 3. The test uses a **manual assertion or a fixed wait**: `expect(await locator.isVisible()).toBe(true)`, `waitForTimeout`. Use a web-first assertion, which waits and retries: `await expect(locator).toBeVisible()`. (Best Practices, "Use web first assertions".)
 4. A Playwright call has **no `await`**: the test passes without running the call. Gate: `pnpm lint`, rule `@typescript-eslint/no-floating-promises`. (Best Practices, "Lint your tests".)
 5. The test takes **a response or a quiet network as the sign that the screen is ready**. A streamed tRPC answer sends HTTP 200 before the procedure ends, and the app prefetches without end. Wait for the screen's own answer: the field that closes, the row that shows, the heading of the next step.
-6. The test **depends on data it did not make**, or on data that a second test changes. Each test makes its own data, with a name that holds the test and the run, and removes it at the end. Data it cannot remove carries one fixed marked name. (Playwright, Parallelism, "Give each test its own backend data".)
+6. The test **depends on data it did not make**, or on data that a second test changes. Each test makes its own data, with a name that holds the test and the run, and removes it at the end. Data it cannot remove carries one fixed marked name, and each fixed value of that data (a phone, an address) is in one file, `support/flow-check.ts`: two flows never give one value to two people. (Playwright, Parallelism, "Give each test its own backend data".)
 7. The file uses **`serial` mode**, or a test needs a second test to run first. Steps that build on each other are one test, with one `test.step` per step (`flowSteps` in `support/steps.ts`): the report lists each step. Two flows that only share a starting point (a member who is set up) are two tests, and a helper makes the starting point for each: a failure in the first then does not hide the second. (Parallelism, "Serial mode": "Using serial is not recommended.")
 8. The test **changes or ends the session of the shared account**: it signs out, changes the password, removes the member. Such a test signs in as an account that it made. (Playwright, Authentication, "Basic: shared account in all tests", "When not to use".)
 9. The run **reaches a third party for real**: an email, an SMS, a payment. The server of the run starts with no key for each sender, so each message prints to the server log. The test reads its own message there, by the address or the number that it made, and it reads the newest message that it has not read: the server sends a message after it answers the request, so the newest message in the log can be an old one. (Best Practices, "Avoid testing third-party dependencies".)
@@ -79,7 +79,8 @@ Reject the test if any item is true. Each item names its source.
 3. **The fault is in the test** only when an item of the Review checklist is true for it, or the test contradicts the spec. Fix the test so that it says what the spec says.
 4. Never weaken an assertion, never change an expected value to the value the app shows, never skip a test (`test.skip`, `test.fixme`), and never delete one.
 5. **A test that fails on and off:** run the file a maximum of 3 times. Never loop a run. The cause is an item of the Review checklist (most often 3, 5, 6 or 8) or a real race in the app. Read the requests and their order in the trace. A real race in the app is a finding: fix the app in the same change. Two tests at the same moment are two people at the same moment, so a failure that shows only when the tests run in parallel is most often such a race: read the server log of the run (`.output/server-<app>.log`) for the failed statement before you change a test or the number of workers.
-6. **When you cannot fix it:** stop, and do not push. The last message names the test, the cause that you found and the report file. This is the one case that reaches the developer.
+6. **A fault that you find, you fix in the same change**: in the app, in the test or in the setup of the run. A fault that the report names and the change leaves is a second fault.
+7. **When a fix needs what you do not have** (a setting of a service, an access): look for a second fix first. It fits the resources and the stack of the repo, and it changes no infrastructure. Take it from the official docs of the product, the repo of the product or a web standard (MDN, an RFC). A blog or a forum answer with no such source proves nothing: test the claim. Stop only when no such fix exists, and do not push. The last message names the test, the cause, the sources that you read and the report file. This is the one case that reaches the developer.
 
 ## The design check
 
@@ -89,7 +90,7 @@ The design is the standard for a screen: the built screen looks like it. Each th
 
 **The design is its source file**, `docs/designs/<Screen>.dc.html`: the HTML and CSS of the design artifact, which a browser draws as it is. `docs/designs/canvas.json` gives each design its title, its app and its size. The repo holds no picture of a design: a picture has no values, and the source file has each one. A design that exists only as a picture is a gap for the planner to resolve: ask for the source.
 
-**A built screen that the developer changed after the design keeps its look.** The repo's `CLAUDE.md` names those screens. A difference on one is not a fault: no builder changes its look to equal the design, no flow calls `expectDesign` on it (`shot` records the screen and does not fail), and no `pnpm screens` gate lists it. On such a screen a builder fixes a fault of behavior only.
+**A built screen that the developer changed after the design keeps its look.** The repo's `CLAUDE.md` names those screens. A difference on one is not a fault: no builder changes its look to equal the design, no flow calls `expectDesign` on it (`shot` records the screen and does not fail), and no `pnpm screens` gate lists it. On such a screen a builder fixes a fault of behavior only. A part that the spec states and the screen lacks is such a fault: the builder adds it and changes nothing that the screen shows. Never mark its `E<n>` line "no path on the screen" and leave it.
 
 ### Build from the source
 
@@ -139,6 +140,8 @@ Each run writes the Playwright HTML report: `.output/report/<app>-flows/index.ht
 
 **The last message reports the lines of the list, by name.** It gives how many `E<n>` lines pass, and each line that fails, is blocked or has no test, with its name and the cause. It says that a flow or a feature works only when each line of that flow's list passed in this run. A count of tests (`13 passed`) is the output of the gate, never a statement about a feature.
 
+**The result comes first, in plain words.** The first lines say what works now. Then what is not proved, with the cause. Then each side effect of the work (a schema push that changed more than the change, data that stays), one line each. A caveat never stands before the result.
+
 ## E2E test setup
 
 The files under `assets/e2e/` are the standard: copy them to `packages/e2e/` (`gitignore` becomes `.gitignore`), and replace `{{SCOPE}}`, the rows of `support/apps.ts` and the rows of `SIGN_IN` in `support/session.setup.ts`. `flows/web/home.spec.ts` is the first flow of a new repo: move it to the folder of each app.
@@ -150,9 +153,11 @@ packages/e2e/
   flows/<app>/<flow>.spec.ts
   screens/screens.spec.ts  ← draws each route of SCREENS and compares it with its design
   support/
-    apps.ts                ← each app's port, design size and output paths
+    apps.ts                ← each app's port, design size, session life and output paths
     session.setup.ts       ← signs in once, saves the browser state (the repo writes it)
     inbox.ts               ← reads the emailed link and the texted code from the server log
+    file-store.ts          ← carryUploads: sends an upload of the page to the real store
+    flow-check.ts          ← each fixed value of the data that a flow cannot remove
     settle.ts              ← waits for the content; collects the page's errors
     steps.ts               ← flowSteps: one `test.step` per step, its end screen, its hidden faults
     read-look.ts           ← reads the computed look of each visible text of a page
@@ -199,12 +204,12 @@ export default defineConfig({
 
 - The console sender of the app prints an email as `email to <address>: <subject>` with its text on the lines below, and an SMS as `sms to <phone>: <text>`. `support/inbox.ts` reads that form: a sender that prints a different form gives the test no message.
 - Each app has its own port, and none is a dev port. The developer's dev server keeps running.
-- **A service that lists the origins it accepts also lists the origins of the run.** The CORS of a storage bucket and the redirect list of a sign-in provider name the dev origins. Add the origin of each e2e port (`http://localhost:3100` …) beside each dev origin before the first run. Without it the browser refuses the upload, and the flow fails on a step that works on the dev port.
-- The `session` project signs in once through the real sign-in screens and saves the browser state. A saved state that still opens the app is kept. (Playwright, Authentication, "Basic: shared account in all tests".) The state file holds cookies: it stays under the git-ignored `.output/`.
+- **A flow that uploads carries the upload itself.** A storage bucket accepts the origins of the apps only and matches the port exactly, so it refuses the browser of a run. Never add a port of the run to the bucket: `await carryUploads(page)` (`support/file-store.ts`) sends each upload of the page to the real store from the run (`route.fetch`) and gives the page the answer of the store. (AWS, S3, "Elements of a CORS configuration"; Playwright, Network, "Modify responses".) A sign-in provider is different: its redirect list names the origin of each e2e port.
+- The `session` project signs in once through the real sign-in screens and saves the browser state. A saved state is kept while it still opens the app and is younger than half the life of a session (`sessionHours` in `support/apps.ts`): an older session can end in the middle of a run, and each test after it fails. (Playwright, Authentication, "Basic: shared account in all tests".) The state file holds cookies: it stays under the git-ignored `.output/`.
 - A flow starts with that state. `test.use({ storageState: signedOut })` starts a file signed out, and `browser.newContext({ storageState: signedOut })` opens the browser of a second person. (Authentication, "Avoid authentication in some tests".)
-- **The server of the run takes only the connections that the dev servers leave.** The developer's dev servers keep running, and each holds its pool on the one pooler. The db client reads `DATABASE_POOL_MAX` (`packages/db/src/client.ts`), and the config sets it: the pooler's limit minus the pools of the dev servers. In the repo that proved this setup that is 15 − 3 × 4 = 3. A run with the full pool takes connections from a dev server: its session check fails, and the developer is signed out in the middle of their work. A client with a fixed `max` is changed to read the variable before the first run.
+- **The server of the run takes only the connections that the dev servers leave.** Each dev server holds its pool on the one pooler. The db client reads `DATABASE_POOL_MAX` (`packages/db/src/client.ts`), and the config sets it to the limit of the pooler minus the pools of the dev servers (in the repo that proved this setup, 15 − 3 × 4 = 3). A run with the full pool takes connections from a dev server: its session check fails, and the developer is signed out. A client with a fixed `max` is changed to read the variable before the first run.
 - The workers share one server, one database and one server log. That is safe only while each test obeys Review items 6, 8 and 9.
-- **The number of workers is measured, not chosen.** A browser is not the limit: the server and its database pool are. In the repo that proved this setup, the server held 4 connections to a remote database. With 2 workers, tests that took 254 s in sum ran in 133 s. With 4 workers each test took 2 to 3 times as long, and steps ran out of time. Measure one run per number, keep the fastest number at which each test passes, and write the measured numbers beside `workers` in the config.
+- **The number of workers is measured, not chosen.** The server and its database pool are the limit, not the browser. In the repo that proved this setup (4 connections to a remote database), 2 workers ran 254 s of tests in 133 s, and with 4 workers steps ran out of time. Measure one run per number, keep the fastest number at which each test passes, and write the measured numbers beside `workers` in the config.
 - A test that makes its own data pays for it in run time: the helper that makes a member runs one time per test. Do not make data that the test does not use.
 - The scripts: `"flows": "RUN=flows dotenv -e ../../.env -- playwright test --project=flows"` and `"screens": "RUN=screens dotenv -e ../../.env -- playwright test --project=screens"`, with `pnpm flows` and `pnpm screens` at the root. `APP=<app>` picks the app, `pnpm flows <name>` runs one file, and `pnpm flows --workers=<n>` sets the workers of one run.
 
@@ -261,6 +266,8 @@ Run `pnpm exec playwright install chromium` once on a new machine: only the brow
 - Playwright, Parallelism: https://playwright.dev/docs/test-parallel
 - Playwright, Authentication: https://playwright.dev/docs/auth
 - Playwright, Web server: https://playwright.dev/docs/test-webserver
+- Playwright, Network ("Modify responses"): https://playwright.dev/docs/network
+- AWS, S3, Elements of a CORS configuration: https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManageCorsUsing.html
 - Playwright, `test.step`: https://playwright.dev/docs/api/class-test#test-step
 - Husky, Get started: https://typicode.github.io/husky/get-started.html
 - Anthropic, Claude Code best practices ("Give Claude something it can run that comes back pass or fail"): https://code.claude.com/docs/en/best-practices

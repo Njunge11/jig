@@ -10,8 +10,9 @@ import { fileURLToPath } from "node:url";
  */
 
 // One row per app: `scaffold-repo` writes them. The ports start at 3100.
+// `sessionHours`: how long a session of the app lasts from its sign-in.
 const APPS = {
-  web: { port: 3100, width: 1440, height: 900, home: "/" },
+  web: { port: 3100, width: 1440, height: 900, home: "/", sessionHours: 24 },
 } as const;
 
 export type AppName = keyof typeof APPS;
@@ -66,6 +67,11 @@ export function appUnderTest() {
     home: app.home,
     /** The signed-in browser state the `session` project saves. */
     statePath: path.join(outputDir, "state", `${name}.json`),
+    /**
+     * How old the saved state can be: half the life of a session. An older
+     * session can end in the middle of a run, and each test after it fails.
+     */
+    stateMaxAgeMs: (app.sessionHours * 60 * 60 * 1000) / 2,
     /** Everything the server printed, the emails of the console sender among it. */
     serverLogPath: path.join(outputDir, `server-${name}.log`),
     screensDir: path.join(outputDir, "screens", name),
