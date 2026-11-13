@@ -1,0 +1,21 @@
+{
+  "name": "{{SCOPE}}/e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "screens": "RUN=screens dotenv -e ../../.env -- playwright test --project=screens",
+    "flows": "RUN=flows dotenv -e ../../.env -- playwright test --project=flows"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@tailwindcss/node": "^4.1.0",
+    "@types/node": "^24",
+    "eslint": "^9.39.5",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5",
+    "typescript-eslint": "^8.72.2"
+  }
+}

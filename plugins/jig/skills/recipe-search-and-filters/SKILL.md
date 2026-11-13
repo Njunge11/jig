@@ -170,8 +170,9 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
 - [ ] Filter, sort, and search changes reset `page` to 1.
 - [ ] Changing the search or a filter keeps the old list on screen,
       dimmed (`useDeferredValue` on the query input), not the
-      skeleton fallback — proved by a test that holds the answer
-      back.
+      skeleton fallback — proved by an end-to-end test that holds
+      the list request back and asserts that the old rows stay on
+      screen and no skeleton shows.
 - [ ] A pasted URL with params renders the narrowed list without
       a client refetch; a mangled URL falls back to defaults.
 - [ ] Filtered-empty and truly-empty states are distinct.

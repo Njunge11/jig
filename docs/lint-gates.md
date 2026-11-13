@@ -125,19 +125,9 @@ Selectors marked `probed` fired on a bad fixture and stayed silent on a good one
 | 64 | `as never` or a double assertion in a non-test file | lint now | same selectors as backend-standards 31 | v2 `**/*.ts`, `**/*.tsx`, tests ignored |
 | 65 | a view reads a stage from a status string instead of the machine's snapshot | judgment | | |
 
-### 1.4 frontend-tests (9 items)
+### 1.4 frontend-tests (removed)
 
-| # | Item, short | Verdict | Rule | Files |
-| --- | --- | --- | --- | --- |
-| 1 | Asserts state, hooks, refs | judgment | | |
-| 2 | `toHaveBeenCalled` | lint now | same selector as backend-tests 1 | `**/*.test.tsx` |
-| 3 | Asserts CSS classes | lint now | selector `CallExpression[callee.property.name="toHaveClass"]` | `**/*.test.tsx` |
-| 4 | Mocks own hooks or children | lint now | same selector as backend-tests 6 | `**/*.test.tsx` |
-| 5 | Queries by test id | lint now | selector `CallExpression[callee.property.name=/ByTestId$/]` | `**/*.test.tsx` |
-| 6 | Async UI without `findBy*`; absence without `queryBy*` | install | `eslint-plugin-testing-library` (`prefer-find-by`, `await-async-queries`); not installed in the pilot | `**/*.test.tsx` |
-| 7 | jsdom asserts a visual outcome | judgment | | |
-| 8 | Litmus | judgment | | |
-| 9 | Fixture event order not from a trace | judgment | | |
+The component-test layer is removed: the standard has two layers, backend tests and end-to-end tests (`e2e-tests`). Its lint gate is one rule in the e2e package, `@typescript-eslint/no-floating-promises`. The app gates refuse a `*.test.tsx` file under a `ui/` folder.
 
 ### 1.5 eve-agent (11 items, plus the new `outputSchema` item)
 
@@ -164,7 +154,6 @@ Selectors marked `probed` fired on a bad fixture and stayed silent on a good one
 | backend-standards | 29 | 12 | 0 | 2 | 15 |
 | backend-tests | 14 | 7 | 0 | 1 | 6 |
 | frontend-standards | 63 | 10 | 4 | 3 | 46 |
-| frontend-tests | 9 | 4 | 1 | 0 | 4 |
 | eve-agent | 12 | 2 | 0 | 1 | 9 |
 
 `lint now` counts every row with that verdict, including `part` rows.

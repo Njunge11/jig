@@ -200,13 +200,13 @@ The machine module holds the states and the transitions. Implementations are the
   export const LISTED_STAGES = listed.map((node) => ({ status: node.key, label: node.meta?.label, tab: node.meta?.tab }));
   export const stageLabel = (status: OrderStatus) => orderStatusMachine.states[status].meta?.label;
   ```
-- **When several cards draw one machine, the machine's `meta` names what each kind of card shows in each state.** A card that acts on the stage draws the stage's parts: its form, its receipt, its offer of the next step. A card that only reads the stage, such as an overview or a summary, is a separate kind of card. It reads its own `meta` key and never draws the parts of the card that acts. When several acting cards of one machine are on screen, one function picks the card that draws the stage's parts, such as the latest acting card in a chat. It counts acting cards only; a read-only card never counts, so it never takes the parts from an acting card above it. That pick is the only place the screen reads a card's position, and it never moves into the machine's context. What a card draws comes from the meta of its kind, never from a check of data beside the stored snapshot (a nullable column, a `has…` flag). A flag that skips one card is a patch, not the fix: give the card its own kind. A test iterates every state of the machine itself (`Object.keys(machine.states)` or `xstate/graph`, never a hand-written list), renders each kind of card, and asserts on screen what each one shows and that every other part, receipt and offer the machine names is absent: a test that checks only what shows passes a card that also draws the wrong offer.
+- **When several cards draw one machine, the machine's `meta` names what each kind of card shows in each state.** A card that acts on the stage draws the stage's parts: its form, its receipt, its offer of the next step. A card that only reads the stage, such as an overview or a summary, is a separate kind of card. It reads its own `meta` key and never draws the parts of the card that acts. When several acting cards of one machine are on screen, one function picks the card that draws the stage's parts, such as the latest acting card in a chat. It counts acting cards only; a read-only card never counts, so it never takes the parts from an acting card above it. That pick is the only place the screen reads a card's position, and it never moves into the machine's context. What a card draws comes from the meta of its kind, never from a check of data beside the stored snapshot (a nullable column, a `has…` flag). A flag that skips one card is a patch, not the fix: give the card its own kind. One function of the reader module answers what a kind of card shows in a state: its part, its receipt and its offer, read from the meta. A card draws only what that function returns. The machine test iterates every state of the machine itself (`Object.keys(machine.states)` or `xstate/graph`, never a hand-written list), calls that function for each kind of card, and asserts what it names and that every other part, receipt and offer the machine names is absent: a test that checks only what shows passes a card that also draws the wrong offer. An end-to-end test then walks the states a person can reach (`e2e-tests`).
 
   ```ts
   // order.states.ts: one key per kind of card
   paid: { meta: { acting: { part: "order-record", offer: "track-delivery", receipt: true }, reading: { part: "order-record" } } }
 
-  // the test: every state, every kind of card
+  // the machine test: every state, every kind of card, through the reader module's function
   it.each(Object.keys(orderMachine.states))("an overview in %s shows no receipt and no offer", (state) => { … });
   ```
 - **`@xstate/react` is the client of a browser-owned machine.** `useActorRef` gives a stable ref that does not rerender. `useSelector(actorRef, selector, compare?)` rerenders only when the selected value changes. Define selectors outside the component. Pass `shallowEqual` when a selector returns an object. `createActorContext` provides one actor to a tree.
@@ -215,7 +215,7 @@ The machine module holds the states and the transitions. Implementations are the
 - **Provide the client's implementations with `machine.provide(...)` as the hook's first argument.** The hook keeps them up to date. No lazy machine creator, no implementations in the second argument.
 - **New data reaches a running actor as an event.** A changed `input` does not restart it.
 - **An optional actor is `createEmptyActor()`.** `useSelector(props.actor ?? emptyActor, ...)` answers `undefined` until the actor exists.
-- **A UI test asserts what is on screen, never `snapshot.value`.** The `frontend-tests` skill owns the test rules.
+- **An end-to-end test asserts what is on screen, never `snapshot.value`.** The `e2e-tests` skill owns the test rules. Its list holds one line per event a person can send in each state the screen shows, read from the machine file. No test draws a component in jsdom.
 
   A browser-owned machine, a wizard whose snapshot the browser keeps (the page reads it from its own store and passes it in):
 
@@ -249,7 +249,7 @@ Run the gates for your side before a commit. Paste the output in the proof.
 
 1. **Every side:** the app's typecheck script exits `0`.
 2. **Part A and Part B:** the backend test script exits `0`, with the machine's reachability test and its stored-values test in it.
-3. **Part C:** the frontend test script exits `0`, with a render test per view the machine drives.
+3. **Part C:** the backend test script exits `0`, with the machine test that proves what the reader module says each kind of card shows in every state. `pnpm flows` exits `0`, with one end-to-end test per event a person can send in each state the screen shows.
 
 ## Review checklist
 
@@ -283,9 +283,9 @@ Reject the change if any item is true. Walk the Shared items against every chang
 18. A screen of a server-owned machine creates an actor (`useMachine`, `useActorRef`, `createActor`) or sends an event to one. It must resolve the stored snapshot with `resolveState` and read it.
 19. A browser-owned machine starts without its persisted snapshot when one exists. Or it provides implementations through the hook's second argument, or passes new data through `input` instead of an event.
 20. A selector returns a new object without `shallowEqual`, or is defined inside the component.
-21. A UI test asserts `snapshot.value` or context instead of what is on screen.
+21. An end-to-end test reads `snapshot.value` or context, from the page or from the database, instead of asserting what is on screen. Or a test draws a view of the machine in jsdom.
 22. A screen file holds its own map of stage names, list of stages or union of stage values, instead of importing them from the machine's reader module, which reads the state nodes' `meta` and `tags`. This includes a copy that was in the repo before the change and that the change left in place.
-23. A card shows something the machine's `meta` does not name for its kind of card: a read-only card draws a stage part, receipt or offer, or counts when the screen picks the acting card for them; or the pick is in more than one place or in the machine's context; or a card decides what it shows from data beside the stored snapshot. This includes a rule that was in the repo before the change. Or no test iterates every state of the machine itself and asserts on screen what each kind of card shows.
+23. A card shows something the machine's `meta` does not name for its kind of card: a read-only card draws a stage part, receipt or offer, or counts when the screen picks the acting card for them; or the pick is in more than one place or in the machine's context; or a card decides what it shows from data beside the stored snapshot. This includes a rule that was in the repo before the change. Or no machine test iterates every state of the machine itself and asserts what the reader module says each kind of card shows.
 
 ## XState docs map
 

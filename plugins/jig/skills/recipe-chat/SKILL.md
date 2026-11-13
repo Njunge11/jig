@@ -96,8 +96,8 @@ streamed AI output. Libraries: `ai` + `@ai-sdk/react` (the
    card folder (placement: the `structure` skill's
    `ui/cards/<card>/` entry), and the folder holds
    everything that type needs: the component, an
-   `apply(state, part)` when the part changes client state, the
-   click handlers, and the fixture its tests use. The card
+   `apply(state, part)` when the part changes client state, and
+   the click handlers. The card
    imports from the surface (its state type, its hooks); nothing
    in the surface imports a card except the map. A new card is
    one folder and one map line, and no existing file changes.

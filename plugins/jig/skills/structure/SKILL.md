@@ -1,6 +1,6 @@
 ---
 name: structure
-description: Owns the feature folder tree and every file-placement rule for the Next.js + tRPC + Drizzle stack. Use when creating a file, starting a feature, deciding where a component, service, module, or test lives, or restructuring existing code into shape.
+description: Owns the feature folder tree and every file-placement rule for the Next.js + tRPC + Drizzle stack. Use when creating a file, starting a feature, deciding where a component, service, module, test, end-to-end flow or design source file lives, or restructuring existing code into shape.
 ---
 
 # Structure
@@ -51,8 +51,7 @@ features/<feature>/
     search-params.ts         ← the route's shared nuqs parsers module
     cards/<card>/            ← chat surfaces only: one card per streamed part or per form a state's meta names; props in, never the snapshot
     use-<action>.ts          ← a card's mutation hook; calls this feature's router, which moves the stage through the service
-    __tests__/
-      <part>.test.tsx        ← behavior tests
+                               (no __tests__/ here: a screen is proved by its end-to-end flow)
 db/schema/
   <domain>.ts                ← one file per domain (users.ts, orders.ts, billing.ts)
 app/<route>/
@@ -82,6 +81,18 @@ evals/                       ← the developer's: no agent writes, runs or requi
   tools/<tool_name>.eval.ts
 ```
 
+At the repo root, outside every app:
+
+```
+packages/e2e/                ← the end-to-end suite (e2e/ at the root of a repo with one app); the `e2e-tests` skill owns its files
+  flows/<app>/<flow>.spec.ts ← one file per flow of an app: its steps, failure paths and edge cases
+  screens/screens.spec.ts    ← compares each route of SCREENS with its design
+  support/                   ← the app table, the sign-in setup, the inbox reader, the design check
+docs/designs/
+  <Screen>.dc.html           ← the source file of one design: the standard for that screen
+  canvas.json                ← each design's title, app and size
+```
+
 ## Placement rules
 
 1. **Route files are thin.** `app/` holds `page.tsx` (parse
@@ -93,8 +104,10 @@ evals/                       ← the developer's: no agent writes, runs or requi
 3. **Two features need it → it graduates to the kit level**
    (`components/ui/`). A feature never imports another feature's
    `ui/`.
-4. **Tests live in `__tests__/`** beside the code they test, on
-   every branch of the tree.
+4. **Backend tests live in `__tests__/`** beside the code they
+   test. The `ui/` branch has no tests of its own: an end-to-end
+   flow in the e2e package proves a screen, one file per flow,
+   in the folder of the app that shows it.
 5. **The backend branches** (`api/`, `db/`, schema placement)
    follow `backend-standards`; the `ui/` branch
    follows the `frontend-standards` skill. This skill owns only where

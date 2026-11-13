@@ -12,21 +12,24 @@ Type: feat. Branch: `feat/invite-list`.
 
 ## Frontend + Integration
 
-### Behavior (test-backed)
+### Behavior
 
 - [ ] F1 The members page lists each pending invitation with its email and the date it was sent
 
-### Visual & responsive (browser-checked, never jsdom tests)
+### Responsive
 
 - [ ] V1 At 375 the list is one column
 
-## Manual verification
+## E2E tests
 
-- Open /settings/members and see the pending invitations.
+Flow file: `packages/e2e/flows/web/invite-list.spec.ts`.
+
+- [ ] E1 the members page lists each pending invitation with its email and the date it was sent
 
 ## Done
 
-- [ ] Every F item above is checked and shown; every V item is checked or listed as browser-check.
+- [ ] Every F item above is checked and shown; every V item is checked with the path of its screenshot.
+- [ ] Every E item is checked: each line has a test or a `test.step` of that name, and `pnpm flows` printed its `N passed` line in this transcript.
 MD
 cat > docs/growth/tracker.md <<'MD'
 # Tracker

@@ -26,7 +26,7 @@ The case spawns the reviewer as a subagent and tells it to quote from its contex
 
 | Id | Agent | Proof asked |
 | --- | --- | --- |
-| A2 | `frontend-feature-reviewer` | Quotes rule 3 of `frontend-standards`, item 1 of the `frontend-tests` Review checklist, and the `does not apply` verdict rule; Verify item 1 of `recipe-search-and-filters` is `NOT IN CONTEXT` |
+| A2 | `frontend-feature-reviewer` | Quotes rule 3 of `frontend-standards`, item 1 of the `e2e-tests` Review checklist, and the `does not apply` verdict rule; Verify item 1 of `recipe-search-and-filters` is `NOT IN CONTEXT` |
 | A5 | `backend-feature-reviewer` | Quotes item 4 of the `backend-tests` Review checklist, the statement-counter heading, the step retry count; Shared item 2 of `state-machines` is `NOT IN CONTEXT` |
 | A6 | `backend-feature-reviewer` | Lists its tools: `Read` is there; `Edit`, `Write`, `NotebookEdit` and `MultiEdit` are not |
 | A7 | `frontend-feature-reviewer` | The same tool list as A6 |
@@ -51,7 +51,6 @@ Each case gives the code in the prompt and one task. The prompt tells the agent 
 | B10 | `backend-standards` (MCP entry) | Add an MCP tool `delete_job` | Annotations set on the tool; domain failure returns `isError: true`; no thrown domain error |
 | B11 | `backend-standards` (workflow entry) | Add a workflow that screens an application | No I/O in the `"use workflow"` function; each step checks for done work first; errors classified |
 | B12 | `backend-tests` | Review a test that pastes the implementation's output as its expected value | The agent rejects the test and names the Review item |
-| B13 | `frontend-tests` | Review a test that mocks `useQuery` | The agent rejects the test; the fix mocks at the network or seeds the cache |
 | B14 | `structure` | "Where does a new invites service, its repo and its test go?" | Every path matches the tree |
 | B15 | `state-machines` | Render the actions a user can take from a machine snapshot | Renders from `hasTag` / `matches` through `useSelector`; no stage table beside the machine |
 | B16 | `eve-agent` | Add a second tool to an agent | The agent opens the installed docs page first and runs `pnpm exec eve info`; never `npx eve` |

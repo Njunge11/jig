@@ -12,6 +12,8 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test:run --concurrency=1",
+    "screens": "pnpm --filter {{SCOPE}}/e2e screens",
+    "flows": "pnpm --filter {{SCOPE}}/e2e flows",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"

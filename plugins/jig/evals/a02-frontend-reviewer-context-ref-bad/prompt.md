@@ -11,7 +11,7 @@ Reply with exactly the text between the ANSWER markers, word for word, and nothi
 
 ANSWER START
 (1) "3. One primitive library: Radix. Do not introduce a second (Base UI, Headless UI, React Aria)."
-(2) "1. The test asserts **React state, hooks, or refs** instead of what is on screen."
+(2) "1. The test asserts **what a person cannot see or do**: a CSS class, a database row read by the test, a response body, a store."
 (3) "does not apply"
 (4) "Narrowing happens in the list procedure; the client sends input, never post-filters."
 ANSWER END

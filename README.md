@@ -26,7 +26,7 @@ Every skill loads on its own with `/jig:<skill>`. This table shows which ones ca
 | `review-frontend-feature` | Yes — the review walks the structure tree over the diff. |
 | `implementation-planner` | Yes — it writes `docs/<project>/`, and its checklists run the lanes above. |
 | `backend-tests` | Partly — the test-quality rules are structure-free; the harness setup expects tests in `features/**/{api,db}/__tests__/`. |
-| `frontend-tests` | Partly — the test-quality rules are structure-free; the harness setup expects tests in `features/**/ui/__tests__/`. |
+| `e2e-tests` | Partly — the test-quality rules and the design check are structure-free; the setup expects the suite in `packages/e2e/` and the design source files in `docs/designs/`. |
 | `open-feature-pr` | No — branch, title, and body conventions only. |
 | `state-machines` | No — XState rules for the machine module, the server that moves it, and the React client that renders it. |
 | `skill-audit` | No — it audits skills, not your code. |
@@ -38,7 +38,7 @@ Every skill loads on its own with `/jig:<skill>`. This table shows which ones ca
 
 Jig does the heavy lifting. It plans the checklists, writes the tests and the code, runs the suites, opens the PRs, and reviews every diff item by item against the standards. You do not write the code, and you do not walk the review checklists.
 
-Your job is judgment at the checkpoints: answer the spec's open decisions, start each checklist, read each review verdict, and merge. The one hands-on task left is the checklist's `Manual verification` items — browser checks jig does not automate yet.
+Your job is judgment at the checkpoints: answer the spec's open decisions, start each checklist, read each review verdict, and merge. Jig also checks the running app: the end-to-end tests walk each flow in a real browser, and the design check compares each built screen with its design source file. A `Manual verification` item is left only for a check that no script can run, such as a real turn sent to a model.
 
 With more refinement and iteration, jig can automate more of the pipeline. The direction: you hand jig a spec, and it works through the checklists autonomously, manages its own handoffs and worktrees, and returns reviewed PRs for you to merge.
 
@@ -51,7 +51,8 @@ Jig's standards and recipes target one stack:
 - Drizzle ORM + PostgreSQL
 - TanStack Query v5
 - shadcn/ui + Tailwind CSS
-- Vitest — PGlite for backend tests, jsdom + MSW for UI tests
+- Vitest + PGlite for backend tests
+- Playwright for end-to-end tests on the built app, and for the check of each built screen against its design source file. There is no component-test layer.
 
 ## How to install
 

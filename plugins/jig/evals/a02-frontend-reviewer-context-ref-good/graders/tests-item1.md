@@ -1,5 +1,5 @@
 ---
 type: regex
-pattern: 'React state, hooks, or refs'
+pattern: 'what a person cannot see or do'
 flags: i
 ---

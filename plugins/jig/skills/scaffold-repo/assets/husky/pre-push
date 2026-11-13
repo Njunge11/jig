@@ -1,0 +1,33 @@
+# Runs the Playwright end-to-end tests on the real build before a push that
+# holds app code. A failed test refuses the push. HUSKY=0 skips every hook.
+
+# A push of documents alone has nothing to run. The first push of a repo has
+# no origin/main to compare with: it runs the tests.
+if git fetch --quiet origin main 2>/dev/null &&
+  git diff --quiet origin/main...HEAD -- apps packages; then
+  exit 0
+fi
+
+# One run at a time on this machine: each worktree uses the same ports and
+# the same database, so a second push waits for the first.
+lock="$(git rev-parse --path-format=absolute --git-common-dir)/e2e.lock"
+waited=0
+until mkdir "$lock" 2>/dev/null; do
+  if [ "$waited" -ge 1200 ]; then
+    echo "pre-push: another end-to-end run holds $lock for 20 minutes. Remove the folder when no run is active."
+    exit 1
+  fi
+  sleep 10
+  waited=$((waited + 10))
+done
+trap 'rmdir "$lock"' EXIT
+trap 'exit 1' INT TERM
+
+for app in {{APP_NAMES}}; do
+  if ls "packages/e2e/flows/$app"/*.spec.ts >/dev/null 2>&1; then
+    APP="$app" pnpm flows || {
+      echo "pre-push: an end-to-end test of $app failed. Open packages/e2e/.output/report/$app-flows/index.html."
+      exit 1
+    }
+  fi
+done

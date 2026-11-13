@@ -4,7 +4,7 @@ import segmentHasLoadingAndError from "./rules/segment-has-loading-and-error.mjs
 
 /**
  * The jig lint gates as flat-config entries. Every `pnpm lint` item that the
- * backend-standards, backend-tests, frontend-standards and frontend-tests
+ * backend-standards, backend-tests and frontend-standards
  * checklists mark "Gate:" is enforced here, and each message cites its item.
  *
  * `gates(trees)` scopes every entry to the given top-level folders, so an app
@@ -297,7 +297,7 @@ export function gates(trees, options = {}) {
       },
     },
 
-    // --- backend-tests 1, 5, 6, 9 and frontend-tests 3, 5: *.test.tsx ---
+    // --- backend-tests 1, 5, 6, 9: *.test.tsx ---
     {
       files: glob("**/*.test.tsx"),
       rules: {
@@ -305,13 +305,20 @@ export function gates(trees, options = {}) {
           "error",
           ...tsxSyntaxSelectors,
           ...backendTestSelectors,
+        ],
+      },
+    },
+
+    // --- e2e-tests, the two layers: no test draws a component ---
+    {
+      files: [...glob("**/ui/**/*.test.ts"), ...glob("**/ui/**/*.test.tsx")],
+      rules: {
+        "no-restricted-syntax": [
+          "error",
           {
-            selector: 'CallExpression[callee.property.name="toHaveClass"]',
-            message: "frontend-tests 3: asserts CSS classes.",
-          },
-          {
-            selector: "CallExpression[callee.property.name=/ByTestId$/]",
-            message: "frontend-tests 5: queries by test id.",
+            selector: "Program",
+            message:
+              "e2e-tests: no component-test layer. An end-to-end flow in the e2e package proves a screen.",
           },
         ],
       },

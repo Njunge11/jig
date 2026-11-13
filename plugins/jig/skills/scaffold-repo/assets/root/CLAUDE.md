@@ -12,9 +12,12 @@ one copy.
 ## Commands
 
 Run from the repo root: `pnpm dev`, `pnpm build`, `pnpm lint`,
-`pnpm typecheck`, `pnpm test`.
+`pnpm typecheck`, `pnpm test`, `pnpm flows`, `pnpm screens`.
 
-- Tests run on PGlite and need no database.
+- `pnpm test` runs the backend tests on PGlite. They need no database.
+- `pnpm flows` and `pnpm screens` run the end-to-end tests and the design
+  check on the built app and the database of `.env` (see "Screens and
+  flows").
 - `pnpm --filter {{SCOPE}}/db db:check` proves `DATABASE_URL` answers;
   `db:push` pushes the schema to it with no prompt (`--force`: the one
   database is the dev database, and a builder runs it unattended);
@@ -31,7 +34,9 @@ before the work, and every change must pass their Review checklists:
 
 - every file: `jig:structure` places it
 - backend work: `jig:backend-standards`, `jig:backend-tests`
-- frontend work: `jig:frontend-standards`, `jig:frontend-tests`
+- frontend work: `jig:frontend-standards`, `jig:e2e-tests`. There are two
+  test layers: backend tests on PGlite, and end-to-end tests on the built
+  app. No test draws a component in jsdom.
 - a flow with stages that outlive one request is an XState machine built to
   `jig:state-machines`. Never derive a stage from data instead.
 - a feature slice: `jig:implementation-planner` writes the checklist, the
@@ -62,5 +67,28 @@ before the work, and every change must pass their Review checklists:
 - Migrations stay in order: a second task that adds a migration deletes its
   own and runs `pnpm --filter {{SCOPE}}/db db:generate` again on top of main,
   never edits `drizzle/meta/_journal.json` by hand.
-- Never start a dev server to verify. Verify with `pnpm build` and the
-  tests; the developer runs the app.
+- Never start `next dev` or `next start`, and never use a dev port (3000
+  and up): the developer runs the app there. Verify with `pnpm build`, the
+  tests, `pnpm flows` and `pnpm screens`.
+
+## Screens and flows
+
+`packages/e2e` is the Playwright end-to-end suite, built to the jig
+`e2e-tests` skill, which holds each rule. It builds one app, starts it
+headless on its own port (3100 and up), signs in with the seed account and
+stops the server at the end. No window opens. It refuses a server that
+already answers on its port.
+
+- `pnpm flows` runs each flow in `packages/e2e/flows/<app>/`;
+  `pnpm flows <name>` runs one file; `APP=<app>` picks the app.
+- `SCREENS="<Design>=<path>" pnpm screens` draws a route and its design,
+  `docs/designs/<Design>.dc.html`, at the same window size, and fails on a
+  difference of look. The design of a screen is its source file: the repo
+  holds no picture of a design.
+- Each run writes its report to `packages/e2e/.output/report/`. The report
+  is the evidence of a run, never a task for the developer.
+- The flows do not run in `ci`: it has no database. The pre-push hook runs
+  them on this machine when the push holds app code, one run at a time, and
+  refuses the push on a failure. Never push with `--no-verify` or `HUSKY=0`.
+- Each test makes its own data and takes it away at its end. Data that it
+  cannot take away carries one fixed marked name.

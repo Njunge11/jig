@@ -20,6 +20,6 @@ frontend-standards Rules
  1 pass
  2 fail — features/invites/ui/member-picker.tsx:12 — imports Base UI; rebuild it on the kit's Popover + Command
 
-frontend-tests
+e2e-tests
  1 pass
 ANSWER END

@@ -88,7 +88,7 @@ Three steps, in order. They are the first three steps of your plan, before any o
 ### Measure
 
 - **Read the turn from its trace.** `pnpm exec eve traces` prints the span tree of the last turn: each model step with its tokens, each `execute_tool` span with its tool name and duration. Set `EVE_TRACES_CONTENT=on` in `.env.local` to capture prompts and tool payloads. The turn is the developer's: an agent never sends one, and the trace it reads is one the developer already captured.
-- **A client stream fixture copies a real trace.** The `frontend-tests` Review checklist owns that rule. The developer captures the trace with `eve traces`.
+- **No test replays a turn in the client.** The standard has no component-test layer (`e2e-tests`, **The two layers**), so no stream fixture exists. An end-to-end test never sends a turn either: a turn calls a model. What the client draws from a stream is proved by the developer's own turn and its `eve traces`, a `## Manual verification` step. An end-to-end test covers what a stored conversation shows and what a person does on a card.
 - **The trace counts model steps and tool calls, not statements.** A tool's statements are its service's statement budget, asserted by the budget test `backend-standards` § "Queries & performance" demands. A lane is within budget when both hold: the trace's tool list and step count, and each tool's statement count.
 
 ## Common failures
