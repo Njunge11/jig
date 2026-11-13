@@ -182,7 +182,8 @@ export default defineConfig({
     // A server that already answers on the port is not this build: refuse it.
     reuseExistingServer: false,
     // No keys: the console senders print each email and each SMS to the server log.
-    env: { AUTH_URL: app.url, EMAIL_API_KEY: "", SMS_API_KEY: "" },
+    // DATABASE_POOL_MAX: the connections that the dev servers leave on the pooler.
+    env: { AUTH_URL: app.url, DATABASE_POOL_MAX: "3", EMAIL_API_KEY: "", SMS_API_KEY: "" },
   },
 });
 ```
@@ -191,6 +192,7 @@ export default defineConfig({
 - Each app has its own port, and none is a dev port. The developer's dev server keeps running.
 - The `session` project signs in once through the real sign-in screens and saves the browser state. A saved state that still opens the app is kept. (Playwright, Authentication, "Basic: shared account in all tests".) The state file holds cookies: it stays under the git-ignored `.output/`.
 - A flow starts with that state. `test.use({ storageState: signedOut })` starts a file signed out, and `browser.newContext({ storageState: signedOut })` opens the browser of a second person. (Authentication, "Avoid authentication in some tests".)
+- **The server of the run takes only the connections that the dev servers leave.** The developer's dev servers keep running, and each holds its pool on the one pooler. The db client reads `DATABASE_POOL_MAX` (`packages/db/src/client.ts`), and the config sets it: the pooler's limit minus the pools of the dev servers. In the repo that proved this setup that is 15 − 3 × 4 = 3. A run with the full pool takes connections from a dev server: its session check fails, and the developer is signed out in the middle of their work. A client with a fixed `max` is changed to read the variable before the first run.
 - The workers share one server, one database and one server log. That is safe only while each test obeys Review items 6, 8 and 9.
 - **The number of workers is measured, not chosen.** A browser is not the limit: the server and its database pool are. In the repo that proved this setup, the server held 4 connections to a remote database. With 2 workers, tests that took 254 s in sum ran in 133 s. With 4 workers each test took 2 to 3 times as long, and steps ran out of time. Measure one run per number, keep the fastest number at which each test passes, and write the measured numbers beside `workers` in the config.
 - A test that makes its own data pays for it in run time: the helper that makes a member runs one time per test. Do not make data that the test does not use.
