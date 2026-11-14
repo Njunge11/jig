@@ -100,7 +100,7 @@ id=$(gh run list --branch main --event push --commit $(git rev-parse HEAD) --jso
 gh run watch "$id" --exit-status
 ```
 
-The pre-push hook runs the flows of each app that the push can change, before the push leaves the machine. Each pushed commit has its own run: the `ci` workflow has no `concurrency` group, so no later push cancels it. The `ci` run has no database and runs no flow. A failed run is this skill's to fix, in a new commit and push, before the report.
+The pre-push hook runs the flows that the push adds or changes, before the push leaves the machine. `pnpm flows:all` runs the full suite. Each pushed commit has its own run: the `ci` workflow has no `concurrency` group, so no later push cancels it. The `ci` run has no database and runs no flow. A failed run is this skill's to fix, in a new commit and push, before the report.
 
 **Gate:** the run's conclusion is `success`.
 
@@ -128,7 +128,7 @@ When the folder already holds code, Step 2, Step 3 and Step 5 add only what is m
 
 - [ ] Every decision of Step 1 is written in the output, and no fixed row was asked.
 - [ ] Every file in `assets/root/`, `assets/husky/` and `assets/github/`, and every file of the `e2e-tests` skill's `assets/e2e/`, has its copy in the repo, placeholders replaced, no `{{` left (`grep -r '{{' --exclude-dir=node_modules .` prints nothing).
-- [ ] `.husky/pre-push` runs `pnpm flows` for each app that the push can change, and no app has a jsdom or MSW setup.
+- [ ] `.husky/pre-push` runs the flows that the push adds or changes, `pnpm flows:all` runs each app, and no app has a jsdom or MSW setup.
 - [ ] `CLAUDE.md` holds the straight-to-main rule and names this skill as the source of the conventions.
 - [ ] `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm test` pass, and the first commit passed the hooks.
 - [ ] `db:check` printed `db ok`, `gh auth status` is logged in, and `pnpm flows` printed `1 passed` for each app.

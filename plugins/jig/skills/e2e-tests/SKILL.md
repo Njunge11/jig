@@ -29,7 +29,7 @@ Run before a commit. Paste the output in the proof.
 1. `pnpm lint` and `pnpm typecheck` exit `0` in the e2e package. Lint proves every Review item that ends with `Gate:`.
 2. `pnpm flows` exits `0`. Paste its last line (`N passed`) and the path of the report.
 3. `SCREENS="<Design>=<path> …" pnpm screens` exits `0` for each design that a route shows. Paste its last line. A design that a flow step opens (`expectDesign`) is proved by gate 2.
-4. The pre-push hook runs gate 2 for each app that the push can change, and refuses the push on a failure. Never pass `--no-verify`, and never set `HUSKY=0`.
+4. The pre-push hook runs the flows that the push adds or changes, and refuses the push on a failure. Never pass `--no-verify`, and never set `HUSKY=0`.
 
 ## The list first, the test code after the build
 
@@ -244,15 +244,15 @@ test("an invited person sets up the account and opens the app", async ({ page, b
 
 ### The pre-push gate
 
-The machine that pushes runs the tests: it has the database. The hook is `.husky/pre-push`. The `scaffold-repo` skill owns the file (`assets/husky/pre-push`) and installs it. A push runs only the flows that its changes can break:
+The machine that pushes runs the tests: it has the database. The `scaffold-repo` skill owns and installs the hook, `.husky/pre-push` (`assets/husky/pre-push`). A push runs the flows that it adds or changes. `pnpm flows:all` runs the full suite: before a deploy, and when the developer asks.
 
-1. A push of documents, unit tests, their fixtures or their setup has no run.
-2. An app that the push changes, or that uses a changed package, runs all its flows: `turbo ls --affected` names those apps.
-3. A push of flow files or their helpers alone runs `pnpm flows --only-changed=origin/main`: Playwright follows their imports.
-4. The first push of a repo, and a change to the config, to `support/apps.ts` or to the session setup, run each app.
-5. One run at a time uses the ports and the database: the lock is a folder in the shared git folder (`e2e.lock`).
+1. Documents, unit tests, their fixtures and setup: no run.
+2. Changed flow files or helpers: `pnpm flows --only-changed=origin/main` for each app. Playwright follows their imports.
+3. App code with no changed flow: all flows of each app that `turbo ls --affected` names.
+4. The first push of a repo, or a change to the config, `support/apps.ts` or the session setup: each app.
+5. One run at a time uses the ports and the database: `e2e.lock` in the shared git folder is the lock.
 
-A failure refuses the push. Never change the hook to run each app on each push: the CI runs lint, typecheck, the build and the backend tests.
+A failure refuses the push. A flow that fails in the full suite is a fault to fix in the next push. Never make the hook run each flow on each push.
 
 ### Dev dependencies
 
@@ -274,6 +274,7 @@ Run `pnpm exec playwright install chromium` once on a new machine: only the brow
 - Husky, Get started: https://typicode.github.io/husky/get-started.html
 - Playwright, Continuous Integration: https://playwright.dev/docs/ci
 - Turborepo, `--affected`: https://turborepo.dev/docs/reference/run
+- Software Engineering at Google, chapter 23: https://abseil.io/resources/swe-book/html/ch23.html
 - Anthropic, Claude Code best practices: https://code.claude.com/docs/en/best-practices
 - Anthropic, Harness design for long-running application development: https://www.anthropic.com/research/harness-design-long-running-apps
 - Anthropic, Using Claude for prototypes and UX: https://academy.claude.com/tutorials/using-claude-design-for-prototypes-and-ux

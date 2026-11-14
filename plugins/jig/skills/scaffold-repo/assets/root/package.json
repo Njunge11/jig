@@ -14,6 +14,7 @@
     "test": "turbo run test:run --concurrency=1",
     "screens": "pnpm --filter {{SCOPE}}/e2e screens",
     "flows": "pnpm --filter {{SCOPE}}/e2e flows",
+    "flows:all": "for dir in packages/e2e/flows/*/; do APP=$(basename \"$dir\") pnpm flows || exit 1; done",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"

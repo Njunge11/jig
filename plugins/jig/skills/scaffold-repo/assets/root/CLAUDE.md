@@ -89,10 +89,10 @@ already answers on its port.
   is the evidence of a run, never a task for the developer.
 - The flows do not run in `ci`: it has no database. The pre-push hook runs
   them on this machine, one run at a time, and refuses the push on a
-  failure. It runs the flows of each app that the push can change: the app
-  itself, or a package that it uses. A push of flow files alone runs the
-  flows that the change reaches. A push of documents or unit tests has no
-  run. Never push with `--no-verify` or `HUSKY=0`.
+  failure. It runs the flows that the push adds or changes. A push of app
+  code with no changed flow runs all flows of each app that it changes. A
+  push of documents or unit tests has no run. `pnpm flows:all` runs the full
+  suite: run it before a deploy and when the developer asks. Never push with `--no-verify` or `HUSKY=0`.
 - Each test makes its own data and takes it away at its end. Data that it
   cannot take away carries one fixed marked name.
 - Built screens that keep their look: none yet. When the developer changes

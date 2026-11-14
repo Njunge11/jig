@@ -1,6 +1,6 @@
-# Runs the Playwright end-to-end tests on the real build before a push, for
-# the apps that the push can change. A failed test refuses the push. HUSKY=0
-# skips every hook.
+# Runs, on the real build before a push, the Playwright end-to-end tests
+# that the push adds or changes. A failed test refuses the push. The full
+# suite is `pnpm flows:all`. HUSKY=0 skips every hook.
 
 base=origin/main
 
@@ -29,26 +29,37 @@ else
   affected=""
 fi
 
-# For each app: "all" its flows when the push changes the app or a package
-# that it uses, the "changed" flows when the push changes only flow files or
-# their helpers (Playwright follows the imports of each flow file), or nothing.
+# The flows that the push adds or changes, for each app. Playwright follows
+# the imports of each flow file, so a changed helper selects its flows.
+apps="{{APP_NAMES}}"
 plan=""
-for app in {{APP_NAMES}}; do
-  ls "packages/e2e/flows/$app"/*.spec.ts >/dev/null 2>&1 || continue
-  if [ -z "$affected" ] || printf '%s' "$affected" | grep -q "\"apps/$app\""; then
-    plan="$plan $app:all"
-  elif printf '%s' "$affected" | grep -q '"packages/e2e"' &&
-    ! APP="$app" pnpm flows --only-changed="$base" --list 2>/dev/null |
+if printf '%s' "$affected" | grep -q '"packages/e2e"'; then
+  for app in $apps; do
+    ls "packages/e2e/flows/$app"/*.spec.ts >/dev/null 2>&1 || continue
+    if ! APP="$app" pnpm flows --only-changed="$base" --list 2>/dev/null |
       grep -q "Total: 0 tests"; then
-    plan="$plan $app:changed"
-  fi
-done
+      plan="$plan $app:changed"
+    fi
+  done
+fi
+
+# A push with no changed flow has no other proof: each app that it changes,
+# or whose packages it changes, runs all its flows. So does each app when
+# turbo gives no answer.
+if [ -z "$plan" ]; then
+  for app in $apps; do
+    ls "packages/e2e/flows/$app"/*.spec.ts >/dev/null 2>&1 || continue
+    if [ -z "$affected" ] || printf '%s' "$affected" | grep -q "\"apps/$app\""; then
+      plan="$plan $app:all"
+    fi
+  done
+fi
 
 if [ -z "$plan" ]; then
   echo "pre-push: the push changes no app that has a flow. No end-to-end run."
   exit 0
 fi
-echo "pre-push: the end-to-end run of this push:$plan"
+echo "pre-push: the end-to-end run of this push:$plan. The full suite is: pnpm flows:all"
 
 # One run at a time on this machine: each worktree uses the same ports and
 # the same database, so a second push waits for the first.
