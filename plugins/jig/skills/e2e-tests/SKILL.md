@@ -261,6 +261,7 @@ The machine that pushes runs the tests: it has the database. The `scaffold-repo`
 4. The first push, or a change to the config, `support/apps.ts` or the session setup: each app.
 5. One run at a time uses the ports and the database: each `pnpm flows` of the hook waits for the run that holds the lock (`support/run.ts`).
 6. A push to main that does not hold `origin/main`: refused before the run, with the command that rebases. The remote refuses it only after the run.
+7. The hook clears git's own variables first (`unset $(git rev-parse --local-env-vars)`). In a linked worktree git gives a hook `GIT_DIR` and no work tree, a git command in `packages/e2e` then takes that folder as the top of the repo, and `--only-changed` picks every flow (measured: 88 tests, where the right pick was 43).
 
 A failure refuses the push. A flow that fails in the full suite is a fault to fix in the next push. Never make the hook run each flow on each push.
 

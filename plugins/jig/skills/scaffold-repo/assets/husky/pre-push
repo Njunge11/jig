@@ -2,6 +2,13 @@
 # that the push adds or changes. A failed test refuses the push. The full
 # suite is `pnpm flows:all`. HUSKY=0 skips every hook.
 
+# In a linked worktree, git gives a hook GIT_DIR and no work tree. A git
+# command in a subfolder then takes that subfolder as the top of the repo
+# (git-config, core.worktree), so `--only-changed` reads each flow file as
+# new and picks every flow. Measured: 88 tests with GIT_DIR, 43 without.
+# shellcheck disable=SC2046 -- each name is one word
+unset $(git rev-parse --local-env-vars)
+
 base=origin/main
 
 # The refs of this push, from git: `<local ref> <local sha> <remote ref> <remote sha>`.
