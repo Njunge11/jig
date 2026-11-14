@@ -7,6 +7,13 @@ import type { Page } from "@playwright/test";
 const isStore = (url: URL) => url.hostname.endsWith(".amazonaws.com");
 
 /**
+ * The store answers an upload in less than a second. A request with no answer
+ * in this time is sent one more time: the connection to the store can stop,
+ * and the same upload to the same key is safe to send again.
+ */
+const STORE_ANSWER_MS = 6_000;
+
+/**
  * The file store takes a file from the addresses of the apps only, and a run
  * starts the app on a port of its own. So the run sends each upload of `page`
  * to the store itself, with no change, and gives the page the store's answer
@@ -18,7 +25,8 @@ export async function carryUploads(page: Page) {
   await page.route(isStore, async (route) => {
     const request = route.request();
     if (request.method() !== "POST") return route.continue();
-    const response = await route.fetch();
+    const send = () => route.fetch({ timeout: STORE_ANSWER_MS });
+    const response = await send().catch(() => send());
     await route.fulfill({
       response,
       headers: {
