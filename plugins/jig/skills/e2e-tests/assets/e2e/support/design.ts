@@ -20,6 +20,10 @@ import type { StockSteps } from "./stock-steps";
  * difference only when a stock step is nearer to the design than the built
  * value is. A color, a weight, a border and a font have no steps: they are
  * equal or they are a difference.
+ *
+ * A stock type size also changes the width of a text. So a text is in its
+ * place when its left edge, its center or its right edge is where the design
+ * has it: the text keeps the edge that its layout holds.
  */
 
 const designsDir = path.join(repoRoot, "docs", "designs");
@@ -79,6 +83,11 @@ const show = (value: number) => `${Math.round(value * 10) / 10}px`;
 const exact = (design: string, built: string): Verdict =>
   design === built ? SAME : { same: false };
 
+/** Two sizes this near are one size: the browser rounds a computed length. */
+const HAIR = 0.01;
+/** What the look reader gives for a `select` that the browser draws. */
+const BROWSER_ARROW = "arrow";
+
 /** The two steps that a value lies between, on a scale with equal steps. */
 const around = (value: number, unit: number) => [
   Math.floor(value / unit) * unit,
@@ -91,7 +100,6 @@ const around = (value: number, unit: number) => [
  * pass and `text-base` does not.
  */
 function onSteps(design: number, built: number, steps: number[]): Verdict {
-  const HAIR = 0.01;
   const off = Math.min(...steps.map((step) => Math.abs(step - design)));
   if (Math.abs(built - design) <= off + HAIR) return SAME;
   const near = steps.filter((step) => Math.abs(step - design) <= off + HAIR);
@@ -128,18 +136,60 @@ const spaced = sized((design, _look, stock) =>
   around(design, stock.spacing / 2),
 );
 
+/** `left 277px, center 360px, right 443px` as edge name to px. */
+const edgesOf = (place: string): Map<string, number> =>
+  new Map(
+    place.split(", ").flatMap((part): [string, number][] => {
+      const [edge = "", value = ""] = part.split(" ");
+      const px = pxOf(value);
+      return px === null ? [] : [[edge, px]];
+    }),
+  );
+
+/**
+ * The place of a text: right when no stock class brings one edge that the
+ * two screens read nearer to the design. The smallest move of a class is
+ * half a spacing unit (`pl-0.5`, 2 px), from where the built text is: a
+ * border of 1 px puts a text between two steps of the scale. So an edge is
+ * in its place when it is half that move or less from the design. The stock
+ * step it names is the nearest place of the left edge that a class gives.
+ */
+const placed: Rule = (design, built, _look, stock) => {
+  const move = stock.spacing / 2;
+  const want = edgesOf(design);
+  const got = edgesOf(built);
+  const edges = [...want].flatMap(([edge, value]) => {
+    const other = got.get(edge);
+    return other === undefined ? [] : [{ built: other, off: value - other }];
+  });
+  const [left] = edges;
+  if (!left) return exact(design, built);
+  if (edges.some((edge) => Math.abs(edge.off) <= move / 2 + HAIR)) return SAME;
+  const nearest = left.built + Math.round(left.off / move) * move;
+  return { same: false, stock: `${show(nearest)} for the left edge` };
+};
+
 const typeSizeOf = (look: Record<string, string>) =>
   pxOf(look["font-size"] ?? "") ?? 0;
+
+/** `normal (19.5px)`: the height that the font gives a line, as the browser used it. */
+const usedLineHeight = (value: string) =>
+  /^normal \((.+)\)$/.exec(value)?.[1] ?? value;
 
 /** The properties that a stock scale gives. Each other property is exact. */
 const RULES: Record<string, Rule> = {
   "font-size": sized((_design, _look, stock) => stock.fontSizes),
   // `leading-<n>` is a step of the spacing scale, and `leading-none` is the
   // type size.
-  "line-height": sized((design, look, stock) => [
-    ...around(design, stock.spacing),
-    typeSizeOf(look),
-  ]),
+  // A design that sets no line height has the one of its font: the built
+  // text has the stock step that is nearest to it, or no line height too.
+  "line-height": (design, built, look, stock) =>
+    design.startsWith("normal") && built.startsWith("normal")
+      ? SAME
+      : sized((want, text, steps) => [
+          ...around(want, steps.spacing),
+          typeSizeOf(text),
+        ])(usedLineHeight(design), usedLineHeight(built), look, stock),
   // `tracking-*` is a part of the type size.
   "letter-spacing": (design, built, look, stock) => {
     const length = (value: string) => (value === "normal" ? "0px" : value);
@@ -165,10 +215,17 @@ const RULES: Record<string, Rule> = {
   // `h-9`: a whole step. The height of a box follows the line height of its
   // text, and a stock line height is not the line height of the design.
   "box height": sized((design, _look, stock) => around(design, stock.spacing)),
-  "distance from the left of the page": spaced,
-  "text from the left of its box": spaced,
+  "place on the page": placed,
+  "place in its box": placed,
   // `18px #1c3a6e`: the size is on the spacing scale, the color is exact.
+  // A `select` that the browser draws shows the arrow of the browser, and
+  // the icon of a built control stands for it: its shape is not compared.
   "icon in the box": (design, built, look, stock) => {
+    if (design === BROWSER_ARROW || built === BROWSER_ARROW) {
+      return (design === "none") === (built === "none")
+        ? SAME
+        : { same: false };
+    }
     const [wantSize = "", wantColor] = design.split(" ");
     const [gotSize = "", gotColor] = built.split(" ");
     if (wantColor !== gotColor) return { same: false };

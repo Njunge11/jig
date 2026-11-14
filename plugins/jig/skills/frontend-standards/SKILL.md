@@ -458,6 +458,31 @@ export default async function Page() {
     or a table keyed by it. The `state-machines` skill owns the
     machine, its restore with `snapshot`, and the selectors.
 
+### The clock
+
+66. A component never reads the clock in a render or in a
+    `useState` initializer (`Date.now()`, `new Date()`) for a text
+    it draws ("12 min ago", "Active now"). The server draws the
+    text from its clock and the browser from its own when it
+    hydrates: when the two differ, React throws error 418. The
+    root layout (a server component) passes its time to one
+    client provider, and one hook returns that time while the
+    page hydrates and the time of the mount after it:
+
+```tsx
+const serverTime = use(ServerTime); // the provider's value
+const [mountTime] = useState(() => Date.now());
+return useSyncExternalStore(
+  subscribe, // () => () => {}
+  () => mountTime,
+  () => serverTime ?? mountTime,
+);
+```
+
+    (React, `useSyncExternalStore`, "Adding support for server
+    rendering".) The flow that proves it sets the clock of the
+    browser ahead: `page.clock.setFixedTime(...)`.
+
 ## Gates
 
 Run before a commit. Paste the output in the proof.
@@ -466,7 +491,7 @@ Run before a commit. Paste the output in the proof.
 
 ## Review
 
-Rules 1–65, plus the Verify list of every recipe skill, are this
+Rules 1–66, plus the Verify list of every recipe skill, are this
 skill's review checklist — run by the `review-frontend-feature`
 skill. A recipe whose catalog row does not match the build gets
 the recorded verdict `does not apply`; no recipe is skipped.

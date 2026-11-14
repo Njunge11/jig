@@ -76,12 +76,11 @@ export default defineConfig({
     timeout: 600_000,
     env: {
       AUTH_URL: app.url,
-      // The run is one more server on the connections that the dev servers
-      // share. It takes the number that they leave: 3 apps with 4 each on a
-      // pooler of 15 leave 3. A higher number takes a connection from a dev
-      // server, and a full pool signs the developer out. With 2, the server
-      // is too slow for 2 workers and steps run out of time.
-      DATABASE_POOL_MAX: "3",
+      // The run is one more server on the connections of the pooler. The
+      // run and the dev servers in use fit in its limit: on a pooler of 15,
+      // two dev servers in use (4 each) and a script leave 6. A full pooler
+      // fails the session check of a dev server and signs the developer out.
+      DATABASE_POOL_MAX: "6",
       // One line per sender, with no key: the console sender then prints
       // each email and each SMS to the server log, and no flow sends a real
       // message. For example: EMAIL_API_KEY: "".

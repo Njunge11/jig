@@ -26,6 +26,13 @@ export type TextLook = {
  * the place of the text in it are part of the look. The height of a taller
  * box follows its content, which is sample data in a design.
  *
+ * A place is three numbers: the left edge, the center and the right edge of
+ * the text. A stock type size changes the width of a text, and the text
+ * keeps the edge that its layout holds.
+ *
+ * `line-height: normal` is read with the height that the font gives it, so
+ * a design that sets no line height still has a size to build to.
+ *
  * Not read: the shape of an icon, the space between two blocks, the width
  * of a table column and the look of a text that only one screen shows (a
  * row of data). The two screenshots show those.
@@ -147,6 +154,25 @@ export function readLook(): TextLook[] {
     return element.getBoundingClientRect();
   };
 
+  /** The height of a line with `line-height: normal`, per font of the page. */
+  const normalHeights = new Map<string, number>();
+  const normalHeightOf = (style: CSSStyleDeclaration): number => {
+    const font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const known = normalHeights.get(font);
+    if (known !== undefined) return known;
+    const probe = document.createElement("span");
+    probe.textContent = "X";
+    probe.style.cssText =
+      "position:absolute;visibility:hidden;display:inline-block;padding:0;border:0;white-space:nowrap;line-height:normal";
+    probe.style.font = font;
+    probe.style.lineHeight = "normal";
+    document.body.append(probe);
+    const height = probe.getBoundingClientRect().height;
+    probe.remove();
+    normalHeights.set(font, height);
+    return height;
+  };
+
   /** The shadows that paint: a framework adds layers with no color. */
   const shadowOf = (shadow: string): string => {
     const layers = shadow
@@ -156,8 +182,18 @@ export function readLook(): TextLook[] {
     return layers.length > 0 ? layers.join(", ") : "none";
   };
 
-  /** The size and the color of the icon a control shows beside its text. */
+  /**
+   * The size and the color of the icon a control shows beside its text. A
+   * `select` that the browser draws has no icon in the page: the browser
+   * paints its arrow, and the look says `arrow`.
+   */
   const iconOf = (control: Element): string => {
+    if (
+      control instanceof HTMLSelectElement &&
+      getComputedStyle(control).appearance !== "none"
+    ) {
+      return "arrow";
+    }
     const icon = Array.from(control.querySelectorAll("svg")).find(
       (svg) => svg.getBoundingClientRect().width > 0,
     );
@@ -174,6 +210,8 @@ export function readLook(): TextLook[] {
     record: TextLook;
     box: Element;
     left: number;
+    /** The right edge of the letters; a field has none: its text is a value. */
+    right: number | null;
     top: number;
     bottom: number;
     inTable: boolean;
@@ -217,7 +255,10 @@ export function readLook(): TextLook[] {
       "font-family": (style.fontFamily.split(",")[0] ?? "")
         .replace(/["']/g, "")
         .trim(),
-      "line-height": length(style.lineHeight),
+      "line-height":
+        style.lineHeight === "normal"
+          ? `normal (${px(normalHeightOf(style))})`
+          : length(style.lineHeight),
       "letter-spacing": length(style.letterSpacing),
       "text-decoration": style.textDecorationLine,
       "font-style": style.fontStyle,
@@ -256,6 +297,7 @@ export function readLook(): TextLook[] {
       record,
       box,
       left,
+      right: isField(node) ? null : letters.right,
       top: letters.top,
       bottom: letters.bottom,
       inTable: node.closest("table, [role=table], [role=grid]") !== null,
@@ -264,6 +306,12 @@ export function readLook(): TextLook[] {
         box.getBoundingClientRect().height <= CONTROL_HEIGHT,
     });
   }
+
+  /** `left 277px, center 360px, right 443px`: the edges of a text on the page. */
+  const placeOf = (left: number, right: number | null): string =>
+    right === null
+      ? `left ${px(left)}`
+      : `left ${px(left)}, center ${px((left + right) / 2)}, right ${px(right)}`;
 
   // The place of a text is part of its look when the text starts a line of
   // its box. Data moves a text that comes after it on the line: a count of
@@ -279,12 +327,20 @@ export function readLook(): TextLook[] {
         other.bottom > text.top,
     );
     if (!startsItsLine || text.inTable) continue;
-    text.record.look["distance from the left of the page"] =
-      `${text.record.x}px`;
+    text.record.look["place on the page"] = placeOf(
+      text.left + window.scrollX,
+      text.right === null ? null : text.right + window.scrollX,
+    );
     if (text.control) {
-      text.record.look["text from the left of its box"] = px(
-        text.left - text.box.getBoundingClientRect().x,
-      );
+      const boxRect = text.box.getBoundingClientRect();
+      text.record.look["place in its box"] =
+        text.right === null
+          ? `left ${px(text.left - boxRect.left)}`
+          : [
+              `left ${px(text.left - boxRect.left)}`,
+              `center ${px((text.left + text.right - boxRect.left - boxRect.right) / 2)}`,
+              `right ${px(boxRect.right - text.right)}`,
+            ].join(", ");
     }
   }
   return records;
