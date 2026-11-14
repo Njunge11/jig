@@ -46,7 +46,7 @@ The list holds:
 - for each sign-in flow of the app: its own lines, with each failure path that a person can cause (a wrong code, a link that was used, a link that a newer one replaced). The sign-in of the `session` project is the setup of the run: it proves no line. A code or a link that expires by time alone is a case of the server time
 - no line for a case that a browser cannot cause
 
-An agent writes the tests, so the cost of a test is its run time, not its text. Do not drop a line to save work.
+An agent writes the tests, so the cost of a test is its run time, not its text. Do not drop a line to save work. A limit of the server (a daily count, a pause) blocks no line: the test resets the limit on its own test data.
 
 **A spec that is built and has no list gets the list first.** Write the `## E2E tests` list from the spec, per flow across its checklists, before you read a flow file. It holds each kind of line above: the steps, the failure paths, and the edge cases that a person can cause and the spec does not state. Then read the flow files and mark each line that an existing test proves, with the name of that test. Do the two in one answer: a person who asks where a spec stands gets the list with its marks. Put the list in the checklist files of the spec and commit it (`docs(<feature>): the e2e list`) before you write a test. Then write a test for each line that is left. A line that the built app cannot pass shows a fault of the app: fix the app in the same work, and never close the list with such a line open. Never write the list from the screens or from the tests that exist: such a list states what the builder made.
 
@@ -122,7 +122,7 @@ The check code holds no value of a screen and no list of pairs. Never add one. N
 
 ### What the run does not compare
 
-Five things: the shape of an icon, the space between two blocks, the width of a table column, the layers of a shadow or a gradient, and the look of a text that only one screen shows (a row of data). For those, open the two screenshots of the run (`<Design>-<width>.png` and `<Design>-<width>-design.png`) with the Read tool in one step, and fix what a person sees at a glance: a part that is missing, a wrong or placeholder text, a layout that breaks or overflows, a wrong icon. Never measure the pictures, and never copy an accident of the artifact (a default margin of the browser). `<Design>-<width>.design.json` lists the texts that only one screen shows: a text of the design that is not sample data is a part that is not built.
+Five things: the shape of an icon, the space between two blocks, the width of a table column, the layers of a shadow or a gradient, and the look of a text that only one screen shows (a row of data). For those, open the two screenshots of the run (`<Design>-<width>.png` and `<Design>-<width>-design.png`) with the Read tool in one step, and fix what a person sees at a glance: a part that is missing, a wrong or placeholder text, a layout that breaks or overflows, a wrong icon. Never measure the pictures. `<Design>-<width>.design.json` lists the texts that only one screen shows: a text of the design that is not sample data is a part that is not built.
 
 A design has one width. At a different width the screen has no design: save a screenshot at that width (`WIDTH=<n>`), open it, and check it against the responsive rules of `frontend-standards`.
 
