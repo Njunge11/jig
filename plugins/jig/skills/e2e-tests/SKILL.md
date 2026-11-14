@@ -92,6 +92,8 @@ The design is the standard for a screen: to a person, the built screen looks lik
 
 **A built screen that the developer changed after the design keeps its look.** The repo's `CLAUDE.md` names those screens. A difference on one is not a fault: no builder changes its look to equal the design, no flow calls `expectDesign` on it (`shot` records the screen and does not fail), and no `pnpm screens` gate lists it. On such a screen a builder fixes a fault of behavior only. A part that the spec states and the screen lacks is such a fault: the builder adds it and changes nothing that the screen shows. Never mark its `E<n>` line "no path on the screen" and leave it.
 
+**A difference from a part of a later spec (a shell) or from the data of a run is no fault of the screen.** Record the screen with `shot` and judge the two pictures. Never write a check that fails on it.
+
 ### Build from the source
 
 1. Before you build a screen, read the source file of its design: the markup of the screen whole, and the style rule of each class that the markup uses. Do not read the script.
@@ -204,14 +206,15 @@ export default defineConfig({
 ```
 
 - The console sender of the app prints an email as `email to <address>: <subject>` with its text on the lines below, and an SMS as `sms to <phone>: <text>`. `support/inbox.ts` reads that form: a sender that prints a different form gives the test no message.
-- Each app has its own port, and none is a dev port. The developer's dev server keeps running.
+- No app of a run uses a dev port.
 - **A flow that uploads carries the upload itself.** A storage bucket accepts the origins of the apps only and matches the port exactly, so it refuses the browser of a run. Never add a port of the run to the bucket: `await carryUploads(page)` (`support/file-store.ts`) sends each upload of the page to the real store from the run (`route.fetch`) and gives the page the answer of the store. (AWS, S3, "Elements of a CORS configuration"; Playwright, Network, "Modify responses".) A sign-in provider is different: its redirect list names the origin of each e2e port.
-- The `session` project signs in once through the real sign-in screens and saves the browser state. A saved state is kept while it still opens the app and is younger than half the life of a session (`sessionHours` in `support/apps.ts`): an older session can end in the middle of a run, and each test after it fails. (Playwright, Authentication, "Basic: shared account in all tests".) The state file holds cookies: it stays under the git-ignored `.output/`.
+- The `session` project signs in once through the real sign-in screens and saves the browser state. A saved state is kept while it still opens the app and is younger than half the life of a session (`sessionHours` in `support/apps.ts`): an older session can end in the middle of a run, and each test after it fails. (Playwright, Authentication, "Basic: shared account in all tests".)
 - A flow starts with that state. `test.use({ storageState: signedOut })` starts a file signed out, and `browser.newContext({ storageState: signedOut })` opens the browser of a second person. (Authentication, "Avoid authentication in some tests".)
-- **The server of the run shares the pooler with the dev servers.** The db client reads `DATABASE_POOL_MAX` (`packages/db/src/client.ts`), and the config sets it so that the run and the dev servers in use fit in the limit of the pooler (in the repo that proved this setup, 15 − 2 × 4 − 1 = 6). A full pooler fails the session check of a dev server, and the developer is signed out. The client holds one pool on `globalThis`: count the connections of a run (`pg_stat_activity`).
+- **The server of the run shares the pooler with the dev servers.** The db client reads `DATABASE_POOL_MAX` (`packages/db/src/client.ts`), and the config sets it so that the run and the dev servers in use fit in the limit of the pooler. A full pooler fails the session check of a dev server, and the developer is signed out. Count the connections of a run (`pg_stat_activity`).
 - The workers share one server, one database and one server log. That is safe only while each test obeys Review items 6, 8 and 9.
-- **The number of workers is measured, not chosen.** Measure a slow run before a change: time one statement, and count the statements of one test with the call trace. In the repo that proved this setup, each statement took two round trips. As prepared statements (`scaffold-repo`, Step 3), 41 flows went from 24.8 to 5.2 minutes at 4 workers; at 6, steps ran out of time. Keep the fastest number at which each test passes, and write the measured numbers in the config.
-- A test that makes its own data pays for it in run time: the helper that makes a member runs one time per test. Do not make data that the test does not use.
+- **A flow that crosses apps** is in the folder of the app where it starts: the run also starts the peers of that app (`PEERS` in `support/apps.ts`).
+- **The number of workers is measured, not chosen.** Measure a slow run before a change: time one statement, and count the statements of one test with the call trace. With prepared statements (`scaffold-repo`, Step 3), 41 flows went from 24.8 to 5.2 minutes at 4 workers; at 6, steps ran out of time. Keep the fastest number at which each test passes, and write the measured numbers in the config.
+- Do not make data that the test does not use: each helper call costs run time.
 - The scripts: `"flows": "RUN=flows dotenv -e ../../.env -- playwright test --project=flows"` and `"screens": "RUN=screens dotenv -e ../../.env -- playwright test --project=screens"`, with `pnpm flows` and `pnpm screens` at the root. `APP=<app>` picks the app, `pnpm flows <name>` runs one file, and `pnpm flows --workers=<n>` sets the workers of one run.
 
 ### A flow

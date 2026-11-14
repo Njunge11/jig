@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import { defineConfig } from "@playwright/test";
 
-import { appUnderTest, outputDir, repoRoot } from "./support/apps";
+import { appsOfRun, appUnderTest, outputDir, repoRoot } from "./support/apps";
 
 /**
  * Draws the built app in a headless browser, on the one database of `.env`.
@@ -14,7 +14,9 @@ import { appUnderTest, outputDir, repoRoot } from "./support/apps";
  * - `flows` runs each flow of the app from its first screen to its last.
  *
  * Each run empties the build folder of the app, builds the app, starts it
- * on its own port and stops it at the end. No window opens.
+ * on its own port and stops it at the end. No window opens. A flows run
+ * also starts the peers of the app (`appsOfRun`), for a flow that crosses
+ * apps.
  */
 
 const app = appUnderTest();
@@ -26,9 +28,20 @@ mkdirSync(path.dirname(app.statePath), { recursive: true });
 const cleanBuild = fileURLToPath(
   new URL("support/clean-build.ts", import.meta.url),
 );
-const clean = `node "${cleanBuild}" "${app.buildDir}"`;
-const build = `pnpm exec turbo run build --filter={{SCOPE}}/${app.name}`;
-const start = `pnpm --filter {{SCOPE}}/${app.name} exec next start -p ${app.port}`;
+
+const apps = appsOfRun();
+
+/**
+ * The run is one more server on the connections of the pooler. The run and
+ * the dev servers in use fit in its limit: on a pooler of 15, two dev
+ * servers in use (4 each) and a script leave 6. A full pooler fails the
+ * session check of a dev server and signs the developer out. A peer only
+ * answers the steps of a flow that crosses apps: it takes 1, and the app
+ * under test the rest.
+ */
+const RUN_POOL = 6;
+const poolOf = (index: number) =>
+  index === 0 ? RUN_POOL - (apps.length - 1) : 1;
 
 export default defineConfig({
   outputDir: path.join(outputDir, "results"),
@@ -74,23 +87,25 @@ export default defineConfig({
       use: { storageState: app.statePath, screenshot: "on" },
     },
   ],
-  webServer: {
-    command: `${clean} && ${build} && ${start} > "${app.serverLogPath}" 2>&1`,
+  webServer: apps.map((each, index) => ({
+    command: [
+      `node "${cleanBuild}" "${each.buildDir}"`,
+      `pnpm exec turbo run build --filter={{SCOPE}}/${each.name}`,
+      `pnpm --filter {{SCOPE}}/${each.name} exec next start -p ${each.port} > "${each.serverLogPath}" 2>&1`,
+    ].join(" && "),
     cwd: repoRoot,
-    url: app.url,
+    url: each.url,
     // A server that already answers on the port is not this build: refuse it.
     reuseExistingServer: false,
     timeout: 600_000,
     env: {
-      AUTH_URL: app.url,
-      // The run is one more server on the connections of the pooler. The
-      // run and the dev servers in use fit in its limit: on a pooler of 15,
-      // two dev servers in use (4 each) and a script leave 6. A full pooler
-      // fails the session check of a dev server and signs the developer out.
-      DATABASE_POOL_MAX: "6",
+      AUTH_URL: each.url,
+      DATABASE_POOL_MAX: String(poolOf(index)),
+      // One line per app that links to a peer, with the URL of that peer in
+      // the run. For example: PORTAL_URL: appOf("portal").url.
       // One line per sender, with no key: the console sender then prints
       // each email and each SMS to the server log, and no flow sends a real
       // message. For example: EMAIL_API_KEY: "".
     },
-  },
+  })),
 });

@@ -17,6 +17,16 @@ const APPS = {
 
 export type AppName = keyof typeof APPS;
 
+/**
+ * The apps a flows run starts beside the app under test. A flow that starts
+ * in one app and crosses a second one (a person of the second app answers a
+ * step of the first) is in the folder of the first app, and names the second
+ * app here.
+ */
+const PEERS: Record<AppName, readonly AppName[]> = {
+  web: [],
+};
+
 const packageDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
@@ -56,8 +66,22 @@ export function appUnderTest() {
       `APP is "${name}". Use one of: ${Object.keys(APPS).join(", ")}.`,
     );
   }
+  return appOf(name, Number(process.env.WIDTH ?? APPS[name].width));
+}
+
+/**
+ * The apps one run starts: the app under test first, then, in a flows run,
+ * its peers. Each app has its own port, build, server log and session.
+ */
+export function appsOfRun() {
+  const app = appUnderTest();
+  const peers = process.env.RUN === "flows" ? PEERS[app.name] : [];
+  return [app, ...peers.map((name) => appOf(name))];
+}
+
+/** The port, the window and the files of the app `name`. */
+export function appOf(name: AppName, width: number = APPS[name].width) {
   const app = APPS[name];
-  const width = Number(process.env.WIDTH ?? app.width);
   return {
     name,
     port: app.port,
