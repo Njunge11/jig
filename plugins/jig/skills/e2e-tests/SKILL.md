@@ -249,7 +249,7 @@ The machine that pushes runs the tests: it has the database. The `scaffold-repo`
 1. Documents, unit tests, their fixtures and setup: no run.
 2. Changed flow files or helpers: `pnpm flows --only-changed=origin/main` for each app. Playwright follows their imports.
 3. App code with no changed flow: all flows of each app that `turbo ls --affected` names.
-4. The first push of a repo, or a change to the config, `support/apps.ts` or the session setup: each app.
+4. The first push, or a change to the config, `support/apps.ts` or the session setup: each app.
 5. One run at a time uses the ports and the database: `e2e.lock` in the shared git folder is the lock.
 
 A failure refuses the push. A flow that fails in the full suite is a fault to fix in the next push. Never make the hook run each flow on each push.
