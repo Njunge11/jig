@@ -21,6 +21,9 @@ import { appsOfRun, appUnderTest, outputDir, repoRoot } from "./support/apps";
 
 const app = appUnderTest();
 
+// The sessions are in the main checkout, so a new worktree has no output
+// folder yet: the server of the run writes its log there.
+mkdirSync(outputDir, { recursive: true });
 mkdirSync(path.dirname(app.statePath), { recursive: true });
 
 // A cached build goes on top of the last build folder, and the pages that
