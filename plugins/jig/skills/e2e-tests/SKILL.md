@@ -29,7 +29,7 @@ Run before a commit. Paste the output in the proof.
 1. `pnpm lint` and `pnpm typecheck` exit `0` in the e2e package. Lint proves every Review item that ends with `Gate:`.
 2. `pnpm flows` exits `0`. Paste its last line (`N passed`) and the path of the report.
 3. `SCREENS="<Design>=<path> …" pnpm screens` exits `0` for each design that a route shows. Paste its last line. A design that a flow step opens (`expectDesign`) is proved by gate 2.
-4. The pre-push hook runs gate 2 on every push that holds app code, and refuses the push on a failure. Never pass `--no-verify`, and never set `HUSKY=0`.
+4. The pre-push hook runs gate 2 for each app that the push can change, and refuses the push on a failure. Never pass `--no-verify`, and never set `HUSKY=0`.
 
 ## The list first, the test code after the build
 
@@ -244,13 +244,15 @@ test("an invited person sets up the account and opens the app", async ({ page, b
 
 ### The pre-push gate
 
-The machine that pushes runs the tests: it has the database. The hook is `.husky/pre-push`. The `scaffold-repo` skill owns the file (`assets/husky/pre-push`) and installs it. The hook does three things:
+The machine that pushes runs the tests: it has the database. The hook is `.husky/pre-push`. The `scaffold-repo` skill owns the file (`assets/husky/pre-push`) and installs it. A push runs only the flows that its changes can break:
 
-1. It skips a push that holds no app code: `git diff --quiet origin/main...HEAD -- apps packages`. The first push of a repo has no `origin/main`, so it runs the tests.
-2. It lets one run at a time use the ports and the database. The lock is a folder in the shared git folder (`e2e.lock`), so each worktree waits its turn.
-3. It runs `APP=<app> pnpm flows` for each app that has a flow file, and refuses the push on a failure.
+1. A push of documents, unit tests, their fixtures or their setup has no run.
+2. An app that the push changes, or that uses a changed package, runs all its flows: `turbo ls --affected` names those apps.
+3. A push of flow files or their helpers alone runs `pnpm flows --only-changed=origin/main`: Playwright follows their imports.
+4. The first push of a repo, and a change to the config, to `support/apps.ts` or to the session setup, run each app.
+5. One run at a time uses the ports and the database: the lock is a folder in the shared git folder (`e2e.lock`).
 
-Each push has this hook, so each pushed commit passed the e2e tests. The CI runs lint, typecheck, the build and the backend tests.
+A failure refuses the push. Never change the hook to run each app on each push: the CI runs lint, typecheck, the build and the backend tests.
 
 ### Dev dependencies
 
@@ -270,6 +272,8 @@ Run `pnpm exec playwright install chromium` once on a new machine: only the brow
 - AWS, S3, Elements of a CORS configuration: https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManageCorsUsing.html
 - Playwright, `test.step`: https://playwright.dev/docs/api/class-test#test-step
 - Husky, Get started: https://typicode.github.io/husky/get-started.html
-- Anthropic, Claude Code best practices ("Give Claude something it can run that comes back pass or fail"): https://code.claude.com/docs/en/best-practices
-- Anthropic, Harness design for long-running application development ("Separating the agent doing the work from the agent judging it"): https://www.anthropic.com/research/harness-design-long-running-apps
-- Anthropic, Using Claude for prototypes and UX ("build from the actual artboards and the components in them, not from a screenshot"): https://academy.claude.com/tutorials/using-claude-design-for-prototypes-and-ux
+- Playwright, Continuous Integration: https://playwright.dev/docs/ci
+- Turborepo, `--affected`: https://turborepo.dev/docs/reference/run
+- Anthropic, Claude Code best practices: https://code.claude.com/docs/en/best-practices
+- Anthropic, Harness design for long-running application development: https://www.anthropic.com/research/harness-design-long-running-apps
+- Anthropic, Using Claude for prototypes and UX: https://academy.claude.com/tutorials/using-claude-design-for-prototypes-and-ux
