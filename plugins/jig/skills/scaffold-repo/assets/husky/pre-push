@@ -4,7 +4,19 @@
 
 base=origin/main
 
+# The refs of this push, from git: `<local ref> <local sha> <remote ref> <remote sha>`.
+to_main=0
+while read -r _ _ remote_ref _; do
+  if [ "$remote_ref" = refs/heads/main ]; then to_main=1; fi
+done
+
 if git fetch --quiet origin main 2>/dev/null; then
+  # The remote refuses a push to main that does not hold origin/main, but
+  # only after the run. So the hook refuses it before the run.
+  if [ "$to_main" = 1 ] && ! git merge-base --is-ancestor "$base" HEAD; then
+    echo "pre-push: main moved. Run: git pull --rebase origin main. Then push again."
+    exit 1
+  fi
   # A push of documents or of unit tests, with their fixtures and their
   # setup, changes no built app and no flow: it has nothing to run.
   if git diff --quiet "$base"...HEAD -- apps packages package.json \
@@ -61,21 +73,8 @@ if [ -z "$plan" ]; then
 fi
 echo "pre-push: the end-to-end run of this push:$plan. The full suite is: pnpm flows:all"
 
-# One run at a time on this machine: each worktree uses the same ports and
-# the same database, so a second push waits for the first.
-lock="$(git rev-parse --path-format=absolute --git-common-dir)/e2e.lock"
-waited=0
-until mkdir "$lock" 2>/dev/null; do
-  if [ "$waited" -ge 1200 ]; then
-    echo "pre-push: another end-to-end run holds $lock for 20 minutes. Remove the folder when no run is active."
-    exit 1
-  fi
-  sleep 10
-  waited=$((waited + 10))
-done
-trap 'rmdir "$lock"' EXIT
-trap 'exit 1' INT TERM
-
+# One run at a time on this machine: `pnpm flows` waits for the run that
+# holds the lock (`packages/e2e/support/run.ts`).
 for item in $plan; do
   app="${item%%:*}"
   only=""

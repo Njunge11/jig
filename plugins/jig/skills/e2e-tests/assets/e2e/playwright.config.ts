@@ -63,6 +63,11 @@ export default defineConfig({
   // of time, and write the measured numbers here.
   workers: 2,
   forbidOnly: true,
+  // The limit of one step of a flow, and of a test with no step: `flowSteps`
+  // gives a test this time for each step, so no flow sets a limit. Set it
+  // from a measured full run and write the numbers here: the longest step,
+  // times the largest spread of one test between runs. A step that needs
+  // more time is two steps.
   timeout: 90_000,
   // The database is remote: a page that reads it can take seconds to fill.
   expect: { timeout: 15_000 },

@@ -80,7 +80,20 @@ stops the server at the end. No window opens. It refuses a server that
 already answers on its port.
 
 - `pnpm flows` runs each flow in `packages/e2e/flows/<app>/`;
-  `pnpm flows <name>` runs one file; `APP=<app>` picks the app.
+  `pnpm flows <name>` runs one file; `APP=<app>` picks the app. The name is
+  compared with the path of a file inside `packages/e2e`, never with the
+  name of the worktree.
+- One run at a time on this machine: each worktree uses the same ports and
+  the same database. `pnpm screens` and `pnpm flows` wait for the run that
+  holds the lock (`e2e.lock` in the shared git folder,
+  `packages/e2e/support/run.ts`), and print that they wait. Never start
+  Playwright in a different way, never start a second run to get past the
+  wait, and never remove the lock of a run that is active.
+- No flow sets a time limit (`test.setTimeout`, `test.slow`, a `timeout` of
+  `describe.configure` or of a step). Each step of `flowSteps` has the
+  limit of the config, and a test gets that time for each step: a step that
+  hangs fails in that time. A step that needs more time is two steps.
+  `pnpm lint` refuses a limit in a flow.
 - `SCREENS="<Design>=<path>" pnpm screens` draws a route and its design,
   `docs/designs/<Design>.dc.html`, at the same window size, and fails on a
   difference of look. The design of a screen is its source file: the repo

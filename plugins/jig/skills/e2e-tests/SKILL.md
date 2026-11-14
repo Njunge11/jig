@@ -71,6 +71,7 @@ Reject the test if any item is true. Each item names its source.
 13. The test holds a **pixel baseline (`toHaveScreenshot`)**. A baseline is a picture of what the builder made, not of the design, and it needs the same data on every run. The design check below compares the screen with the design itself.
 14. An **expected value comes from the app**, not from the spec: a text copied from the screen that the builder made, when the spec states a different one.
 15. The **name of the test** does not state the step and its outcome, or the body holds logic (a loop, a branch) that hides which step failed.
+16. The test **sets its own time limit**: `test.setTimeout`, `test.slow`, a `timeout` of `describe.configure` or of a step. A raised limit is a guess, and a step that hangs then runs for the length of that limit. Each step of `flowSteps` has the limit of the config, and the test gets that time for each step. A step that needs more time is two steps. Gate: `pnpm lint`, rule `no-restricted-syntax`. (Playwright, Timeouts; `test.step`, option `timeout`.)
 
 ## A test that fails
 
@@ -90,7 +91,7 @@ The design is the standard for a screen: to a person, the built screen looks lik
 
 **The design is its source file**, `docs/designs/<Screen>.dc.html`: the HTML and CSS of the design artifact, which a browser draws as it is. `docs/designs/canvas.json` gives each design its title, its app and its size. The repo holds no picture of a design: a picture has no values, and the source file has each one. A design that exists only as a picture is a gap for the planner to resolve: ask for the source.
 
-**A built screen that the developer changed after the design keeps its look.** The repo's `CLAUDE.md` names those screens. A difference on one is not a fault: no builder changes its look to equal the design, no flow calls `expectDesign` on it (`shot` records the screen and does not fail), and no `pnpm screens` gate lists it. On such a screen a builder fixes a fault of behavior only. A part that the spec states and the screen lacks is such a fault: the builder adds it and changes nothing that the screen shows. Never mark its `E<n>` line "no path on the screen" and leave it.
+**A built screen that the developer changed after the design keeps its look.** The repo's `CLAUDE.md` names those screens. A difference on one is not a fault: no builder changes its look to equal the design, no flow calls `expectDesign` on it (`shot` records the screen and does not fail), and no `pnpm screens` gate lists it. On such a screen a builder fixes a fault of behavior only. A part that the spec states and the screen lacks is such a fault: the builder adds it and changes nothing that the screen shows. Never mark its `E<n>` line "no path on the screen" and leave it. A checklist that adds a part to a screen that exists builds only that part to the design: a part that an earlier checklist built (a card, a footer, a button) keeps its look. A review `fail` line on such a part gets the answer "built part, kept" in the handoff, never a change.
 
 **A difference from a part of a later spec (a shell) or from the data of a run is no fault of the screen.** Record the screen with `shot` and judge the two pictures. Never write a check that fails on it.
 
@@ -160,9 +161,10 @@ packages/e2e/
     inbox.ts               ← reads the emailed link and the texted code from the server log
     file-store.ts          ← carryUploads: sends an upload of the page to the real store
     flow-check.ts          ← each fixed value of the data that a flow cannot remove
+    run.ts                 ← starts a run: one run at a time on the machine, a filter selects files of the package
     settle.ts              ← waits for the content; collects the page's errors
     clean-build.ts         ← empties the build folder of the app before the build of a run
-    steps.ts               ← flowSteps: one `test.step` per step, its end screen, its hidden faults
+    steps.ts               ← flowSteps: one `test.step` per step, its end screen, its hidden faults, its time limit
     read-look.ts           ← reads the computed look of each visible text of a page
     design.ts              ← draws a design source file and compares two looks
     stock-steps.ts         ← what each stock Tailwind class gives with the theme of the app
@@ -215,7 +217,10 @@ export default defineConfig({
 - **A flow that crosses apps** is in the folder of the app where it starts: the run also starts the peers of that app (`PEERS` in `support/apps.ts`).
 - **The number of workers is measured, not chosen.** Measure a slow run before a change: time one statement, and count the statements of one test with the call trace. With prepared statements (`scaffold-repo`, Step 3), 41 flows went from 24.8 to 5.2 minutes at 4 workers; at 6, steps ran out of time. Keep the fastest number at which each test passes, and write the measured numbers in the config.
 - Do not make data that the test does not use: each helper call costs run time.
-- The scripts: `"flows": "RUN=flows dotenv -e ../../.env -- playwright test --project=flows"` and `"screens": "RUN=screens dotenv -e ../../.env -- playwright test --project=screens"`, with `pnpm flows` and `pnpm screens` at the root. `APP=<app>` picks the app, `pnpm flows <name>` runs one file, and `pnpm flows --workers=<n>` sets the workers of one run.
+- The scripts: `"flows": "dotenv -e ../../.env -- node support/run.ts flows"` and `"screens": "dotenv -e ../../.env -- node support/run.ts screens"`, with `pnpm flows` and `pnpm screens` at the root. `APP=<app>` picks the app, `pnpm flows <name>` runs one file, and `pnpm flows --workers=<n>` sets the workers of one run.
+- **One run at a time on a machine.** Each worktree of the repo uses the same ports and the same database. A second run that starts while the first builds finds the first server on its port and tests that server: its emails are in the log of the other worktree, and its tests fail when the first run stops the server. `support/run.ts` makes a run wait for the run that holds `e2e.lock` in the shared git folder, and prints that it waits. Never start Playwright in a different way, never start a second run to get past the wait, and never remove the lock of a run that is active.
+- **A filter selects files of the package.** Playwright compares a filter with the full path of a file, and a worktree has the name of its checklist: in `12-order-export/`, the filter `order-export` selects each file, and the run is the full suite. `support/run.ts` compares such a filter with the path inside the package.
+- **The limit of a step is measured, not chosen.** `timeout` in the config is the limit of one step of `flowSteps`, and of a test with no step. Set it from a full run: the longest step, times the largest spread of one test between runs. Write the measured numbers in the config. (Playwright, Timeouts.)
 
 ### A flow
 
@@ -244,7 +249,7 @@ test("an invited person sets up the account and opens the app", async ({ page, b
 });
 ```
 
-`flowSteps` runs each step as a `test.step`, puts the screen each page ended on into the report, and fails the step on a fault that the screen hides (Review item 11). A step returns the value of its body, so a later step uses what an earlier step made. The data that a test makes, and the removal of that data at the end of the test, belong in a fixture (`test.extend`): the removal then runs when the test fails too.
+`flowSteps` runs each step as a `test.step`, puts the screen each page ended on into the report, and fails the step on a fault that the screen hides (Review item 11). It gives each step the time limit of the config and gives the test that time for each step (Review item 16), so a long flow sets no limit. A step returns the value of its body, so a later step uses what an earlier step made. The data that a test makes, and the removal of that data at the end of the test, belong in a fixture (`test.extend`): the removal then runs when the test fails too.
 
 ### The pre-push gate
 
@@ -254,7 +259,8 @@ The machine that pushes runs the tests: it has the database. The `scaffold-repo`
 2. Changed flow files or helpers: `pnpm flows --only-changed=origin/main` for each app. Playwright follows their imports.
 3. App code with no changed flow: all flows of each app that `turbo ls --affected` names.
 4. The first push, or a change to the config, `support/apps.ts` or the session setup: each app.
-5. One run at a time uses the ports and the database: `e2e.lock` in the shared git folder is the lock.
+5. One run at a time uses the ports and the database: each `pnpm flows` of the hook waits for the run that holds the lock (`support/run.ts`).
+6. A push to main that does not hold `origin/main`: refused before the run, with the command that rebases. The remote refuses it only after the run.
 
 A failure refuses the push. A flow that fails in the full suite is a fault to fix in the next push. Never make the hook run each flow on each push.
 
@@ -275,6 +281,7 @@ Run `pnpm exec playwright install chromium` once on a new machine: only the brow
 - Playwright, Network ("Modify responses"): https://playwright.dev/docs/network
 - AWS, S3, Elements of a CORS configuration: https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManageCorsUsing.html
 - Playwright, `test.step`: https://playwright.dev/docs/api/class-test#test-step
+- Playwright, Timeouts: https://playwright.dev/docs/test-timeouts
 - Husky, Get started: https://typicode.github.io/husky/get-started.html
 - Playwright, Continuous Integration: https://playwright.dev/docs/ci
 - Turborepo, `--affected`: https://turborepo.dev/docs/reference/run
