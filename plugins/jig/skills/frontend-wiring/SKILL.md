@@ -55,6 +55,14 @@ export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(queryOptio
 }
 ```
 
+**One context for each request.** `createTRPCContext` in `init.ts` is wrapped in React `cache()`, as the tRPC server components guide writes it:
+
+```ts
+export const createTRPCContext = cache(async () => makeContext(await headers()));
+```
+
+A page prefetches several procedures. With `cache()` they get one context, and the context holds the session read (`backend-standards`, "A check of a base procedure runs one time for each request"). A `ctx` function with no `cache()` makes a new context for each prefetch, and each prefetch reads the session and the roles again. Proof: count the statements of one page load in the call trace (`TRACE_LOG=1`): the session read shows one time.
+
 **`lib/trpc/react.tsx`** — browser provider. The QueryClient is a **module-level singleton in the browser**, **new-per-request on the server** (never share one across requests). Exposes `useTRPC()`. This is the shape of the tRPC docs' `trpc/client.tsx` (trpc.io/docs/client/tanstack-react-query/server-components):
 
 ```tsx
