@@ -72,6 +72,8 @@ export function appUnderTest() {
      * session can end in the middle of a run, and each test after it fails.
      */
     stateMaxAgeMs: (app.sessionHours * 60 * 60 * 1000) / 2,
+    /** Where `next build` writes the app. */
+    buildDir: path.join(repoRoot, "apps", name, ".next"),
     /** Everything the server printed, the emails of the console sender among it. */
     serverLogPath: path.join(outputDir, `server-${name}.log`),
     screensDir: path.join(outputDir, "screens", name),

@@ -84,9 +84,9 @@ Reject the test if any item is true. Each item names its source.
 
 ## The design check
 
-The design is the standard for a screen: the built screen looks like it. Each thing the eye sees is a difference: color, type size and weight, icons, radius, shadow, layout, order, alignment, spacing and text.
+The design is the standard for a screen: to a person, the built screen looks like it, built with stock Tailwind and good practice. It is not a copy of each pixel: a design artifact can be wrong.
 
-**The app is built with stock Tailwind classes only.** A size of the design that no stock class gives (13 px of type, a radius of 12 px, a line height of 21 px) is built with the nearest stock class. Never add a size token to the theme and never write an arbitrary value (`text-[13px]`) to equal a design. A color is different: each color of the design is a token of the theme.
+**The app is built with stock Tailwind classes only.** A size of the design that no stock class gives (13 px of type, a radius of 12 px) is built with the nearest stock class. Never add a size token to the theme and never write an arbitrary value (`text-[13px]`) to equal a design.
 
 **The design is its source file**, `docs/designs/<Screen>.dc.html`: the HTML and CSS of the design artifact, which a browser draws as it is. `docs/designs/canvas.json` gives each design its title, its app and its size. The repo holds no picture of a design: a picture has no values, and the source file has each one. A design that exists only as a picture is a gap for the planner to resolve: ask for the source.
 
@@ -94,7 +94,7 @@ The design is the standard for a screen: the built screen looks like it. Each th
 
 ### Build from the source
 
-1. Before you build a screen, read the source file of its design: the markup of the screen whole, and the style rule of each class that the markup uses (search the style block by class name). Do not read the script.
+1. Before you build a screen, read the source file of its design: the markup of the screen whole, and the style rule of each class that the markup uses. Do not read the script.
 2. Take each value from the source: the order of the parts, the texts word for word, each size, weight, color, radius, border and shadow.
 3. Build each color with the token of the theme that gives it. When no token gives it, correct the theme file, in one place. Build each size with the stock Tailwind class that is nearest to it (`text-sm` for 13 px or 14 px, `h-9` for 36 px). Never write a raw color value or a one-off size in a component (the token rules of `frontend-standards`).
 4. A part that many screens share (the side nav, the top bar, a button) is corrected where it lives, one time.
@@ -102,7 +102,7 @@ The design is the standard for a screen: the built screen looks like it. Each th
 ### Compare
 
 - A route: `SCREENS="<Design>=<path>" pnpm screens`.
-- A screen that a route alone does not show (a dialog, a sheet, a state of a record): `await expectDesign(page, "<Design>")` in the flow step that opens it.
+- A screen that a route alone does not show (a dialog, a sheet, a state of a record): `await expectDesign(page, "<Design>")` in the flow step that opens it. For the design of a loading state, pass `{ loading: true }`.
 
 The run draws the built screen and the design source in the same browser at the same window size. It reads the computed look of each visible text on the two screens and pairs the texts that read the same (a number is data, so `22 active` pairs with `8 active`). It fails on a difference and prints the two values, with the nearest stock step when the built size is not that step:
 
@@ -114,15 +114,15 @@ Deals: 3 texts look different from the design, 104 look the same.
   box height: design 36px, built 32px, the nearest stock step is 36px
 ```
 
-It compares, per text: color, font size, weight, family, line height, letter spacing, decoration and style; the color behind the text; the background, the border, the radius and the shadow of its box; for a control, the height, and the size and color of its icon; and the place of the first text of each line. It reads the look that the browser computed, so a design class and a Tailwind class that look the same are equal, and so are `#1c3a6e` and an `oklch()` of the same color.
+It compares, per text: color, font size, weight, family, line height, letter spacing, decoration and style; the color behind the text; the background, the border, the radius and the shadow of its box; for a control, the height, and the size and color of its icon; and the place of the first text of each line. It reads the computed look, so a design class and a Tailwind class that look the same are equal.
 
-A size is a difference only when a stock step is nearer to the design than the built value is: 13 px of type lies between `text-xs` and `text-sm`, so the two pass and `text-base` fails. This holds for the type size, the line height, the letter spacing, the radius, the height, the icon size and the place of a text. A stock type size changes the width of a text, so a text is in its place when its left edge, its center or its right edge is where the design has it. A design text with no line height (`normal`) has the height that its font gives. The run writes no step by hand: Tailwind compiles each stock class with the theme of the app, and the browser computes what the class gives (`support/stock-steps.ts`). A color, a weight, a border and a font have no steps: they are equal or they are a difference. A shadow is present or absent: stock Tailwind has no class for its layers.
+A size is a difference only when a stock step is nearer to the design than the built value is: 13 px of type lies between `text-xs` and `text-sm`, so the two pass and `text-base` fails. This holds for the type size, the line height, the letter spacing, the radius, the height, the icon size and the place of a text. A stock type size changes the width of a text, so a text is in its place when its left edge, its center or its right edge is where the design has it. A design text with no line height (`normal`) has the height that its font gives. A color, a weight, a border and a font have no steps: they are equal or they are a difference. A shadow is present or absent: stock Tailwind has no class for its layers.
 
 The check code holds no value of a screen and no list of pairs. Never add one. Never add an exception for a text, never change a design file, and never change the check to make a screen pass: fix the screen, the shared part or the theme.
 
 ### What the run does not compare
 
-Five things: the shape of an icon, the space between two blocks, the width of a table column, the layers of a shadow or a gradient, and the look of a text that only one screen shows (a row of data). For those, open the two screenshots of the run (`<Design>-<width>.png` and `<Design>-<width>-design.png`) with the Read tool in one step, read the CSS of that part in the source file, and fix each difference. `<Design>-<width>.design.json` lists the texts that only one screen shows: a text of the design that is not sample data is a part that is not built.
+Five things: the shape of an icon, the space between two blocks, the width of a table column, the layers of a shadow or a gradient, and the look of a text that only one screen shows (a row of data). For those, open the two screenshots of the run (`<Design>-<width>.png` and `<Design>-<width>-design.png`) with the Read tool in one step, and fix what a person sees at a glance: a part that is missing, a wrong or placeholder text, a layout that breaks or overflows, a wrong icon. Never measure the pictures, and never copy an accident of the artifact (a default margin of the browser). `<Design>-<width>.design.json` lists the texts that only one screen shows: a text of the design that is not sample data is a part that is not built.
 
 A design has one width. At a different width the screen has no design: save a screenshot at that width (`WIDTH=<n>`), open it, and check it against the responsive rules of `frontend-standards`.
 
@@ -159,6 +159,7 @@ packages/e2e/
     file-store.ts          ← carryUploads: sends an upload of the page to the real store
     flow-check.ts          ← each fixed value of the data that a flow cannot remove
     settle.ts              ← waits for the content; collects the page's errors
+    clean-build.ts         ← empties the build folder of the app before the build of a run
     steps.ts               ← flowSteps: one `test.step` per step, its end screen, its hidden faults
     read-look.ts           ← reads the computed look of each visible text of a page
     design.ts              ← draws a design source file and compares two looks

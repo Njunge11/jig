@@ -1,13 +1,18 @@
 import { expect, type Page } from "@playwright/test";
 
+/** Waits until the document and its fonts are loaded. */
+export async function loaded(page: Page) {
+  await page.waitForLoadState("load");
+  await page.evaluate(() => document.fonts.ready);
+}
+
 /**
  * Waits until a page shows its content: the document and its fonts are
  * loaded and no skeleton is left on screen. It does not wait for the network
  * to go quiet: the app prefetches the pages its links point to.
  */
 export async function settle(page: Page) {
-  await page.waitForLoadState("load");
-  await page.evaluate(() => document.fonts.ready);
+  await loaded(page);
   await expect(page.locator('[data-slot="skeleton"]:visible')).toHaveCount(0, {
     timeout: 20_000,
   });

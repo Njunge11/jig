@@ -1,5 +1,6 @@
 import { mkdirSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { defineConfig } from "@playwright/test";
 
@@ -12,14 +13,20 @@ import { appUnderTest, outputDir, repoRoot } from "./support/apps";
  *   source in `docs/designs`.
  * - `flows` runs each flow of the app from its first screen to its last.
  *
- * Each run builds the app, starts it on its own port and stops it at the
- * end. No window opens.
+ * Each run empties the build folder of the app, builds the app, starts it
+ * on its own port and stops it at the end. No window opens.
  */
 
 const app = appUnderTest();
 
 mkdirSync(path.dirname(app.statePath), { recursive: true });
 
+// A cached build goes on top of the last build folder, and the pages that
+// the last server saved there stay: the run empties the folder first.
+const cleanBuild = fileURLToPath(
+  new URL("support/clean-build.ts", import.meta.url),
+);
+const clean = `node "${cleanBuild}" "${app.buildDir}"`;
 const build = `pnpm exec turbo run build --filter={{SCOPE}}/${app.name}`;
 const start = `pnpm --filter {{SCOPE}}/${app.name} exec next start -p ${app.port}`;
 
@@ -68,7 +75,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `${build} && ${start} > "${app.serverLogPath}" 2>&1`,
+    command: `${clean} && ${build} && ${start} > "${app.serverLogPath}" 2>&1`,
     cwd: repoRoot,
     url: app.url,
     // A server that already answers on the port is not this build: refuse it.
