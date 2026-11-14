@@ -1,3 +1,5 @@
+import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -44,8 +46,38 @@ export const themeCss = path.join(
   "packages/ui/src/styles/globals.css",
 );
 
-/** Where a run writes: screenshots, the saved session and the server log. */
+/** Where a run writes: screenshots, the report and the server log. */
 export const outputDir = path.join(packageDir, ".output");
+
+/**
+ * The checkout that keeps the saved sessions: the main one. A worktree of
+ * the repo has its own `.output`, and with its own sessions it signs in
+ * again on its first run. A server limits that (the links an address gets in
+ * a day, the devices of an account), so each worktree uses the sessions of
+ * the main checkout and signs in only when they are too old.
+ */
+function sessionCheckout(): string {
+  try {
+    const gitDir = execFileSync(
+      "git",
+      ["rev-parse", "--path-format=absolute", "--git-common-dir"],
+      { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+    ).trim();
+    const main = path.dirname(gitDir);
+    const sameSuite = path.join(main, path.relative(repoRoot, packageDir));
+    return existsSync(sameSuite) ? main : repoRoot;
+  } catch {
+    return repoRoot;
+  }
+}
+
+/** Where the saved sessions live, for each worktree of the repo. */
+export const stateDir = path.join(
+  sessionCheckout(),
+  path.relative(repoRoot, packageDir),
+  ".output",
+  "state",
+);
 
 /**
  * The browser state of a person who is signed out. The flows start signed
@@ -90,7 +122,7 @@ export function appOf(name: AppName, width: number = APPS[name].width) {
     /** The page a signed-in person lands on; a signed-out visit leaves it. */
     home: app.home,
     /** The signed-in browser state the `session` project saves. */
-    statePath: path.join(outputDir, "state", `${name}.json`),
+    statePath: path.join(stateDir, `${name}.json`),
     /**
      * How old the saved state can be: half the life of a session. An older
      * session can end in the middle of a run, and each test after it fails.

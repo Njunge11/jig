@@ -167,7 +167,7 @@ packages/e2e/
     design.ts              ← draws a design source file and compares two looks
     stock-steps.ts         ← what each stock Tailwind class gives with the theme of the app
     shot.ts                ← shot, expectDesign
-  .output/                 ← git-ignored: the report, the screenshots, the saved session, the server log
+  .output/                 ← git-ignored: the report, the screenshots, the server log, the saved session (in the main checkout)
 docs/designs/<Screen>.dc.html, canvas.json   ← the design source files
 ```
 
