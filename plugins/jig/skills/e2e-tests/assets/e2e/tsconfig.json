@@ -1,6 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    // `node support/run.ts` imports a file by its full name.
+    "allowImportingTsExtensions": true,
     "types": ["node"],
     "lib": ["ES2022", "DOM"]
   },

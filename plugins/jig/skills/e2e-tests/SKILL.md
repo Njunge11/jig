@@ -1,6 +1,6 @@
 ---
 name: e2e-tests
-description: The standard for end-to-end tests and for the design check. Playwright tests drive the built app in a real browser on the real database, one test per step, failure path and edge case that a person can cause. The design check compares each built screen with its design source file. Gives the list of tests a checklist carries, the review checklist for a test, the rules for a test that fails, the report of a run, the design check, and the one setup. Use when writing, reviewing, or planning an end-to-end test, an e2e test, a Playwright test, or a browser test of a user flow; when asked to make sure that a user flow or a screen works, to map the flows and edge cases of a spec, or to fix a flow that is broken; when reporting the outcome of an e2e run; for a frontend, UI or component test (the standard has none: a flow proves the screen); when a built screen is checked against its design or the design check fails on it, also for a screen that must keep its look; or when creating the e2e test setup.
+description: The standard for end-to-end tests and for the design check. Playwright tests drive the built app in a real browser on a real PostgreSQL database, one test per step, failure path and edge case that a person can cause. The design check compares each built screen with its design source file. Gives the list of tests a checklist carries, the review checklist for a test, the rules for a test that fails, the report of a run, the design check, and the one setup. Use when writing, reviewing, or planning an end-to-end test, an e2e test, a Playwright test, or a browser test of a user flow; when asked to make sure that a user flow or a screen works, to map the flows and edge cases of a spec, or to fix a flow that is broken; when reporting the outcome of an e2e run; for a frontend, UI or component test (the standard has none: a flow proves the screen); when a built screen is checked against its design or the design check fails on it, also for a screen that must keep its look; or when creating the e2e test setup.
 ---
 
 # End-to-end tests
@@ -14,7 +14,7 @@ description: The standard for end-to-end tests and for the design check. Playwri
 | Layer | Runs on | Proves |
 | --- | --- | --- |
 | Backend tests (`backend-tests`) | PGlite, in milliseconds, in CI | each rule and each edge case of a procedure, a service, a repo, a machine |
-| End-to-end tests (this skill) | the production build, a real browser, the real database | each step, each failure path and each edge case that a person can cause on a screen, through the whole wiring |
+| End-to-end tests (this skill) | the production build, a real browser, a real PostgreSQL database that the run starts on the machine | each step, each failure path and each edge case that a person can cause on a screen, through the whole wiring |
 
 There is no third layer. No test draws a component in jsdom, and no test mocks the network. The recipes state the correct build of a component, the review checks each recipe item, and the e2e tests prove what a person sees.
 
@@ -57,10 +57,10 @@ A flow has one file, `flows/<app>/<flow>.spec.ts`. The name of a test, or of a `
 Reject the test if any item is true. Each item names its source.
 
 1. The test asserts **what a person cannot see or do**: a CSS class, a database row read by the test, a response body, a store. Assert what the page shows. The one exception is the server log as the person's inbox: the emailed link and the texted code. (Playwright, Best Practices, "Test user-visible behavior".)
-2. The test locates by **CSS, XPath or test id** where a role, a label or a text locator exists (`getByRole`, `getByLabel`, `getByText`). (Best Practices, "Prefer user-facing attributes to XPath or CSS selectors".)
+2. The test locates by **CSS, XPath or test id** where a role, a label or a text locator exists (`getByRole`, `getByLabel`, `getByText`). (Best Practices, "Prefer user-facing attributes to XPath or CSS selectors".) A toast is read inside the toast region, with its full text (`toastOf` in `support/toast.ts`): the page can show the same words in a second place (the activity of a record, the row of a list) while the toast is on screen, and a locator of the text alone then answers two elements. Such a test passes on a slow database and fails on a fast one.
 3. The test uses a **manual assertion or a fixed wait**: `expect(await locator.isVisible()).toBe(true)`, `waitForTimeout`. Use a web-first assertion, which waits and retries: `await expect(locator).toBeVisible()`. (Best Practices, "Use web first assertions".)
 4. A Playwright call has **no `await`**: the test passes without running the call. Gate: `pnpm lint`, rule `@typescript-eslint/no-floating-promises`. (Best Practices, "Lint your tests".)
-5. The test takes **a response or a quiet network as the sign that the screen is ready**. A streamed tRPC answer sends HTTP 200 before the procedure ends, and the app prefetches without end. Wait for the screen's own answer: the field that closes, the row that shows, the heading of the next step.
+5. The test takes **a response or a quiet network as the sign that the screen is ready**. A streamed tRPC answer sends HTTP 200 before the procedure ends, and the app prefetches without end. Wait for the screen's own answer: the field that closes, the row that shows, the heading of the next step. The address of a page is such an early sign too: a layout that streams its frame and then redirects (a `redirect()` under a `Suspense`) has the old address when the page loads. Read which page it is from what it shows (`expect(home.or(welcomeForm)).toBeVisible()`). A full page load that the app starts (a sign-out, `window.location`) changes the address before the scripts of the new page run, and a field of a form that is typed in before then loses its text: the helper that fills the form waits for the loaded page first (`page.waitForLoadState("load")`, or `page.waitForURL`, which waits for the load; `expect(page).toHaveURL` does not).
 6. The test **depends on data it did not make**, or on data that a second test changes. Each test makes its own data, with a name that holds the test and the run, and removes it at the end. Data it cannot remove carries one fixed marked name, and each fixed value of that data (a phone, an address) is in one file, `support/flow-check.ts`: two flows never give one value to two people. (Playwright, Parallelism, "Give each test its own backend data".)
 7. The file uses **`serial` mode**, or a test needs a second test to run first. Steps that build on each other are one test, with one `test.step` per step (`flowSteps` in `support/steps.ts`): the report lists each step. Two flows that only share a starting point (a member who is set up) are two tests, and a helper makes the starting point for each: a failure in the first then does not hide the second. (Parallelism, "Serial mode": "Using serial is not recommended.")
 8. The test **changes or ends the session of the shared account**: it signs out, changes the password, removes the member. Such a test signs in as an account that it made. (Playwright, Authentication, "Basic: shared account in all tests", "When not to use".)
@@ -161,15 +161,17 @@ packages/e2e/
     inbox.ts               ← reads the emailed link and the texted code from the server log
     file-store.ts          ← carryUploads: sends an upload of the page to the real store
     flow-check.ts          ← each fixed value of the data that a flow cannot remove
-    run.ts                 ← starts a run: one run at a time on the machine, a filter selects files of the package
+    run.ts                 ← starts a run: one run at a time on the machine, the database of the run, a filter selects files of the package
+    test-database.ts       ← the database of a run: a PostgreSQL server on the machine, its start data, its stop
     settle.ts              ← waits for the content; collects the page's errors
+    toast.ts               ← toastOf: the toast with a text
     clean-build.ts         ← empties the build folder of the app before the build of a run
     steps.ts               ← flowSteps: one `test.step` per step, its end screen, its hidden faults, its time limit
     read-look.ts           ← reads the computed look of each visible text of a page
     design.ts              ← draws a design source file and compares two looks
     stock-steps.ts         ← what each stock Tailwind class gives with the theme of the app
     shot.ts                ← shot, expectDesign
-  .output/                 ← git-ignored: the report, the screenshots, the server log, the saved session (in the main checkout)
+  .output/                 ← git-ignored: the report, the screenshots, the server log, the saved session and the test database (in the main checkout)
 docs/designs/<Screen>.dc.html, canvas.json   ← the design source files
 ```
 
@@ -201,8 +203,7 @@ export default defineConfig({
     // A server that already answers on the port is not this build: refuse it.
     reuseExistingServer: false,
     // No keys: the console senders print each email and each SMS to the server log.
-    // DATABASE_POOL_MAX: the run and the dev servers in use fit in the limit of the pooler.
-    env: { AUTH_URL: app.url, DATABASE_POOL_MAX: "6", EMAIL_API_KEY: "", SMS_API_KEY: "" },
+    env: { AUTH_URL: app.url, EMAIL_API_KEY: "", SMS_API_KEY: "" },
   },
 });
 ```
@@ -212,7 +213,12 @@ export default defineConfig({
 - **A flow that uploads carries the upload itself.** A storage bucket accepts the origins of the apps only and matches the port exactly, so it refuses the browser of a run. Never add a port of the run to the bucket: `await carryUploads(page)` (`support/file-store.ts`) sends each upload of the page to the real store from the run (`route.fetch`) and gives the page the answer of the store. (AWS, S3, "Elements of a CORS configuration"; Playwright, Network, "Modify responses".) A sign-in provider is different: its redirect list names the origin of each e2e port.
 - The `session` project signs in once through the real sign-in screens and saves the browser state. A saved state is kept while it still opens the app and is younger than half the life of a session (`sessionHours` in `support/apps.ts`): an older session can end in the middle of a run, and each test after it fails. (Playwright, Authentication, "Basic: shared account in all tests".)
 - A flow starts with that state. `test.use({ storageState: signedOut })` starts a file signed out, and `browser.newContext({ storageState: signedOut })` opens the browser of a second person. (Authentication, "Avoid authentication in some tests".)
-- **The server of the run shares the pooler with the dev servers.** The db client reads `DATABASE_POOL_MAX` (`packages/db/src/client.ts`), and the config sets it so that the run and the dev servers in use fit in the limit of the pooler. A full pooler fails the session check of a dev server, and the developer is signed out. Count the connections of a run (`pg_stat_activity`).
+- **The run has its own database, on the machine.** `support/run.ts` starts a PostgreSQL server (`support/test-database.ts`), gives its URL to the apps and the tests as `DATABASE_URL` in place of the one of `.env`, and stops the server at the end. Never run a flow on the database of `.env`: it is remote, each statement pays one round trip, and a request makes many (measured on one repo: 188 ms for a statement there and 0.1 ms on the machine).
+  - The server has its own data folder (`.output/postgres` of the main checkout, so each worktree uses the same database), its own port, the loopback address only, a password of its own (`--auth=scram-sha-256`), no socket file, and the settings of the PostgreSQL docs' "Non-Durable Settings". It touches no other PostgreSQL of the machine. (PostgreSQL docs, "Creating a Database Cluster", "Non-Durable Settings"; Playwright, Best Practices, "make sure you control the data".)
+  - It has the major version, the encoding, the locale and the time zone of the remote database (`select version()`, `pg_database`), so a statement answers and sorts as it does there.
+  - Each run writes the start data, with commands that change nothing on a second run (`START_DATA`): the schema of the checkout (`db:push`), then each seed command of the repo. The start data is the account that the session setup signs in as, and each row that a screen reads and no flow makes: a setting, a rate, a bank account. A flow that fails on an empty database and passes on the remote one names such a row: add its seed command, and never put a row in the test database by hand.
+  - A flow never depends on the rows that older runs left (Review item 6). A step that needs a full page of a list makes the rows that are missing. A step that needs a second person signs in one of the start data.
+  - To start from an empty database, delete `.output/postgres` and the saved sessions of the main checkout: the next run makes them again.
 - The workers share one server, one database and one server log. That is safe only while each test obeys Review items 6, 8 and 9.
 - **A flow that crosses apps** is in the folder of the app where it starts: the run also starts the peers of that app (`PEERS` in `support/apps.ts`).
 - **The number of workers is measured, not chosen.** Measure a slow run before a change: time one statement, and count the statements of one test with the call trace. With prepared statements (`scaffold-repo`, Step 3), 41 flows went from 24.8 to 5.2 minutes at 4 workers; at 6, steps ran out of time. Keep the fastest number at which each test passes, and write the measured numbers in the config.
@@ -253,7 +259,7 @@ test("an invited person sets up the account and opens the app", async ({ page, b
 
 ### The pre-push gate
 
-The machine that pushes runs the tests: it has the database. The `scaffold-repo` skill owns and installs the hook, `.husky/pre-push` (`assets/husky/pre-push`). A push runs the flows that it adds or changes. `pnpm flows:all` runs the full suite: before a deploy, and when the developer asks.
+The machine that pushes runs the tests: the run starts its own database there. The `scaffold-repo` skill owns and installs the hook, `.husky/pre-push` (`assets/husky/pre-push`). A push runs the flows that it adds or changes. `pnpm flows:all` runs the full suite: before a deploy, and when the developer asks.
 
 1. Documents, unit tests, their fixtures and setup: no run.
 2. Changed flow files or helpers: `pnpm flows --only-changed=origin/main` for each app. Playwright follows their imports.

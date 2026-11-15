@@ -7,7 +7,9 @@ import { defineConfig } from "@playwright/test";
 import { appsOfRun, appUnderTest, outputDir, repoRoot } from "./support/apps";
 
 /**
- * Draws the built app in a headless browser, on the one database of `.env`.
+ * Draws the built app in a headless browser, on the database of the run
+ * (`support/test-database.ts`): `support/run.ts` starts it and gives its URL
+ * as `DATABASE_URL`, in place of the one of `.env`.
  *
  * - `screens` draws each route in `SCREENS` and compares it with its design
  *   source in `docs/designs`.
@@ -34,18 +36,6 @@ const cleanBuild = fileURLToPath(
 
 const apps = appsOfRun();
 
-/**
- * The run is one more server on the connections of the pooler. The run and
- * the dev servers in use fit in its limit: on a pooler of 15, two dev
- * servers in use (4 each) and a script leave 6. A full pooler fails the
- * session check of a dev server and signs the developer out. A peer only
- * answers the steps of a flow that crosses apps: it takes 1, and the app
- * under test the rest.
- */
-const RUN_POOL = 6;
-const poolOf = (index: number) =>
-  index === 0 ? RUN_POOL - (apps.length - 1) : 1;
-
 export default defineConfig({
   outputDir: path.join(outputDir, "results"),
   // The report is the page the developer opens: each flow step with the
@@ -58,7 +48,7 @@ export default defineConfig({
   // of a file run at the same time. The workers share one server, one
   // database and one server log.
   fullyParallel: true,
-  // Start with 2. The workers share one server and its database pool: raise
+  // Start with 2. The workers share one server and one machine: raise
   // the number only while a measured run gets shorter and no step runs out
   // of time, and write the measured numbers here.
   workers: 2,
@@ -69,7 +59,8 @@ export default defineConfig({
   // times the largest spread of one test between runs. A step that needs
   // more time is two steps.
   timeout: 90_000,
-  // The database is remote: a page that reads it can take seconds to fill.
+  // Playwright's own limit is 5 seconds. Lower this number only with a
+  // measured full run.
   expect: { timeout: 15_000 },
   use: {
     baseURL: app.url,
@@ -95,7 +86,7 @@ export default defineConfig({
       use: { storageState: app.statePath, screenshot: "on" },
     },
   ],
-  webServer: apps.map((each, index) => ({
+  webServer: apps.map((each) => ({
     command: [
       `node "${cleanBuild}" "${each.buildDir}"`,
       `pnpm exec turbo run build --filter={{SCOPE}}/${each.name}`,
@@ -108,7 +99,6 @@ export default defineConfig({
     timeout: 600_000,
     env: {
       AUTH_URL: each.url,
-      DATABASE_POOL_MAX: String(poolOf(index)),
       // One line per app that links to a peer, with the URL of that peer in
       // the run. For example: PORTAL_URL: appOf("portal").url.
       // One line per sender, with no key: the console sender then prints

@@ -22,7 +22,7 @@ Read `$ARGUMENTS`. The decisions are:
 | Package scope (`{{SCOPE}}`) | `@` + the repo's initials (`cars-request-africa` → `@cra`) | `--scope` or default |
 | Apps (`{{APPS}}`) | one app, `web` | `--apps` or ask |
 | Ports | 3000, 3001, 3002 … in app order; the e2e run of each app uses 3100, 3101, 3102 … | fixed |
-| Database | one Supabase project, session pooler | fixed |
+| Database | one Supabase project, session pooler. The end-to-end run alone uses a PostgreSQL server that it starts on the machine | fixed |
 | Git flow | straight to main, no PRs | fixed |
 | Node | 24 | fixed |
 | GitHub | private repo under the developer's account | fixed |
@@ -72,6 +72,7 @@ Then, per app: name it `{{SCOPE}}/<app>`, set `dev` to `dotenv -e ../../.env -- 
 
 Invoke `jig:e2e-tests` with the Skill tool. Copy its `assets/e2e/` to `packages/e2e/` (`gitignore` becomes `.gitignore`), with `{{SCOPE}}` replaced. Then:
 
+0. `support/test-database.ts`: replace `{{POSTGRES_MAJOR}}` with the major version of the remote database (`select version()` through `db:check`'s connection; 17 when the project is new), and add one row to `START_DATA` for each seed command of the repo. Install that PostgreSQL when the machine has none: `brew install postgresql@<major>` on macOS (keg-only: it starts no service and changes no other PostgreSQL). You run the install, and never hand it to the developer.
 1. `support/apps.ts`: one row per app in `APPS`, in app order, with the ports 3100, 3101, 3102 … and the width of the app's designs (1440 for a desktop app, 390 for a phone app).
 2. `support/session.setup.ts`: one row per app in `SIGN_IN`. An app with no sign-in yet has the empty function.
 3. `flows/web/home.spec.ts` is the first flow: move it to `flows/<app>/home.spec.ts` for each app.
@@ -85,10 +86,10 @@ Invoke `jig:e2e-tests` with the Skill tool. Copy its `assets/e2e/` to `packages/
 
 This step exists because an unreachable database or a missing login surfaces at the developer's first manual check, after a whole checklist is built. Prove each one now:
 
-1. `.env`: copy `.env.example` to `.env`, generate `AUTH_SECRET` with `openssl rand -base64 32`. Ask the developer for the Supabase session-pooler URI (dashboard → Connect → Session pooler, port 5432) when `DATABASE_URL` is empty. Never probe a local Postgres or Docker: the database is the Supabase project.
+1. `.env`: copy `.env.example` to `.env`, generate `AUTH_SECRET` with `openssl rand -base64 32`. Ask the developer for the Supabase session-pooler URI (dashboard → Connect → Session pooler, port 5432) when `DATABASE_URL` is empty. Never probe a local Postgres or Docker for the app: the database of `.env` is the Supabase project. The one local server is the test database, which the end-to-end run starts and stops itself.
 2. `pnpm --filter {{SCOPE}}/db db:check` prints `db ok`. Then `pnpm --filter {{SCOPE}}/db db:push` prints `Changes applied`. The script carries `--force`, so it never waits on a prompt: you run it, and never hand it to the developer.
 3. `gh auth status` shows a logged-in account.
-4. For each app, `APP=<app> pnpm flows` prints `1 passed`: the run built the app, started it headless on its e2e port and opened the home page with no error. This is the one time a scaffold starts a server, and the run stops it.
+4. For each app, `APP=<app> pnpm flows` prints `1 passed`: the run started its test database, built the app, started it headless on its e2e port and opened the home page with no error. This is the one time a scaffold starts a server, and the run stops it.
 
 **Gate:** the transcript shows `db ok`, the push's table list, the `gh` login line, and one `passed` line per app.
 
@@ -114,8 +115,9 @@ When the folder already holds code, Step 2, Step 3 and Step 5 add only what is m
 
 ## Don't — common failures
 
-- Don't point `.env.example` at a local Postgres. The database is the Supabase project; a local URL sends the developer to a server that does not exist.
-- Don't skip Step 6 because the tests are green. The backend tests run on PGlite; only `db:check` and the first flow prove the real database and the built app.
+- Don't point `.env.example` at a local Postgres. The database of the app is the Supabase project; a local URL sends the developer to a server that does not exist. The test database is not in `.env`: the end-to-end run makes its URL.
+- Don't run the flows on the database of `.env`. It is remote: each statement of each step pays one round trip, and a full suite takes several times longer.
+- Don't skip Step 6 because the tests are green. The backend tests run on PGlite; only `db:check` proves the database of `.env`, and only the first flow proves the test database and the built app.
 - Don't add a jsdom or MSW harness, or a test that renders a component. There are two test layers: backend tests and end-to-end tests.
 - Don't run the e2e tests on a dev port or on a server that already runs. The run starts its own build on port 3100 and up.
 - Don't write a PR-based `CLAUDE.md`. The `open-feature-pr` skill reads the straight-to-main line to choose its push path.

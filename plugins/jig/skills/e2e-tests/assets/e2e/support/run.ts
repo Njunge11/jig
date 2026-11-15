@@ -10,11 +10,13 @@ import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
+import { startTestDatabase, stopTestDatabase } from "./test-database.ts";
+
 /**
  * Starts one run of this package:
  * `node support/run.ts <screens|flows> [arguments of playwright test]`.
  * `pnpm screens` and `pnpm flows` call it, and so does the pre-push hook.
- * It does two things before Playwright starts.
+ * It does three things before Playwright starts.
  *
  * One run at a time on this machine. Each worktree of the repo uses the same
  * ports and the same database. A second run that starts while the first
@@ -22,6 +24,10 @@ import { fileURLToPath } from "node:url";
  * emails are in the log of the other worktree, and its tests fail when the
  * first run stops the server. So a run waits for the run that holds
  * `e2e.lock` in the shared git folder. A lock whose process ended is taken.
+ *
+ * The run has its own database, on this machine (`test-database.ts`): the
+ * run starts its server, gives the apps and the tests its URL in place of
+ * the `DATABASE_URL` of `.env`, and stops the server at the end.
  *
  * A filter selects files of this package. Playwright compares a filter with
  * the full path of a file (`forceRegExp` in its `util.js`), and a worktree
@@ -174,8 +180,14 @@ async function takeLock(): Promise<void> {
   }
 }
 
+/** Ends the run: the server of the database stops, then the lock goes. */
 function release(): void {
-  if (holder() === process.pid) rmSync(lock, { recursive: true, force: true });
+  if (holder() !== process.pid) return;
+  try {
+    stopTestDatabase();
+  } finally {
+    rmSync(lock, { recursive: true, force: true });
+  }
 }
 
 let child: ChildProcess | undefined;
@@ -190,11 +202,20 @@ for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) {
   });
 }
 
-if (!listsOnly) await takeLock();
+const env: NodeJS.ProcessEnv = { ...process.env, RUN: run };
+if (!listsOnly) {
+  await takeLock();
+  try {
+    env.DATABASE_URL = await startTestDatabase();
+  } catch (error) {
+    release();
+    throw error;
+  }
+}
 child = spawn(
   path.join(packageDir, "node_modules", ".bin", "playwright"),
   ["test", `--project=${run}`, ...args],
-  { cwd: packageDir, stdio: "inherit", env: { ...process.env, RUN: run } },
+  { cwd: packageDir, stdio: "inherit", env },
 );
 child.on("exit", (code) => {
   if (!listsOnly) release();

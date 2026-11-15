@@ -16,7 +16,7 @@ Run from the repo root: `pnpm dev`, `pnpm build`, `pnpm lint`,
 
 - `pnpm test` runs the backend tests on PGlite. They need no database.
 - `pnpm flows` and `pnpm screens` run the end-to-end tests and the design
-  check on the built app and the database of `.env` (see "Screens and
+  check on the built app and a database of their own (see "Screens and
   flows").
 - `pnpm --filter {{SCOPE}}/db db:check` proves `DATABASE_URL` answers;
   `db:push` pushes the schema to it with no prompt (`--force`: the one
@@ -83,8 +83,14 @@ already answers on its port.
   `pnpm flows <name>` runs one file; `APP=<app>` picks the app. The name is
   compared with the path of a file inside `packages/e2e`, never with the
   name of the worktree.
+- The run has its own database: a PostgreSQL server on this machine
+  (`packages/e2e/support/test-database.ts`), never the database of `.env`.
+  The run starts it, writes the schema and the seed, and stops it at the
+  end. Its data folder is `packages/e2e/.output/postgres` of the main
+  checkout. Data that a flow needs and no flow makes is in a seed command
+  of `START_DATA`, never put in the test database by hand.
 - One run at a time on this machine: each worktree uses the same ports and
-  the same database. `pnpm screens` and `pnpm flows` wait for the run that
+  the same test database. `pnpm screens` and `pnpm flows` wait for the run that
   holds the lock (`e2e.lock` in the shared git folder,
   `packages/e2e/support/run.ts`), and print that they wait. Never start
   Playwright in a different way, never start a second run to get past the
