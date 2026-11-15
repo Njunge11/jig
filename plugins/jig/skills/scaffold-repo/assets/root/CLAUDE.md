@@ -118,6 +118,12 @@ already answers on its port.
   a built screen after its design, name the screen here. No builder then
   changes its look to equal the design, and no flow uses `expectDesign` on
   it.
+- Each other screen and each other part looks like its design, also a part
+  that an earlier checklist built. A difference that the design check or a
+  review finds on it is a fault: the builder fixes it in the shared part.
+- A stock shadcn part (a badge, a button) keeps its stock size and weight.
+  A few pixels of height or one step of weight between it and the design is
+  not a difference, and it is never a question for the developer.
 - A flow that uploads a file calls `carryUploads(page)`
   (`packages/e2e/support/file-store.ts`): the run sends the upload to the
   real store itself. No port of a run goes into the CORS of a bucket.
