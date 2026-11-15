@@ -13,9 +13,21 @@ base=origin/main
 
 # The refs of this push, from git: `<local ref> <local sha> <remote ref> <remote sha>`.
 to_main=0
+sends=0
 while read -r _ _ remote_ref _; do
+  sends=1
   if [ "$remote_ref" = refs/heads/main ]; then to_main=1; fi
 done
+
+# git lists only the refs that it sends. A ref that the remote refuses is not
+# in the list: when main moved, the list is empty, and git refuses the push
+# after the hook. Measured: a push that was 17 commits behind main ran 59
+# flows for 7 minutes and was refused then. With no ref to send, a run
+# proves nothing, so the hook stops here.
+if [ "$sends" = 0 ]; then
+  echo "pre-push: git sends no ref: main moved. Run: git pull --rebase origin main. Then push again."
+  exit 1
+fi
 
 if git fetch --quiet origin main 2>/dev/null; then
   # The remote refuses a push to main that does not hold origin/main, but
