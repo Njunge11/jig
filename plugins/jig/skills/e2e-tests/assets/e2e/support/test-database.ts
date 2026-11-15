@@ -152,8 +152,24 @@ const START_DATA: readonly (readonly [workspace: string, script: string])[] = [
   ["{{SCOPE}}/db", "db:push"],
 ];
 
+/**
+ * Builds each package that a command of the start data imports. A new
+ * worktree has no `dist` folder, and a command then fails on its first
+ * import. turbo builds nothing that is built.
+ */
+function buildForStartData(): void {
+  const filters = new Set(
+    START_DATA.map(([workspace]) => `--filter=${workspace}^...`),
+  );
+  execFileSync("pnpm", ["exec", "turbo", "run", "build", ...filters], {
+    cwd: repoRoot,
+    stdio: ["ignore", "ignore", "inherit"],
+  });
+}
+
 /** Writes the start data on the database `url`. */
 function writeStartData(url: string): void {
+  buildForStartData();
   for (const [workspace, script] of START_DATA) {
     execFileSync("pnpm", ["--filter", workspace, script], {
       cwd: repoRoot,

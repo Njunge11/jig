@@ -40,7 +40,8 @@ if git fetch --quiet origin main 2>/dev/null; then
   # The setup of a run reaches each flow of each app.
   if ! git diff --quiet "$base"...HEAD -- packages/e2e/playwright.config.ts \
     packages/e2e/package.json packages/e2e/support/apps.ts \
-    packages/e2e/support/session.setup.ts; then
+    packages/e2e/support/session.setup.ts packages/e2e/support/run.ts \
+    packages/e2e/support/test-database.ts; then
     affected=""
   fi
 else
