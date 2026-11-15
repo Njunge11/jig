@@ -6,7 +6,8 @@
 # command in a subfolder then takes that subfolder as the top of the repo
 # (git-config, core.worktree), so `--only-changed` reads each flow file as
 # new and picks every flow. Measured: 88 tests with GIT_DIR, 43 without.
-# shellcheck disable=SC2046 -- each name is one word
+# Each name is one word.
+# shellcheck disable=SC2046
 unset $(git rev-parse --local-env-vars)
 
 base=origin/main
@@ -28,6 +29,32 @@ if [ "$sends" = 0 ]; then
   echo "pre-push: git sends no ref: main moved. Run: git pull --rebase origin main. Then push again."
   exit 1
 fi
+
+# One push at a time on this machine. Builders push from parallel worktrees,
+# and main moved while a push ran its flows: git refused that push after the
+# run (measured: a run of 7 minutes, 2 times in one hour). A push waits here
+# for the push before it, and the check below then sees the new main and
+# refuses in a second. The lock is a folder in the shared git folder, with
+# the process number of its hook. A lock whose process ended is taken.
+push_lock="$(git rev-parse --path-format=absolute --git-common-dir)/push.lock"
+waited=0
+until mkdir "$push_lock" 2>/dev/null; do
+  holder="$(cat "$push_lock/pid" 2>/dev/null || true)"
+  if [ -n "$holder" ] && ! kill -0 "$holder" 2>/dev/null; then
+    rm -rf "$push_lock"
+    continue
+  fi
+  if [ "$waited" = 0 ]; then
+    echo "pre-push: another push is active on this machine. This push waits for it."
+  fi
+  waited=1
+  sleep 5
+done
+echo $$ >"$push_lock/pid"
+trap 'rm -rf "$push_lock"' EXIT
+trap 'exit 1' INT TERM
+# git sends the commits of the push before this one after its hook ends.
+if [ "$waited" = 1 ]; then sleep 10; fi
 
 if git fetch --quiet origin main 2>/dev/null; then
   # The remote refuses a push to main that does not hold origin/main, but
@@ -101,7 +128,8 @@ for item in $plan; do
   if [ "${item##*:}" = changed ]; then
     only="--only-changed=$base"
   fi
-  # shellcheck disable=SC2086 -- $only is one flag or nothing
+  # $only is one flag or nothing.
+  # shellcheck disable=SC2086
   APP="$app" pnpm flows $only || {
     echo "pre-push: an end-to-end test of $app failed. Open packages/e2e/.output/report/$app-flows/index.html."
     exit 1
