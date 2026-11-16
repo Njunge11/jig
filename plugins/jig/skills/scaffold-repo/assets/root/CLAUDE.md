@@ -18,7 +18,9 @@ parallel turbo run: the tasks of the `ci` workflow.
 
 - `pnpm lint` is oxlint: each package with lint has an `oxlint.config.ts`,
   and the jig gates are `packages/lint-config`. `pnpm typecheck` is
-  `bun check`, the type checker of Bun. `pnpm format` is `bun fmt`;
+  `bun check`, the type checker of Bun. The `typescript` package is
+  version 7 in each package: it has the fast `tsc` and no compiler API for
+  JavaScript, so a tool that loads that API does not work. `pnpm format` is `bun fmt`;
   `bunfig.toml` lists the files that it skips. `next build` does not check
   the types a second time (`typescript.ignoreBuildErrors` in each
   `next.config.ts`): `pnpm typecheck` is the one type check.
