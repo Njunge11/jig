@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { appUnderTest } from "./apps";
+import { appUnderTest, keptOf } from "./apps";
 import {
   compareLooks,
   describeCheck,
@@ -51,6 +51,8 @@ async function restPointer(page: Page) {
  * Saves a full-page screenshot of what the page shows now. When
  * `docs/designs/<name>.dc.html` exists, it also draws that design at the
  * same window size and compares the look of each text the two screens show.
+ * The texts of the kept shell of the app (`kept` in `support/apps.ts`) are
+ * left out of the two screens.
  *
  * `pnpm screens` calls it for a route. A flow calls it for a screen that a
  * route alone does not show: a dialog, a sheet, a state of a record. Name
@@ -85,10 +87,13 @@ export async function shot(
   }
 
   const designFile = `${base}-design.png`;
-  const design = await drawDesign(page, source, designFile);
+  // The kept shell of the app is in neither list: the page is compared in
+  // its own part.
+  const kept = keptOf(page.url());
+  const design = await drawDesign(page, source, designFile, kept.design);
   const check = compareLooks(
     design,
-    await page.evaluate(readLook),
+    await page.evaluate(readLook, kept.built),
     await stockSteps(page),
   );
   writeFileSync(`${base}.design.json`, `${JSON.stringify(check, null, 2)}\n`);

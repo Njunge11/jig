@@ -11,8 +11,12 @@ export type TextLook = {
 
 /**
  * Reads the look of each visible piece of text of the page it runs in:
- * `page.evaluate(readLook)`. It runs in the browser, so it uses nothing
- * outside its own body.
+ * `page.evaluate(readLook, leftOut)`. It runs in the browser, so it uses
+ * nothing outside its own body. A text inside an element that a selector of
+ * `leftOut` matches is not read: the kept shell of an app. An element that
+ * holds such a part is the frame of the shell: its background and its
+ * padding are the shell's, so it is no box of a text, and the place of a
+ * text is then measured in the page's own part, not on the page.
  *
  * The look is the computed style, not the CSS that gave it: a design drawn
  * with its own class names and a screen built with Tailwind give the same
@@ -37,7 +41,7 @@ export type TextLook = {
  * of a table column and the look of a text that only one screen shows (a
  * row of data). The two screenshots show those.
  */
-export function readLook(): TextLook[] {
+export function readLook(leftOut: string[] = []): TextLook[] {
   const SIDES = ["Top", "Right", "Bottom", "Left"] as const;
   const CORNERS = ["TopLeft", "TopRight", "BottomRight", "BottomLeft"] as const;
   const COLOR =
@@ -77,6 +81,7 @@ export function readLook(): TextLook[] {
   const behind = (element: Element): string => {
     const layers: number[][] = [];
     for (let node: Element | null = element; node; node = node.parentElement) {
+      if (isFrame(node)) break;
       const layer = painted(getComputedStyle(node).backgroundColor);
       if ((layer[3] ?? 0) > 0) layers.push(layer);
       if (layer[3] === 255) break;
@@ -102,9 +107,18 @@ export function readLook(): TextLook[] {
       : "0px";
   };
 
+  const keptParts = leftOut.flatMap((selector) =>
+    Array.from(document.querySelectorAll(selector)),
+  );
+  const isKept = (element: Element) =>
+    keptParts.some((part) => part.contains(element));
+  /** An element around a kept part: the frame of the shell. */
+  const isFrame = (element: Element) =>
+    keptParts.some((part) => part !== element && element.contains(part));
+
   const paintsBox = (style: CSSStyleDeclaration): boolean =>
     alphaOf(style.backgroundColor) > 0 ||
-    style.boxShadow !== "none" ||
+    shadowOf(style.boxShadow) !== "none" ||
     SIDES.some((side) => borderOf(style, side) !== "0px");
 
   const boxOf = (element: Element): Element => {
@@ -113,6 +127,7 @@ export function readLook(): TextLook[] {
       node && node !== document.documentElement;
       node = node.parentElement
     ) {
+      if (isFrame(node)) break;
       if (paintsBox(getComputedStyle(node))) return node;
     }
     return document.body;
@@ -173,12 +188,19 @@ export function readLook(): TextLook[] {
     return height;
   };
 
-  /** The shadows that paint: a framework adds layers with no color. */
+  /**
+   * The shadows that paint: a framework adds layers with no color, and
+   * layers with a color and no size (`0px 0px 0px 0px`).
+   */
   const shadowOf = (shadow: string): string => {
     const layers = shadow
       .replace(COLOR, colorOf)
       .split(/,\s*(?=#)/)
-      .filter((layer) => !layer.includes(" at 0%"));
+      .filter(
+        (layer) =>
+          !layer.includes(" at 0%") &&
+          /[1-9]/.test(layer.replace(/#[0-9a-f]+(?: at \d+%)?/i, "")),
+      );
     return layers.length > 0 ? layers.join(", ") : "none";
   };
 
@@ -227,6 +249,7 @@ export function readLook(): TextLook[] {
     node = walker.nextNode()
   ) {
     if (!(node instanceof Element) || SKIPPED.includes(node.tagName)) continue;
+    if (isKept(node)) continue;
     const style = getComputedStyle(node);
     let text = textOf(node).replace(/\s+/g, " ").trim();
     if (style.textTransform === "uppercase") text = text.toUpperCase();
@@ -313,6 +336,22 @@ export function readLook(): TextLook[] {
       ? `left ${px(left)}`
       : `left ${px(left)}, center ${px((left + right) / 2)}, right ${px(right)}`;
 
+  // The own part of a page in a kept shell: from the left edge of its first
+  // text to the right edge of its last one. The shell gives the page its
+  // padding, so each edge of a text is measured from the same edge of this
+  // part: the left from its left, the center from its center, the right
+  // from its right.
+  const partLeft = Math.min(...placed.map((text) => text.left));
+  const partRight = Math.max(...placed.map((text) => text.right ?? text.left));
+  const placeInPart = (text: { left: number; right: number | null }): string =>
+    text.right === null
+      ? `left ${px(text.left - partLeft)}`
+      : [
+          `left ${px(text.left - partLeft)}`,
+          `center ${px((text.left + text.right - partLeft - partRight) / 2)}`,
+          `right ${px(text.right - partRight)}`,
+        ].join(", ");
+
   // The place of a text is part of its look when the text starts a line of
   // its box. Data moves a text that comes after it on the line: a count of
   // 5 or of 12 before the next tab. The width of a table column follows its
@@ -327,10 +366,14 @@ export function readLook(): TextLook[] {
         other.bottom > text.top,
     );
     if (!startsItsLine || text.inTable) continue;
-    text.record.look["place on the page"] = placeOf(
-      text.left + window.scrollX,
-      text.right === null ? null : text.right + window.scrollX,
-    );
+    if (keptParts.length > 0) {
+      text.record.look["place in the page's own part"] = placeInPart(text);
+    } else {
+      text.record.look["place on the page"] = placeOf(
+        text.left + window.scrollX,
+        text.right === null ? null : text.right + window.scrollX,
+      );
+    }
     if (text.control) {
       const boxRect = text.box.getBoundingClientRect();
       text.record.look["place in its box"] =

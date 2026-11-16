@@ -29,6 +29,18 @@ const PEERS: Record<AppName, readonly AppName[]> = {
   web: [],
 };
 
+/**
+ * The parts of an app that keep the developer's look and are on each of its
+ * pages: a shell. The design check leaves out each text inside them, on the
+ * built page (`built`) and on the design (`design`), so a page in the shell
+ * is compared in its own part. This is the `mask` of a Playwright
+ * screenshot, for a check that reads values and not pixels. A selector,
+ * never a text or a value. An app with no kept part has two empty lists.
+ */
+const KEPT: Record<AppName, { built: string[]; design: string[] }> = {
+  web: { built: [], design: [] },
+};
+
 const packageDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
@@ -109,6 +121,19 @@ export function appsOfRun() {
   const app = appUnderTest();
   const peers = process.env.RUN === "flows" ? PEERS[app.name] : [];
   return [app, ...peers.map((name) => appOf(name))];
+}
+
+/**
+ * The kept parts of the app that serves the page at `url`. A flow of one app
+ * can open a page of a second app, so the address of the page picks the app,
+ * not `APP`.
+ */
+export function keptOf(url: string): { built: string[]; design: string[] } {
+  const port = Number(new URL(url).port);
+  for (const [name, app] of Object.entries(APPS)) {
+    if (app.port === port && isAppName(name)) return KEPT[name];
+  }
+  return { built: [], design: [] };
 }
 
 /** The port, the window and the files of the app `name`. */

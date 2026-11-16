@@ -216,6 +216,7 @@ const RULES: Record<string, Rule> = {
   // text, and a stock line height is not the line height of the design.
   "box height": sized((design, _look, stock) => around(design, stock.spacing)),
   "place on the page": placed,
+  "place in the page's own part": placed,
   "place in its box": placed,
   // `18px #1c3a6e`: the size is on the spacing scale, the color is exact.
   // A `select` that the browser draws shows the arrow of the browser, and
@@ -317,6 +318,7 @@ export async function drawDesign(
   built: Page,
   source: string,
   file: string,
+  leftOut: string[] = [],
 ): Promise<TextLook[]> {
   const design = await built.context().newPage();
   try {
@@ -339,7 +341,7 @@ export async function drawDesign(
       ),
     );
     await design.screenshot({ path: file, fullPage: true });
-    return await design.evaluate(readLook);
+    return await design.evaluate(readLook, leftOut);
   } finally {
     await design.close();
   }

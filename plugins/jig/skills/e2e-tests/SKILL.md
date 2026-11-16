@@ -28,7 +28,7 @@ Run before a commit. Paste the output in the proof.
 
 1. `pnpm lint` and `pnpm typecheck` exit `0` in the e2e package. Lint proves every Review item that ends with `Gate:`.
 2. `pnpm flows` exits `0`. Paste its last line (`N passed`) and the path of the report.
-3. `SCREENS="<Design>=<path> …" pnpm screens` exits `0` for each design that a route shows. Paste its last line. A design that a flow step opens (`expectDesign`) is proved by gate 2.
+3. `SCREENS="<Design>=<path> …" pnpm screens` exits `0` for each design that a route shows, or each difference that it prints is on a stock shadcn part and has that verdict (**The proof**). Paste its last line. A design that a flow step opens (`expectDesign`, `shot`) is proved by gate 2.
 4. The pre-push hook runs the flow files that the push adds or changes and the smoke set, and refuses the push on a failure. The full suite runs outside a push. Never pass `--no-verify`, and never set `HUSKY=0`.
 
 ## The list first, the test code after the build
@@ -93,7 +93,7 @@ The design is the standard for a screen: to a person, the built screen looks lik
 
 **A built screen that the developer changed after the design keeps its look.** The repo's `CLAUDE.md` names those screens. A difference on one is not a fault: no builder changes its look to equal the design, no flow calls `expectDesign` on it (`shot` records the screen and does not fail), and no `pnpm screens` gate lists it. On such a screen a builder fixes a fault of behavior only. A part that the spec states and the screen lacks is such a fault: the builder adds it and changes nothing that the screen shows. Never mark its `E<n>` line "no path on the screen" and leave it. A checklist that adds a part to such a screen builds only that part to the design.
 
-**A screen that is drawn over a kept screen is recorded with `shot`.** A dialog or a sheet over a kept shell is an example. The run pairs each text of the page, so `expectDesign` and `pnpm screens` fail on the texts of the kept screen, and no builder can make that line pass. The flow step that opens the screen calls `shot`. The proof of its design Done item is the builder's verdict on each text of the screen's own part in `<Design>-<width>.design.json`, the verdict for the five things, and the reviewer's verdict. A difference on a text of its own part is a fault, and the builder fixes it. This is never a question for the developer.
+**A page in a kept shell is compared in its own part.** `KEPT` in `support/apps.ts` holds, per app, the selectors of the parts that keep their look and are on each page (a side nav, a top bar), for the built page and for the design. The run leaves out each text inside them on the two screens, takes no box and no color from the frame around them, and measures the place of a text in the page's own part. This is the `mask` of a Playwright screenshot, for a check that reads values. So `<Design>-<width>.design.json` lists only the differences of the page's own part, also for a dialog or a sheet over the shell. A difference on a text of the own part is a fault, and the builder fixes it. The one exception is a stock shadcn part (below). A flow step calls `expectDesign` when the run prints no difference, and `shot` when each difference that is left is on a stock part. This is never a question for the developer.
 
 **Each other screen and each other part looks like its design**, also a part that an earlier checklist built (a card, a preview). A difference that the design check or a review finds on it is a fault: the builder fixes it in the same checklist, in the shared part, one time. A checklist line that names an existing part never permits a difference from the design.
 
@@ -139,7 +139,7 @@ A full-page screenshot is taller than the window, so a side nav ends at the wind
 
 ### The proof
 
-1. The builder's proof of a design is the passed `pnpm screens` line or the passed flow step, and one verdict for the five things: `pass`, or `fixed` with file:line.
+1. The builder's proof of a design is the line of its design run (`pnpm screens`, or the flow step with `expectDesign` or `shot`): the passed line, or `N texts look different from the design, M look the same`. For each difference that the run prints, the builder gives one verdict: `fixed` with file:line, or `stock part` with the name of the stock shadcn part. Then one verdict for the five things: `pass`, or `fixed` with file:line.
 2. The reviewer (`review-frontend-feature`) gives the verdict a second time with no access to the builder's session: it reads each `.design.json`, opens each pair of screenshots, and returns one verdict per design. A difference is a `fail` line. An agent that grades its own work grades it too high, so the judge is a second agent. (Anthropic, "Harness design for long-running application development".)
 3. The developer checks no screen.
 
