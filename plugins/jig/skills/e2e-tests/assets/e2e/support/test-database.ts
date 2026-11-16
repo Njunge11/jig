@@ -3,9 +3,12 @@ import { randomBytes } from "node:crypto";
 import {
   appendFileSync,
   chmodSync,
+  cpSync,
   existsSync,
   mkdirSync,
+  readdirSync,
   readFileSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
@@ -13,7 +16,14 @@ import path from "node:path";
 import postgres from "postgres";
 
 // Plain node runs this file (`run.ts`): the import names the full file.
-import { repoRoot, stateDir } from "./apps.ts";
+import {
+  baseStateDir,
+  checkoutKey,
+  checkoutKeyOf,
+  repoRoot,
+  sharedOutputDir,
+  stateDir,
+} from "./apps.ts";
 
 /**
  * The database of a run: a PostgreSQL server on this machine, with its own
@@ -23,12 +33,21 @@ import { repoRoot, stateDir } from "./apps.ts";
  * of each step pays one round trip to it. Measured on one repo: 188 ms for a
  * statement there and 0.1 ms here.
  *
- * - The data folder is beside the saved sessions, in the main checkout: each
- *   worktree uses the same database, as it uses the same sessions. `initdb`
- *   makes it on the first run and refuses a folder that holds files
- *   (PostgreSQL docs, "Creating a Database Cluster"). To start from an empty
- *   database, delete `packages/e2e/.output/postgres` of the main checkout
- *   and `packages/e2e/.output/state`.
+ * - The data folder is beside the saved sessions, in the main checkout: one
+ *   server for each checkout of the repo. `initdb` makes it on the first run
+ *   and refuses a folder that holds files (PostgreSQL docs, "Creating a
+ *   Database Cluster"). To start from an empty database, delete
+ *   `packages/e2e/.output/postgres` of the main checkout and
+ *   `packages/e2e/.output/state`.
+ * - Each worktree has its own database on that server, and its own saved
+ *   sessions. Two builders work in two worktrees at the same time, each on
+ *   a schema of its own: with one database, the schema push of one run
+ *   removed the tables of the other, or had a question and wrote nothing.
+ *   The first run of a worktree copies the database of the main checkout
+ *   (`CREATE DATABASE ... TEMPLATE`: PostgreSQL docs, "Template Databases")
+ *   and its sessions, so it signs in no person again. The copy needs a
+ *   source with no connection: one run is active at a time. A run removes
+ *   the database and the sessions of a worktree that git knows no more.
  * - The server listens on the loopback address only, on a port that no
  *   other server uses, and makes no socket file. Each connection gives the
  *   password of the data folder (`--auth=scram-sha-256`: the docs say not to
@@ -46,9 +65,12 @@ import { repoRoot, stateDir } from "./apps.ts";
 const MAJOR = {{POSTGRES_MAJOR}};
 /** Not 5432 (a server of the machine) and not 54322 (the Supabase CLI). */
 const PORT = 54329;
-const NAME = "e2e";
+/** The role of each connection, and the database of the main checkout. */
+const BASE = "e2e";
+/** The database of this checkout. */
+const NAME = checkoutKey ? `${BASE}_${checkoutKey}` : BASE;
 
-const home = path.join(path.dirname(stateDir), "postgres");
+const home = path.join(sharedOutputDir, "postgres");
 const dataDir = path.join(home, "data");
 const passwordFile = path.join(home, "password");
 const serverLog = path.join(home, "server.log");
@@ -94,7 +116,7 @@ function password(): string {
 }
 
 function urlOf(database: string): string {
-  return `postgres://${NAME}:${password()}@127.0.0.1:${PORT}/${database}`;
+  return `postgres://${BASE}:${password()}@127.0.0.1:${PORT}/${database}`;
 }
 
 function makeCluster(): void {
@@ -105,7 +127,7 @@ function makeCluster(): void {
     "-D",
     dataDir,
     "-U",
-    NAME,
+    BASE,
     `--pwfile=${passwordFile}`,
     "--auth=scram-sha-256",
     "--encoding=UTF8",
@@ -126,12 +148,58 @@ function runs(): boolean {
   return status.status === 0;
 }
 
+/** `a"b` as `"a""b"`: a name in a statement. */
+const quoted = (name: string) => `"${name.replaceAll('"', '""')}"`;
+
+/** The key of each worktree that git knows, the main checkout among them. */
+function worktreeKeys(): Set<string> {
+  const list = execFileSync("git", ["worktree", "list", "--porcelain"], {
+    cwd: repoRoot,
+    encoding: "utf8",
+  });
+  return new Set(
+    list
+      .split("\n")
+      .filter((line) => line.startsWith("worktree "))
+      .map((line) => checkoutKeyOf(line.slice("worktree ".length))),
+  );
+}
+
+/**
+ * Makes the database of this checkout when the server has none. A worktree
+ * gets a copy of the database of the main checkout and of its sessions. The
+ * database and the sessions of a worktree that is gone are removed.
+ */
 async function makeDatabase(): Promise<void> {
   const sql = postgres(urlOf("postgres"), { max: 1, onnotice: () => {} });
   try {
-    const found =
-      await sql`select 1 from pg_database where datname = ${NAME}`;
-    if (found.length === 0) await sql.unsafe(`create database ${NAME}`);
+    const rows = await sql<{ name: string }[]>`
+      select datname as name from pg_database`;
+    const names = rows.map((row) => row.name);
+    if (!names.includes(BASE)) await sql.unsafe(`create database ${BASE}`);
+
+    const live = worktreeKeys();
+    for (const name of names) {
+      if (!name.startsWith(`${BASE}_`)) continue;
+      const key = name.slice(BASE.length + 1);
+      if (live.has(key)) continue;
+      await sql.unsafe(`drop database if exists ${quoted(name)}`);
+      rmSync(path.join(baseStateDir, key), { recursive: true, force: true });
+    }
+
+    if (NAME === BASE || names.includes(NAME)) return;
+    await sql.unsafe(`create database ${quoted(NAME)} template ${BASE}`);
+    // The sessions of the copy are the sessions of its source. The files keep
+    // their age: a session is used for half of its life only.
+    rmSync(stateDir, { recursive: true, force: true });
+    mkdirSync(stateDir, { recursive: true });
+    if (!existsSync(baseStateDir)) return;
+    for (const file of readdirSync(baseStateDir)) {
+      if (!file.endsWith(".json")) continue;
+      cpSync(path.join(baseStateDir, file), path.join(stateDir, file), {
+        preserveTimestamps: true,
+      });
+    }
   } finally {
     await sql.end();
   }
@@ -180,28 +248,113 @@ export function pushAsked(output: string): boolean {
   return output.includes(PUSH_ASKED);
 }
 
+/** What the newest migration snapshot of this checkout holds. */
+function schemaOfCheckout(): {
+  tables: Map<string, Set<string>>;
+  enums: Set<string>;
+} {
+  const drizzleDir = path.join(repoRoot, "packages", "db", "drizzle", "meta");
+  const journal: { entries: { idx: number }[] } = JSON.parse(
+    readFileSync(path.join(drizzleDir, "_journal.json"), "utf8"),
+  );
+  const newest = Math.max(...journal.entries.map((entry) => entry.idx));
+  const snapshot: {
+    tables: Record<string, { columns: Record<string, unknown> }>;
+    enums: Record<string, unknown>;
+  } = JSON.parse(
+    readFileSync(
+      path.join(drizzleDir, `${String(newest).padStart(4, "0")}_snapshot.json`),
+      "utf8",
+    ),
+  );
+  return {
+    tables: new Map(
+      Object.entries(snapshot.tables).map(([name, table]) => [
+        name,
+        new Set(Object.keys(table.columns)),
+      ]),
+    ),
+    enums: new Set(Object.keys(snapshot.enums)),
+  };
+}
+
+/**
+ * Removes each table, each column and each enum of `public` that this
+ * checkout does not know. The copy of a worktree can hold them: its source
+ * had the schema of a different checkout, or main removed a table after the
+ * copy. With them gone, a schema push only adds, and has no question. Only
+ * for the database of a worktree, which no second checkout uses.
+ */
+export async function dropUnknown(url: string): Promise<void> {
+  const { tables, enums } = schemaOfCheckout();
+  const sql = postgres(url, { max: 1, onnotice: () => {} });
+  try {
+    const columns = await sql<{ table: string; column: string }[]>`
+      select table_name as table, column_name as column
+      from information_schema.columns
+      where table_schema = 'public'`;
+    const dropped = new Set<string>();
+    for (const { table, column } of columns) {
+      const known = tables.get(`public.${table}`);
+      if (!known) {
+        if (dropped.has(table)) continue;
+        dropped.add(table);
+        await sql.unsafe(
+          `drop table if exists public.${quoted(table)} cascade`,
+        );
+      } else if (!known.has(column)) {
+        await sql.unsafe(
+          `alter table public.${quoted(table)} drop column if exists ${quoted(column)} cascade`,
+        );
+      }
+    }
+    const types = await sql<{ name: string }[]>`
+      select t.typname as name from pg_type t
+      join pg_namespace n on n.oid = t.typnamespace
+      where n.nspname = 'public' and t.typtype = 'e'`;
+    for (const { name } of types) {
+      if (enums.has(`public.${name}`)) continue;
+      await sql.unsafe(`drop type if exists public.${quoted(name)} cascade`);
+    }
+  } finally {
+    await sql.end();
+  }
+}
+
+/** Runs one command of the start data on `url`, and answers what it printed. */
+function runStartCommand(workspace: string, script: string, url: string) {
+  const run = spawnSync("pnpm", ["--filter", workspace, script], {
+    cwd: repoRoot,
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    env: { ...process.env, DATABASE_URL: url },
+  });
+  if (run.error) throw run.error;
+  process.stderr.write(run.stderr);
+  if (run.status !== 0) {
+    throw new Error(`${workspace} ${script} ended with code ${run.status}.`);
+  }
+  return run.stdout + run.stderr;
+}
+
 /** Writes the start data on the database `url`. */
-function writeStartData(url: string): void {
+async function writeStartData(url: string): Promise<void> {
   buildForStartData();
   for (const [workspace, script] of START_DATA) {
-    const run = spawnSync("pnpm", ["--filter", workspace, script], {
-      cwd: repoRoot,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "pipe"],
-      env: { ...process.env, DATABASE_URL: url },
-    });
-    if (run.error) throw run.error;
-    process.stderr.write(run.stderr);
-    if (run.status !== 0) {
-      throw new Error(`${workspace} ${script} ended with code ${run.status}.`);
+    let output = runStartCommand(workspace, script, url);
+    if (!pushAsked(output)) continue;
+    // The database of a worktree is its own: remove what the checkout does
+    // not know, and push one more time.
+    if (NAME !== BASE) {
+      await dropUnknown(url);
+      output = runStartCommand(workspace, script, url);
     }
-    if (pushAsked(run.stdout + run.stderr)) {
+    if (pushAsked(output)) {
       throw new Error(
         [
-          `${workspace} ${script} did not write the schema of this checkout to the test database.`,
-          "The test database holds a table or a column that this checkout does not know, and this checkout adds one, so drizzle-kit had a question.",
-          "The usual cause: main has a newer migration, and the run of a second worktree wrote it to the shared test database.",
-          "Fix: commit, run `git pull --rebase origin main`, make your own migration again on top of main, and run again.",
+          `${workspace} ${script} did not write the schema of this checkout to the test database ${NAME}.`,
+          "drizzle-kit had a question and no terminal: the database holds a table, a column or an enum that this checkout does not know, and this checkout adds one.",
+          "Fix: when your schema change has no migration yet, run `pnpm --filter <scope>/db db:generate`. When main has a newer migration, run `git pull --rebase origin main` and make your own migration again on top of main. Then run again.",
           "Do not change a flow for this, and do not empty the test database.",
         ].join("\n"),
       );
@@ -218,7 +371,7 @@ export async function startTestDatabase(): Promise<string> {
   if (!runs()) tool("pg_ctl", ["start", "-w", "-D", dataDir, "-l", serverLog]);
   await makeDatabase();
   const url = urlOf(NAME);
-  writeStartData(url);
+  await writeStartData(url);
   return url;
 }
 

@@ -83,13 +83,43 @@ function sessionCheckout(): string {
   }
 }
 
-/** Where the saved sessions live, for each worktree of the repo. */
-export const stateDir = path.join(
-  sessionCheckout(),
+const mainCheckout = sessionCheckout();
+
+/**
+ * The files that each checkout of the repo uses: the data folder of the test
+ * database server and the saved sessions. They are in the main checkout.
+ */
+export const sharedOutputDir = path.join(
+  mainCheckout,
   path.relative(repoRoot, packageDir),
   ".output",
-  "state",
 );
+
+/** `83-add-exporter` as `83_add_exporter`: a part of a database name. */
+export function checkoutKeyOf(folder: string): string {
+  return path
+    .basename(folder)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .slice(0, 40);
+}
+
+/**
+ * What names the test database and the sessions of this checkout: empty for
+ * the main checkout, the folder name for a worktree. Two builders work in
+ * two worktrees at the same time, each on a schema of its own, so a
+ * worktree has its own copy of the test database and of the sessions.
+ */
+export const checkoutKey =
+  mainCheckout === repoRoot ? "" : checkoutKeyOf(repoRoot);
+
+/** The saved sessions of the main checkout: a new worktree starts from a copy. */
+export const baseStateDir = path.join(sharedOutputDir, "state");
+
+/** Where the saved sessions of this checkout live. */
+export const stateDir = checkoutKey
+  ? path.join(baseStateDir, checkoutKey)
+  : baseStateDir;
 
 /**
  * The browser state of a person who is signed out. The flows start signed
