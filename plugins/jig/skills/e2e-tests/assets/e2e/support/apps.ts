@@ -95,7 +95,7 @@ export const sharedOutputDir = path.join(
   ".output",
 );
 
-/** `83-add-exporter` as `83_add_exporter`: a part of a database name. */
+/** `12-order-list` as `12_order_list`: a part of a database name. */
 export function checkoutKeyOf(folder: string): string {
   return path
     .basename(folder)
