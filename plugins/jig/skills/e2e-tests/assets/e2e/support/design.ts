@@ -324,6 +324,20 @@ export async function drawDesign(
     if (viewport) await design.setViewportSize(viewport);
     await design.goto(pathToFileURL(source).href);
     await design.evaluate(() => document.fonts.ready);
+    // A design can open a part with an animation (a tray slides in for
+    // 0.22 s): read the part where it rests, as a person sees it, not on its
+    // way. An animation with no end (a spinner) is not waited for.
+    await design.evaluate(() =>
+      Promise.allSettled(
+        document
+          .getAnimations()
+          .filter(
+            (animation) =>
+              animation.effect?.getComputedTiming().endTime !== Infinity,
+          )
+          .map((animation) => animation.finished),
+      ),
+    );
     await design.screenshot({ path: file, fullPage: true });
     return await design.evaluate(readLook);
   } finally {
