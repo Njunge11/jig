@@ -167,15 +167,45 @@ function buildForStartData(): void {
   });
 }
 
+/**
+ * What `drizzle-kit push` prints when it has a question and no terminal: is
+ * a table (or a column) new, or the new name of one that the database has?
+ * It then writes nothing and ends with code 0, so the exit code proves
+ * nothing.
+ */
+const PUSH_ASKED = "Interactive prompts require a TTY";
+
+/** True when the output of a `db:push` shows that the schema was not written. */
+export function pushAsked(output: string): boolean {
+  return output.includes(PUSH_ASKED);
+}
+
 /** Writes the start data on the database `url`. */
 function writeStartData(url: string): void {
   buildForStartData();
   for (const [workspace, script] of START_DATA) {
-    execFileSync("pnpm", ["--filter", workspace, script], {
+    const run = spawnSync("pnpm", ["--filter", workspace, script], {
       cwd: repoRoot,
-      stdio: ["ignore", "ignore", "inherit"],
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
       env: { ...process.env, DATABASE_URL: url },
     });
+    if (run.error) throw run.error;
+    process.stderr.write(run.stderr);
+    if (run.status !== 0) {
+      throw new Error(`${workspace} ${script} ended with code ${run.status}.`);
+    }
+    if (pushAsked(run.stdout + run.stderr)) {
+      throw new Error(
+        [
+          `${workspace} ${script} did not write the schema of this checkout to the test database.`,
+          "The test database holds a table or a column that this checkout does not know, and this checkout adds one, so drizzle-kit had a question.",
+          "The usual cause: main has a newer migration, and the run of a second worktree wrote it to the shared test database.",
+          "Fix: commit, run `git pull --rebase origin main`, make your own migration again on top of main, and run again.",
+          "Do not change a flow for this, and do not empty the test database.",
+        ].join("\n"),
+      );
+    }
   }
 }
 
