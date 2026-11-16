@@ -12,28 +12,53 @@ export const toastOf = (page: Page, text: string) =>
     .getByText(text, { exact: true });
 
 /**
- * Waits until the toast with the text `text` is gone. A toast stays while
- * the pointer is on it, and a click leaves the pointer where the next toast
- * shows. A toast that stays covers the controls under it, and a click on one
- * of them never lands. So the pointer leaves first, as a person's does.
+ * The list items of the page, without the toasts. A toast is a list item
+ * too, and it often holds the name of the thing that a row holds ("Aoi Sato
+ * removed"). A locator of each list item of the document then counts the
+ * toast as a row for the 4 seconds that the toast shows: a wait for the row
+ * to go took 4.3 seconds each time. No role tells a toast from a row, so the
+ * attribute of the toast library does.
+ */
+export const listItemsOf = (page: Page) =>
+  page.getByRole("listitem").and(page.locator(":not([data-sonner-toast])"));
+
+/**
+ * Takes the toast with the text `text` off the screen: a swipe down, as a
+ * person does who does not wait for it. A toast that stays covers the
+ * controls under it, and a click on one of them never lands.
  *
- * One move of the pointer is not always enough. In a run of 4 workers a
- * toast stayed open (`data-expanded="true"`) for 15 seconds after the one
- * move. So each try puts the pointer on the toast and takes it off again:
- * the toast gets the two events, in order.
+ * A toast closes by itself 4 seconds after the pointer leaves it, and a wait
+ * for that took 4.3 seconds for each toast (measured: 75 seconds in a sample
+ * of 31 tests). The swipe has the steps of the toast library's own
+ * Playwright test ("toast's dismiss callback gets executed correctly",
+ * sonner, test/tests/basic.spec.ts): from the centre of the toast, a small
+ * move that starts the drag, then the main move.
+ *
+ * A try that does not close the toast is made again after 1 second. The
+ * pointer leaves the toast at the end of each try, so a toast that no swipe
+ * closes still closes by itself.
  */
 export async function toastGone(page: Page, text: string) {
   const toast = toastOf(page, text);
   await expect(async () => {
-    const box = await toast
+    const box = await page
+      .locator("[data-sonner-toast]")
+      .filter({ hasText: text })
       .first()
       .boundingBox({ timeout: 1_000 })
       .catch(() => null);
     if (box) {
-      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      const x = box.x + box.width / 2;
+      const y = box.y + box.height / 2;
+      await page.mouse.move(x, y);
+      await page.mouse.down();
+      await page.mouse.move(x, y + 20, { steps: 5 });
+      await page.mouse.move(x, y + 300, { steps: 10 });
+      await page.mouse.up();
     }
     await page.mouse.move(0, 0);
-    // A toast closes 4 seconds after the pointer leaves it.
-    await expect(toast).toHaveCount(0, { timeout: 6_000 });
+    // A short wait, then the next try: a swipe does not reach a toast while
+    // a dialog that closes still takes the pointer (measured: 4 of 10).
+    await expect(toast).toHaveCount(0, { timeout: 1_000 });
   }).toPass();
 }

@@ -72,6 +72,7 @@ Reject the test if any item is true. Each item names its source.
 14. An **expected value comes from the app**, not from the spec: a text copied from the screen that the builder made, when the spec states a different one.
 15. The **name of the test** does not state the step and its outcome, or the body holds logic (a loop, a branch) that hides which step failed.
 16. The test **sets its own time limit**: `test.setTimeout`, `test.slow`, a `timeout` of `describe.configure` or of a step. A raised limit is a guess, and a step that hangs then runs for the length of that limit. Each step of `flowSteps` has the limit of the config, and the test gets that time for each step. A step that needs more time is two steps. Gate: `pnpm lint`, rule `jig/restricted-syntax`. (Playwright, Timeouts; `test.step`, option `timeout`.)
+17. The test **waits for a toast to close by itself**, or a locator of list rows counts a toast. A toast stays 4 seconds, and a toast is a list item that can hold the name of the row: a wait for the row to go then takes 4 seconds. Take the toast away with `toastGone`, and locate the rows of a list with `listItemsOf` (`support/toast.ts`). (Measured: 44 such waits were 31% of the test time of 31 tests.)
 
 ## A test that fails
 
@@ -170,7 +171,7 @@ packages/e2e/
     run.ts                 ← starts a run: one run at a time on the machine, the database of the run, a filter selects files of the package
     test-database.ts       ← the database of a run: a PostgreSQL server on the machine, its start data, its stop
     settle.ts              ← waits for the content; collects the page's errors
-    toast.ts               ← toastOf: the toast with a text; toastGone: the pointer leaves and the toast closes
+    toast.ts               ← toastOf: the toast with a text; toastGone: a swipe takes the toast away; listItemsOf: the list items without the toasts
     clean-build.ts         ← empties the build folder of the app before the build of a run
     steps.ts               ← flowSteps: one `test.step` per step, its end screen, its hidden faults, its time limit
     read-look.ts           ← reads the computed look of each visible text of a page
