@@ -88,49 +88,51 @@ else
   affected=""
 fi
 
-# The flows that the push adds or changes, for each app. Playwright follows
-# the imports of each flow file, so a changed helper selects its flows.
+# The run of a push is short. For each app that the push reaches it runs the
+# flow files that the push adds or changes, and the smoke set: the tests with
+# the tag @smoke, one per main flow of the app. It does not follow the imports
+# of a flow: one changed line of a shared helper then selected most flows
+# (measured: 127 of 168 tests). The full suite, `pnpm flows:all`, runs one
+# time after a checklist is on main, outside a push.
 apps="{{APP_NAMES}}"
-plan=""
-if printf '%s' "$affected" | grep -q '"packages/e2e"'; then
-  for app in $apps; do
-    ls "packages/e2e/flows/$app"/*.spec.ts >/dev/null 2>&1 || continue
-    if ! APP="$app" pnpm flows --only-changed="$base" --list 2>/dev/null |
-      grep -q "Total: 0 tests"; then
-      plan="$plan $app:changed"
-    fi
-  done
+
+# The flow files of app $1 that the push adds or changes, as names with no ending.
+changed_flows() {
+  git diff --name-only --diff-filter=d "$base"...HEAD -- "packages/e2e/flows/$1" |
+    sed -n 's|.*/\([^/]*\)\.spec\.ts$|\1|p'
+}
+
+# A changed helper of the flows reaches each app.
+helpers=0
+if ! git diff --quiet "$base"...HEAD -- packages/e2e ':(exclude)packages/e2e/flows'; then
+  helpers=1
 fi
 
-# A push with no changed flow has no other proof: each app that it changes,
-# or whose packages it changes, runs all its flows. So does each app when
-# turbo gives no answer.
-if [ -z "$plan" ]; then
-  for app in $apps; do
-    ls "packages/e2e/flows/$app"/*.spec.ts >/dev/null 2>&1 || continue
-    if [ -z "$affected" ] || printf '%s' "$affected" | grep -q "\"apps/$app\""; then
-      plan="$plan $app:all"
-    fi
-  done
-fi
+plan=""
+for app in $apps; do
+  ls "packages/e2e/flows/$app"/*.spec.ts >/dev/null 2>&1 || continue
+  if [ -n "$(changed_flows "$app")" ] || [ "$helpers" = 1 ] || [ -z "$affected" ] ||
+    printf '%s' "$affected" | grep -q "\"apps/$app\""; then
+    plan="$plan $app"
+  fi
+done
 
 if [ -z "$plan" ]; then
   echo "pre-push: the push changes no app that has a flow. No end-to-end run."
   exit 0
 fi
-echo "pre-push: the end-to-end run of this push:$plan. The full suite is: pnpm flows:all"
+echo "pre-push: the end-to-end run of this push: the smoke set and the changed flow files of$plan. The full suite is: pnpm flows:all"
 
 # One run at a time on this machine: `pnpm flows` waits for the run that
 # holds the lock (`packages/e2e/support/run.ts`).
-for item in $plan; do
-  app="${item%%:*}"
-  only=""
-  if [ "${item##*:}" = changed ]; then
-    only="--only-changed=$base"
-  fi
-  # $only is one flag or nothing.
-  # shellcheck disable=SC2086
-  APP="$app" pnpm flows $only || {
+for app in $plan; do
+  # Playwright tests the expression against the file name, the name and the
+  # tags of each test. The character before a file name is a space or "/".
+  select="@smoke"
+  for file in $(changed_flows "$app"); do
+    select="$select|[^a-z-]$file\\.spec\\.ts"
+  done
+  APP="$app" pnpm flows --grep "$select" || {
     echo "pre-push: an end-to-end test of $app failed. Open packages/e2e/.output/report/$app-flows/index.html."
     exit 1
   }

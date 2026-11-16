@@ -11,12 +11,16 @@ import { collectPageErrors, settle } from "../../support/settle";
 
 const app = appUnderTest();
 
-test("the home page opens and throws no error", async ({ page }) => {
-  const errors = collectPageErrors(page);
+test(
+  "the home page opens and throws no error",
+  { tag: "@smoke" },
+  async ({ page }) => {
+    const errors = collectPageErrors(page);
 
-  const response = await page.goto(app.home);
-  await settle(page);
+    const response = await page.goto(app.home);
+    await settle(page);
 
-  expect(response?.status()).toBe(200);
-  expect(errors).toEqual([]);
-});
+    expect(response?.status()).toBe(200);
+    expect(errors).toEqual([]);
+  },
+);

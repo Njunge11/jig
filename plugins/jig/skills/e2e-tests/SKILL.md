@@ -29,7 +29,7 @@ Run before a commit. Paste the output in the proof.
 1. `pnpm lint` and `pnpm typecheck` exit `0` in the e2e package. Lint proves every Review item that ends with `Gate:`.
 2. `pnpm flows` exits `0`. Paste its last line (`N passed`) and the path of the report.
 3. `SCREENS="<Design>=<path> …" pnpm screens` exits `0` for each design that a route shows. Paste its last line. A design that a flow step opens (`expectDesign`) is proved by gate 2.
-4. The pre-push hook runs the flows that the push adds or changes, and refuses the push on a failure. Never pass `--no-verify`, and never set `HUSKY=0`.
+4. The pre-push hook runs the flow files that the push adds or changes and the smoke set, and refuses the push on a failure. The full suite runs outside a push. Never pass `--no-verify`, and never set `HUSKY=0`.
 
 ## The list first, the test code after the build
 
@@ -265,17 +265,29 @@ test("an invited person sets up the account and opens the app", async ({ page, b
 
 ### The pre-push gate
 
-The machine that pushes runs the tests: the run starts its own database there. The `scaffold-repo` skill owns and installs the hook, `.husky/pre-push` (`assets/husky/pre-push`). A push runs the flows that it adds or changes. `pnpm flows:all` runs the full suite: before a deploy, and when the developer asks.
+The machine that pushes runs the tests: the run starts its own database there. The `scaffold-repo` skill owns and installs the hook, `.husky/pre-push` (`assets/husky/pre-push`).
+
+**Two levels.** The check before a merge is fast and narrow, and the full suite runs after it, outside the loop of the person who pushes. (Playwright, Continuous Integration: `--only-changed` is a fast first pass and a heuristic, and the full suite runs after it. Kubernetes, testing strategy: a check before the merge runs only for its paths; end-to-end tests are the most expensive tests and run after the merge or on a schedule.)
+
+**Level 1, the push.** For each app that the push reaches, the hook runs:
+
+- the flow files that the push adds or changes, by their names, and
+- the smoke set: the tests with `{ tag: "@smoke" }`.
+
+One `--grep` expression selects the two, because Playwright tests it against the file name, the name and the tags of each test. The hook does not follow the imports of a flow (`--only-changed`): one changed line of a shared helper then selects most flows (measured: 127 of 168 tests for one new line of a list of names).
 
 1. Documents, unit tests, their fixtures and setup: no run.
-2. Changed flow files or helpers: `pnpm flows --only-changed=origin/main` for each app. Playwright follows their imports.
-3. App code with no changed flow: all flows of each app that `turbo ls --affected` names.
-4. The first push, or a change to the config, `support/apps.ts` or the session setup: each app.
-5. One run at a time uses the ports and the database: each `pnpm flows` of the hook waits for the run that holds the lock (`support/run.ts`).
-6. A push to main that does not hold `origin/main`: refused before the run, with the command that rebases. The remote refuses it only after the run.
-7. The hook clears git's own variables first (`unset $(git rev-parse --local-env-vars)`). In a linked worktree git gives a hook `GIT_DIR` and no work tree, a git command in `packages/e2e` then takes that folder as the top of the repo, and `--only-changed` picks every flow (measured: 88 tests, where the right pick was 43).
+2. An app is in the run when the push changes one of its flow files, its code or a package that it uses (`turbo ls --affected`), or a helper of the flows (`packages/e2e` outside `flows/`).
+3. The first push, or a change to the config, `support/apps.ts` or the session setup: each app.
+4. One run at a time uses the ports and the database: each `pnpm flows` of the hook waits for the run that holds the lock (`support/run.ts`).
+5. A push to main that does not hold `origin/main`: refused before the run, with the command that rebases. The remote refuses it only after the run.
+6. The hook clears git's own variables first (`unset $(git rev-parse --local-env-vars)`). In a linked worktree git gives a hook `GIT_DIR` and no work tree, and a git command in `packages/e2e` then takes that folder as the top of the repo.
 
-A failure refuses the push. A flow that fails in the full suite is a fault to fix in the next push. Never make the hook run each flow on each push.
+**The smoke set.** One test per main flow of an app: the happy path that the business cannot run without (the sign-in, the main record made, the main list, the money screen). The set of one app takes 2 minutes at most. A checklist that adds a main flow tags its happy-path test. A test with a second browser, an upload or a wait on a time is not in the set.
+
+**Level 2, the full suite.** `pnpm flows:all` runs each flow of each app. It runs one time after a checklist is on main, while no push is active, and before a deploy. A flow that fails there is fixed before the next checklist starts. A builder that changes a helper under `support/` runs the flow files that use the changed part (`pnpm flows <name>`) before its push.
+
+A failure refuses the push. Never make the hook run each flow on each push.
 
 ### Dev dependencies
 
