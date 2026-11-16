@@ -14,7 +14,6 @@ function classesSkipStep(text) {
   return hasLg && !hasStep;
 }
 
-/** @type {import("eslint").Rule.RuleModule} */
 const responsiveMdStepRule = {
   meta: {
     type: "problem",

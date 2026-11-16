@@ -1,0 +1,36 @@
+# The git hooks of the repo, run by Lefthook (https://lefthook.dev).
+# `pnpm install` installs them. `LEFTHOOK=0` and `--no-verify` skip a hook:
+# never use them.
+
+# A commit: format the staged files, then lint and check the types. A job
+# that fails stops the commit, and the job after it does not run.
+pre-commit:
+  piped: true
+  jobs:
+    # `--staged` formats the staged files and stages them again (Bun docs,
+    # "Formatter", "Git hooks").
+    - name: format
+      run: pnpm exec bun fmt --staged
+    # One turbo run: oxlint and `bun check` of each package, in parallel.
+    # turbo runs a task of each package that the commit changes and of each
+    # package that depends on one. The result of each other package comes
+    # from its cache.
+    - name: lint and typecheck
+      glob: "*.{ts,tsx,js,jsx,mjs,mts}"
+      run: pnpm exec turbo run lint typecheck
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: pnpm exec commitlint --edit {1}
+
+# A push: the end-to-end run of the push. The script reads the refs of the
+# push from stdin (Lefthook docs, `use_stdin`), and `follow` prints its lines
+# while it runs.
+pre-push:
+  follow: true
+  jobs:
+    - name: flows
+      script: e2e.sh
+      runner: sh -e
+      use_stdin: true

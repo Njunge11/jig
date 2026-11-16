@@ -9,7 +9,7 @@ export function makeCancelService(deps: { repo: OrdersRepo }) {
 
     const held = await deps.repo.heldReservations(orderId);
     for (const r of held) {
-      // eslint-disable-next-line no-await-in-loop
+      // oxlint-disable-next-line no-await-in-loop
       await deps.repo.release(r.id);
     }
 

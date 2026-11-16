@@ -1,23 +1,12 @@
-import testNamedAfterSource from "./rules/test-named-after-source.mjs";
-import responsiveMdStep from "./rules/responsive-md-step.mjs";
-import segmentHasLoadingAndError from "./rules/segment-has-loading-and-error.mjs";
-
 /**
- * The jig lint gates as flat-config entries. Every `pnpm lint` item that the
+ * The jig lint gates as oxlint overrides. Every `pnpm lint` item that the
  * backend-standards, backend-tests and frontend-standards
  * checklists mark "Gate:" is enforced here, and each message cites its item.
  *
  * `gates(trees)` scopes every entry to the given top-level folders, so an app
- * passes its feature trees and a package passes `["src"]`.
+ * passes its feature trees and a package passes `["src"]`. A later entry
+ * replaces the options of a rule that an earlier entry set for the same file.
  */
-
-const jigPlugin = {
-  rules: {
-    "test-named-after-source": testNamedAfterSource,
-    "responsive-md-step": responsiveMdStep,
-    "segment-has-loading-and-error": segmentHasLoadingAndError,
-  },
-};
 
 const testIgnores = [
   "**/*.test.ts",
@@ -115,7 +104,15 @@ const tsxSyntaxSelectors = [
   },
 ];
 
+const loadsAppRouterSelector = {
+  selector:
+    'ImportDeclaration[importKind!="type"][source.value=/(^|\\/)_app$/]',
+  message:
+    "backend-tests 17: a test makes its caller from the routers that it calls (callerFactoryOf, test/caller.ts), not from the app router. A test that loads the app router runs on each change of each router.",
+};
+
 const backendTestSelectors = [
+  loadsAppRouterSelector,
   {
     selector: "CallExpression[callee.property.name=/^toHaveBeenCalled/]",
     message: "backend-tests 1: asserts an internal call, toHaveBeenCalled.",
@@ -148,7 +145,8 @@ export function gates(trees, options = {}) {
     {
       files: [...tsFiles, ...tsxFiles],
       rules: {
-        "react-hooks/exhaustive-deps": "error",
+        "react/no-deriving-state-in-effects": "error",
+        "react/exhaustive-deps": "error",
         "jsx-a11y/control-has-associated-label": "error",
         "jsx-a11y/label-has-associated-control": "error",
         "no-restricted-imports": ["error", { paths: [trpcReactQueryPath] }],
@@ -158,18 +156,18 @@ export function gates(trees, options = {}) {
     // --- backend-standards 31 / frontend-standards 64 (.ts, tests ignored) ---
     {
       files: tsFiles,
-      ignores: testIgnores,
+      excludeFiles: testIgnores,
       rules: {
-        "no-restricted-syntax": ["error", ...forcedAssertionSelectors],
+        "jig/restricted-syntax": ["error", ...forcedAssertionSelectors],
       },
     },
 
     // --- backend-standards 19, 23, 24, 25: every backend .ts file ---
     {
       files: tsFiles,
-      ignores: [...testIgnores, "**/ui/**", "components/ui/**", "app/**"],
+      excludeFiles: [...testIgnores, "**/ui/**", "components/ui/**", "app/**"],
       rules: {
-        "no-restricted-syntax": ["error", ...backendGlobSyntaxSelectors],
+        "jig/restricted-syntax": ["error", ...backendGlobSyntaxSelectors],
         "no-empty": ["error", { allowEmptyCatch: false }],
       },
     },
@@ -177,9 +175,9 @@ export function gates(trees, options = {}) {
     // --- backend-standards 2, 10, 11, 14, 16: service.ts ---
     {
       files: glob("**/*.service.ts"),
-      ignores: testIgnores,
+      excludeFiles: testIgnores,
       rules: {
-        "no-restricted-syntax": ["error", ...layerSyntaxSelectors],
+        "jig/restricted-syntax": ["error", ...layerSyntaxSelectors],
         "no-await-in-loop": "error",
         "no-restricted-imports": [
           "error",
@@ -204,9 +202,9 @@ export function gates(trees, options = {}) {
     // --- backend-standards 2, 11, 14, 16: repo.ts ---
     {
       files: glob("**/*.repo.ts"),
-      ignores: testIgnores,
+      excludeFiles: testIgnores,
       rules: {
-        "no-restricted-syntax": ["error", ...layerSyntaxSelectors],
+        "jig/restricted-syntax": ["error", ...layerSyntaxSelectors],
         "no-await-in-loop": "error",
         "no-restricted-imports": [
           "error",
@@ -238,10 +236,9 @@ export function gates(trees, options = {}) {
     // --- frontend-standards 3, 9, 14, 16, 31/64: every .tsx file ---
     {
       files: tsxFiles,
-      plugins: { jig: jigPlugin },
       rules: {
         "jig/responsive-md-step": "error",
-        "no-restricted-syntax": ["error", ...tsxSyntaxSelectors],
+        "jig/restricted-syntax": ["error", ...tsxSyntaxSelectors],
         "no-restricted-imports": [
           "error",
           {
@@ -266,9 +263,9 @@ export function gates(trees, options = {}) {
     },
     {
       files: tsxFiles,
-      ignores: testIgnores,
+      excludeFiles: testIgnores,
       rules: {
-        "no-restricted-syntax": [
+        "jig/restricted-syntax": [
           "error",
           ...tsxSyntaxSelectors,
           ...forcedAssertionSelectors,
@@ -280,7 +277,7 @@ export function gates(trees, options = {}) {
     {
       files: glob("**/*.test.ts"),
       rules: {
-        "no-restricted-syntax": [
+        "jig/restricted-syntax": [
           "error",
           ...backendTestSelectors,
           {
@@ -301,7 +298,7 @@ export function gates(trees, options = {}) {
     {
       files: glob("**/*.test.tsx"),
       rules: {
-        "no-restricted-syntax": [
+        "jig/restricted-syntax": [
           "error",
           ...tsxSyntaxSelectors,
           ...backendTestSelectors,
@@ -313,7 +310,7 @@ export function gates(trees, options = {}) {
     {
       files: [...glob("**/ui/**/*.test.ts"), ...glob("**/ui/**/*.test.tsx")],
       rules: {
-        "no-restricted-syntax": [
+        "jig/restricted-syntax": [
           "error",
           {
             selector: "Program",
@@ -324,13 +321,18 @@ export function gates(trees, options = {}) {
       },
     },
 
+    // --- a fixture of the tests does not load the app router ---
+    {
+      files: glob("**/__fixtures__/**"),
+      rules: { "jig/restricted-syntax": ["error", loadsAppRouterSelector] },
+    },
+
     // --- backend-tests 10: a test file is named after its source ---
     {
       files: [
         ...glob("**/__tests__/*.test.ts"),
         ...glob("**/__tests__/*.test.tsx"),
       ],
-      plugins: { jig: jigPlugin },
       rules: { "jig/test-named-after-source": "error" },
     },
 
@@ -339,7 +341,6 @@ export function gates(trees, options = {}) {
       ? [
           {
             files: options.pages,
-            plugins: { jig: jigPlugin },
             rules: { "jig/segment-has-loading-and-error": "error" },
           },
         ]

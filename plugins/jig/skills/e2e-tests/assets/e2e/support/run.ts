@@ -194,7 +194,10 @@ let child: ChildProcess | undefined;
 for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) {
   process.on(signal, () => {
     if (child) {
-      child.kill(signal);
+      // The Playwright runner stops its servers on SIGINT only (its
+      // `SigIntWatcher`). A SIGTERM ends it at once, and the three app
+      // servers stay on their ports. So each stop signal goes on as SIGINT.
+      child.kill("SIGINT");
     } else {
       release();
       process.exit(1);

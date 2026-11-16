@@ -65,9 +65,10 @@ list-narrowing mechanics. Libraries: `nuqs` for URL state and
 
    `PageProps<"/products">` is the global route type that Next
    writes to `.next/types` on `next dev`, `next build` or
-   `next typegen`. Without those files `tsc` fails with "Cannot
-   find name 'PageProps'", so the app's `typecheck` script is
-   `next typegen && tsc --noEmit`, as the Next CLI docs show.
+   `next typegen`. Without those files the typecheck fails with
+   "Cannot find name 'PageProps'", so the app's `typecheck` script
+   is `next typegen && bun check --no-script`: the Next CLI docs
+   put `next typegen` before the type checker.
 
 4. **Client list: URL state in, a deferred input to one suspense
    query.** `placeholderData` does not exist for suspense queries,

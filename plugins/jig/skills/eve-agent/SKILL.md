@@ -119,9 +119,9 @@ Reject the change if any item is true. Walk it against every changed file under 
 6. A hook blocks, injects context, or has an unguarded body.
 7. A value the agent must remember across turns rides `clientContext` instead of `defineState`.
 8. A lane change names no turn for the developer to send under manual verification, or names one without the tool order and the model-call count its trace must show.
-9. A `useEveAgent` client resumes a thread without `initialSession` and `resume: true`, reuses one store across threads, or passes `initialEvents` that hold more than one session. Gate for the `resume: true` clause: `pnpm lint`, rule `no-restricted-syntax (eve-agent 9)`; walk the rest by hand.
+9. A `useEveAgent` client resumes a thread without `initialSession` and `resume: true`, reuses one store across threads, or passes `initialEvents` that hold more than one session. Gate for the `resume: true` clause: `pnpm lint`, rule `jig/restricted-syntax (eve-agent 9)`; walk the rest by hand.
 10. A gate in the Gates section was not run, or its output is not in the proof, or a builder ran the developer's part of one: an eval script, a turn sent to a model, or `eve traces` of a turn the developer did not send.
-12. A tool whose raw output a client, a hook or a mapping reads has no `outputSchema`. Gate: `pnpm lint`, rule `no-restricted-syntax (eve-agent new)`.
+12. A tool whose raw output a client, a hook or a mapping reads has no `outputSchema`. Gate: `pnpm lint`, rule `jig/restricted-syntax (eve-agent new)`.
 13. A tool's `execute` body runs outside the tool's trace root, or a call under it runs outside `trace`, so the turn's block misses it (`backend-standards` Review item 35).
 
 ## eve docs map

@@ -12,9 +12,25 @@ one copy.
 ## Commands
 
 Run from the repo root: `pnpm dev`, `pnpm build`, `pnpm lint`,
-`pnpm typecheck`, `pnpm test`, `pnpm flows`, `pnpm screens`.
+`pnpm typecheck`, `pnpm test`, `pnpm format`, `pnpm flows`, `pnpm screens`.
+`pnpm verify` runs lint, typecheck, build and the backend tests in one
+parallel turbo run: the tasks of the `ci` workflow.
 
+- `pnpm lint` is oxlint: each package with lint has an `oxlint.config.ts`,
+  and the jig gates are `packages/lint-config`. `pnpm typecheck` is
+  `bun check`, the type checker of Bun. `pnpm format` is `bun fmt`;
+  `bunfig.toml` lists the files that it skips. `next build` does not check
+  the types a second time (`typescript.ignoreBuildErrors` in each
+  `next.config.ts`): `pnpm typecheck` is the one type check.
 - `pnpm test` runs the backend tests on PGlite. They need no database.
+- `pnpm test:changed` runs the backend tests that the changes since
+  `origin/main` reach (Vitest `--changed`): a test runs when it imports a
+  changed file. A changed `package.json` or Vitest config runs each test.
+  It is the check of a builder before a push. `ci` runs each test.
+- A router test makes its caller from the routers that it calls:
+  `callerFactoryOf({ orders: ordersRouter })` (`test/caller.ts` of an app).
+  No test and no fixture imports the app router: such a test runs on each
+  change of each router. `pnpm lint` refuses the import.
 - `pnpm flows` and `pnpm screens` run the end-to-end tests and the design
   check on the built app and a database of their own (see "Screens and
   flows").
@@ -62,8 +78,10 @@ before the work, and every change must pass their Review checklists:
   (`The job has exceeded the maximum execution time`). The fix is more
   shards in the workflow's `test` matrix, never a re-run and never a higher
   limit.
-- The commit hooks run lint-staged and commitlint. A subject starts in lower
-  case and carries no attribution trailer.
+- The hooks are Lefthook (`lefthook.yml`). A commit runs oxlint with
+  `--fix` and `bun fmt` on the staged files, then `pnpm typecheck`, then
+  commitlint. A subject starts in lower case and carries no attribution
+  trailer.
 - Migrations stay in order: a second task that adds a migration deletes its
   own and runs `pnpm --filter {{SCOPE}}/db db:generate` again on top of main,
   never edits `drizzle/meta/_journal.json` by hand.
@@ -117,7 +135,7 @@ already answers on its port.
   active, before a deploy, and when the developer asks. A flow that fails
   in the full suite is fixed before the next checklist starts. A builder
   that changes a helper in `packages/e2e/support` also runs the flow files
-  that use the changed part (`pnpm flows <name>`) before its push. Never push with `--no-verify` or `HUSKY=0`.
+  that use the changed part (`pnpm flows <name>`) before its push. Never push with `--no-verify` or `LEFTHOOK=0`.
 - Each test makes its own data and takes it away at its end. Data that it
   cannot take away carries one fixed marked name.
 - Built screens that keep their look: none yet. When the developer changes

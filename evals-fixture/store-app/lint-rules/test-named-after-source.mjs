@@ -1,10 +1,9 @@
-// backend-tests 10: a test file must be named after
+// docs/lint-gates.md §6.1 backend-tests 10: a test file must be named after
 // the source file it tests. Reports when neither `<name>.ts` nor
 // `<name>.tsx` exists beside the `__tests__` folder.
 import fs from "node:fs";
 import path from "node:path";
 
-/** @type {import("eslint").Rule.RuleModule} */
 const testNamedAfterSourceRule = {
   meta: {
     type: "problem",

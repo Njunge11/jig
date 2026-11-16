@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
+    "typecheck": "bun check --no-script",
+    "lint": "oxlint",
     "screens": "dotenv -e ../../.env -- node support/run.ts screens",
     "flows": "dotenv -e ../../.env -- node support/run.ts flows"
   },
@@ -13,10 +13,9 @@
     "@playwright/test": "^1.65.0",
     "@tailwindcss/node": "^4.1.0",
     "@types/node": "^24",
-    "eslint": "^9.39.5",
     "postgres": "^3.4.7",
     "tailwindcss": "^4.1.0",
     "typescript": "^5",
-    "typescript-eslint": "^8.72.2"
+    "{{SCOPE}}/lint-config": "workspace:*"
   }
 }

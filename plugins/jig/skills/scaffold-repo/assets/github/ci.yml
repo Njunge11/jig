@@ -1,6 +1,7 @@
 # The one check of every push to main (jig open-feature-pr, Straight to main):
-# lint, typecheck, build and the full suite. The suites run
-# on PGlite, so the job needs no database and no secret.
+# the format, lint, typecheck, build and the full suite. The suites run
+# on PGlite, so the job needs no database and no secret. `pnpm install`
+# brings each tool (oxlint, Bun), so the job sets up Node and pnpm only.
 name: ci
 
 on:
@@ -24,9 +25,9 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-      - run: pnpm typecheck
-      - run: pnpm build
+      - run: pnpm format:check
+      # One turbo run: the three tasks of each package run in parallel.
+      - run: pnpm exec turbo run lint typecheck build
 
   # The full suite. Each matrix entry is one machine: `args` goes to
   # `turbo run test:run`. A job that reaches its time limit shows as

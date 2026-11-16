@@ -81,5 +81,5 @@ Reject the change if any item is true. Skip items 1–3 when the diff has no wor
 3. A step's failure modes are not classified (`FatalError` vs `RetryableError`) where they differ.
 4. An MCP tool has no annotations, throws a domain error instead of a return with `isError: true`, or returns `structuredContent` without the text fallback.
 5. A mutating MCP tool is registered outside the idempotency wrapper, or accepts an idempotency key as input.
-6. An eve tool's `execute` is declared inside a function body or wrapped in a factory, instead of a named function at module scope in `agent/tools/<tool_name>.ts`; or the tool throws an expected failure instead of returning it. Gate for the `execute` clause: `pnpm lint`, rule `no-restricted-syntax (backend-standards 26)`; walk the rest by hand.
+6. An eve tool's `execute` is declared inside a function body or wrapped in a factory, instead of a named function at module scope in `agent/tools/<tool_name>.ts`; or the tool throws an expected failure instead of returning it. Gate for the `execute` clause: `pnpm lint`, rule `jig/restricted-syntax (backend-standards 26)`; walk the rest by hand.
 7. Removed — evals are the developer's; no agent writes or requires one (`eve-agent` § Evals).

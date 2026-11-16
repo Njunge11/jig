@@ -19,6 +19,11 @@
     "test:run": {
       "dependsOn": ["^build"],
       "env": ["TRACE_LOG"]
+    },
+    "test:changed": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "env": ["TRACE_LOG"]
     }
   }
 }

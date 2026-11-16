@@ -14,8 +14,8 @@ const GIT_READ = new Set([
   "diff", "log", "status", "show", "rev-parse", "ls-files", "merge-base",
   "blame", "grep", "ls-remote", "cat-file", "describe", "shortlog",
 ]);
-const GATE_SCRIPTS = new Set(["lint", "typecheck", "test", "test:run"]);
-const GATE_BINS = new Set(["vitest", "tsc", "eslint", "eve"]);
+const GATE_SCRIPTS = new Set(["lint", "typecheck", "test", "test:run", "test:changed", "format:check"]);
+const GATE_BINS = new Set(["vitest", "oxlint", "bun", "eve"]);
 
 // Splits a command line into segments on unquoted ; && || | and newlines.
 // Returns null when it finds an unquoted write redirect or a command
@@ -85,7 +85,8 @@ function gateAllowed(args) {
   if (args.some((a) => writes.some((w) => a === w || a.startsWith(w + "=") || a.startsWith("--fix")))) return false;
   const [bin, ...rest] = args;
   if (GATE_BINS.has(bin)) {
-    if (bin === "tsc") return rest.includes("--noEmit");
+    // `bun check` reads only. `bun fmt` writes each file unless it has `--check`.
+    if (bin === "bun") return rest[0] === "check" || (rest[0] === "fmt" && rest.includes("--check"));
     if (bin === "eve") return rest[0] === "info";
     return true;
   }

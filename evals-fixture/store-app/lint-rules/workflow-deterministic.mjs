@@ -64,7 +64,7 @@ function isRestrictedImportSource(source) {
 
 // Generic ESTree walk: true if any function anywhere in the tree has a body
 // that starts with the "use workflow" directive. `parent` is skipped so the
-// walk never follows the back-edge ESLint sets while traversing.
+// walk never follows the back-edge that the linter sets while traversing.
 function containsWorkflowFunction(node, seen) {
   if (!node || typeof node !== "object" || typeof node.type !== "string") {
     return false;
@@ -101,7 +101,6 @@ function fileIsWorkflow(programNode) {
   );
 }
 
-/** @type {import("eslint").Rule.RuleModule} */
 const workflowDeterministicRule = {
   meta: {
     type: "problem",

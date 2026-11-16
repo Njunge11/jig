@@ -17,7 +17,6 @@ function isPrefetchCall(node) {
   return false;
 }
 
-/** @type {import("eslint").Rule.RuleModule} */
 const segmentHasLoadingAndErrorRule = {
   meta: {
     type: "problem",

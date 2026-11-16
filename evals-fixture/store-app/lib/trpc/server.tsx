@@ -14,11 +14,11 @@ export function HydrateClient({ children }: { children: React.ReactNode }) {
   return <HydrationBoundary state={dehydrate(getQueryClient())}>{children}</HydrationBoundary>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(queryOptions: T) {
   const qc = getQueryClient();
   if (queryOptions.queryKey[1]?.type === "infinite") {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // oxlint-disable-next-line typescript/no-explicit-any
     void qc.prefetchInfiniteQuery(queryOptions as any);
   } else {
     void qc.prefetchQuery(queryOptions);

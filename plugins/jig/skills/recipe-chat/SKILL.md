@@ -67,8 +67,8 @@ streamed AI output. Libraries: `ai` + `@ai-sdk/react` (the
    not by `AppMessagePart["type"]`: a `UIMessage` part union also
    holds `reasoning`, `file`, `step-start`, `source-url`,
    `tool-*` and more, so `Record<AppMessagePart["type"], …>`
-   demands a card for each and fails `tsc`. `satisfies
-   Record<CardType, Card>` fails `tsc` on a data part type with
+   demands a card for each and fails the typecheck. `satisfies
+   Record<CardType, Card>` fails the typecheck on a data part type with
    no card, so a new type cannot ship unrendered; the widened
    `cardFor` lookup returns `undefined` for every other type, so
    it renders nothing. Each card narrows its own part

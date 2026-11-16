@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "typecheck": "next typegen && tsc --noEmit",
-    "lint": "eslint ."
+    "typecheck": "next typegen && bun check --no-script",
+    "lint": "oxlint"
   },
   "dependencies": {
     "@ai-sdk/react": "4.0.146",
@@ -63,9 +63,9 @@
     "@types/node": "24.19.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "bun": "1.4.4",
     "drizzle-kit": "0.31.9",
-    "eslint": "9.39.5",
-    "eslint-config-next": "16.4.3",
+    "oxlint": "1.93.0",
     "shadcn": "4.22.1",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3"

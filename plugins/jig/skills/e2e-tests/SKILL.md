@@ -29,7 +29,7 @@ Run before a commit. Paste the output in the proof.
 1. `pnpm lint` and `pnpm typecheck` exit `0` in the e2e package. Lint proves every Review item that ends with `Gate:`.
 2. `pnpm flows` exits `0`. Paste its last line (`N passed`) and the path of the report.
 3. `SCREENS="<Design>=<path> …" pnpm screens` exits `0` for each design that a route shows, or each difference that it prints is on a stock shadcn part and has that verdict (**The proof**). Paste its last line. A design that a flow step opens (`expectDesign`, `shot`) is proved by gate 2.
-4. The pre-push hook runs the flow files that the push adds or changes and the smoke set, and refuses the push on a failure. The full suite runs outside a push. Never pass `--no-verify`, and never set `HUSKY=0`.
+4. The pre-push hook runs the flow files that the push adds or changes and the smoke set, and refuses the push on a failure. The full suite runs outside a push. Never pass `--no-verify`, and never set `LEFTHOOK=0`.
 
 ## The list first, the test code after the build
 
@@ -59,7 +59,7 @@ Reject the test if any item is true. Each item names its source.
 1. The test asserts **what a person cannot see or do**: a CSS class, a database row read by the test, a response body, a store. Assert what the page shows. The one exception is the server log as the person's inbox: the emailed link and the texted code. (Playwright, Best Practices, "Test user-visible behavior".)
 2. The test locates by **CSS, XPath or test id** where a role, a label or a text locator exists (`getByRole`, `getByLabel`, `getByText`). (Best Practices, "Prefer user-facing attributes to XPath or CSS selectors".) A toast is read inside the toast region, with its full text (`toastOf` in `support/toast.ts`): the page can show the same words in a second place (the activity of a record, the row of a list) while the toast is on screen, and a locator of the text alone then answers two elements. Such a test passes on a slow database and fails on a fast one. A toast stays while the pointer is on it, and a toast that stays covers the controls under it: a click on one of them never lands. After a click that starts a toast, move the pointer off the toast before the next click near it (`toastGone`). One move of the pointer is not always enough: `toastGone` puts the pointer on the toast, takes it off again, and tries again while the toast stays.
 3. The test uses a **manual assertion or a fixed wait**: `expect(await locator.isVisible()).toBe(true)`, `waitForTimeout`. Use a web-first assertion, which waits and retries: `await expect(locator).toBeVisible()`. (Best Practices, "Use web first assertions".)
-4. A Playwright call has **no `await`**: the test passes without running the call. Gate: `pnpm lint`, rule `@typescript-eslint/no-floating-promises`. (Best Practices, "Lint your tests".)
+4. A Playwright call has **no `await`**: the test passes without running the call. Gate: `pnpm lint`, rule `typescript/no-floating-promises`. (Best Practices, "Lint your tests".)
 5. The test takes **a response or a quiet network as the sign that the screen is ready**. A streamed tRPC answer sends HTTP 200 before the procedure ends, and the app prefetches without end. Wait for the screen's own answer: the field that closes, the row that shows, the heading of the next step. The address of a page is such an early sign too: a layout that streams its frame and then redirects (a `redirect()` under a `Suspense`) has the old address when the page loads. Read which page it is from what it shows (`expect(home.or(welcomeForm)).toBeVisible()`). A full page load that the app starts (a sign-out, `window.location`) changes the address before the scripts of the new page run, and a field of a form that is typed in before then loses its text: the helper that fills the form waits for the loaded page first (`page.waitForLoadState("load")`, or `page.waitForURL`, which waits for the load; `expect(page).toHaveURL` does not). After a filter, a tab or a search changes, the address also changes before the rows and the counts do: the test waits for a row or a count that only the new answer shows before it reads a number from the screen.
 6. The test **depends on data it did not make**, or on data that a second test changes. Each test makes its own data, with a name that holds the test and the run, and removes it at the end. Data it cannot remove carries one fixed marked name, and each fixed value of that data (a phone, an address) is in one file, `support/flow-check.ts`: two flows never give one value to two people. (Playwright, Parallelism, "Give each test its own backend data".) A compare of two numbers that the page reads at different moments (the count on a tab and the total of its list) loads the page again on each retry: a second test can add a row between the two reads.
 7. The file uses **`serial` mode**, or a test needs a second test to run first. Steps that build on each other are one test, with one `test.step` per step (`flowSteps` in `support/steps.ts`): the report lists each step. Two flows that only share a starting point (a member who is set up) are two tests, and a helper makes the starting point for each: a failure in the first then does not hide the second. (Parallelism, "Serial mode": "Using serial is not recommended.")
@@ -71,7 +71,7 @@ Reject the test if any item is true. Each item names its source.
 13. The test holds a **pixel baseline (`toHaveScreenshot`)**. A baseline is a picture of what the builder made, not of the design, and it needs the same data on every run. The design check below compares the screen with the design itself.
 14. An **expected value comes from the app**, not from the spec: a text copied from the screen that the builder made, when the spec states a different one.
 15. The **name of the test** does not state the step and its outcome, or the body holds logic (a loop, a branch) that hides which step failed.
-16. The test **sets its own time limit**: `test.setTimeout`, `test.slow`, a `timeout` of `describe.configure` or of a step. A raised limit is a guess, and a step that hangs then runs for the length of that limit. Each step of `flowSteps` has the limit of the config, and the test gets that time for each step. A step that needs more time is two steps. Gate: `pnpm lint`, rule `no-restricted-syntax`. (Playwright, Timeouts; `test.step`, option `timeout`.)
+16. The test **sets its own time limit**: `test.setTimeout`, `test.slow`, a `timeout` of `describe.configure` or of a step. A raised limit is a guess, and a step that hangs then runs for the length of that limit. Each step of `flowSteps` has the limit of the config, and the test gets that time for each step. A step that needs more time is two steps. Gate: `pnpm lint`, rule `jig/restricted-syntax`. (Playwright, Timeouts; `test.step`, option `timeout`.)
 
 ## A test that fails
 
@@ -158,7 +158,7 @@ The files under `assets/e2e/` are the standard: copy them to `packages/e2e/` (`g
 ```
 packages/e2e/
   playwright.config.ts     ← the server of the run, the workers, the projects, the report
-  eslint.config.mjs        ← the no-floating-promises gate
+  oxlint.config.ts         ← the no-floating-promises gate and the no-time-limit gate
   flows/<app>/<flow>.spec.ts
   screens/screens.spec.ts  ← draws each route of SCREENS and compares it with its design
   support/
@@ -265,7 +265,7 @@ test("an invited person sets up the account and opens the app", async ({ page, b
 
 ### The pre-push gate
 
-The machine that pushes runs the tests: the run starts its own database there. The `scaffold-repo` skill owns and installs the hook, `.husky/pre-push` (`assets/husky/pre-push`).
+The machine that pushes runs the tests: the run starts its own database there. The `scaffold-repo` skill owns and installs the hook: the `pre-push` job of `lefthook.yml` and its script `.lefthook/pre-push/e2e.sh` (`assets/lefthook/`).
 
 **Two levels.** The check before a merge is fast and narrow, and the full suite runs after it, outside the loop of the person who pushes. (Playwright, Continuous Integration: `--only-changed` is a fast first pass and a heuristic, and the full suite runs after it. Kubernetes, testing strategy: a check before the merge runs only for its paths; end-to-end tests are the most expensive tests and run after the merge or on a schedule.)
 
@@ -292,8 +292,10 @@ A failure refuses the push. Never make the hook run each flow on each push.
 ### Dev dependencies
 
 ```
-@playwright/test  @tailwindcss/node  tailwindcss  dotenv-cli  eslint  typescript-eslint  typescript
+@playwright/test  @tailwindcss/node  tailwindcss  dotenv-cli  typescript
 ```
+
+oxlint, `oxlint-tsgolint` (the type-aware rules) and Bun are dev dependencies of the repo root. `oxlint.config.ts` is in the `include` of the package's `tsconfig.json`: the type-aware lint puts a file outside each tsconfig into the nearest tsconfig of a folder above, and a lint of 1 second then takes minutes.
 
 Run `pnpm exec playwright install chromium` once on a new machine: only the browser the suite uses. (Best Practices, "Optimize browser downloads on CI".)
 
@@ -307,7 +309,8 @@ Run `pnpm exec playwright install chromium` once on a new machine: only the brow
 - AWS, S3, Elements of a CORS configuration: https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManageCorsUsing.html
 - Playwright, `test.step`: https://playwright.dev/docs/api/class-test#test-step
 - Playwright, Timeouts: https://playwright.dev/docs/test-timeouts
-- Husky, Get started: https://typicode.github.io/husky/get-started.html
+- Lefthook, Configuration: https://lefthook.dev/configuration/
+- Oxlint, Type-Aware Linting: https://oxc.rs/docs/guide/usage/linter/type-aware
 - Playwright, Continuous Integration: https://playwright.dev/docs/ci
 - Turborepo, `--affected`: https://turborepo.dev/docs/reference/run
 - Software Engineering at Google, chapter 23: https://abseil.io/resources/swe-book/html/ch23.html

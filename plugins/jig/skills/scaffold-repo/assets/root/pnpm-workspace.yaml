@@ -7,3 +7,6 @@ allowBuilds:
   sharp: false
   unrs-resolver: false
   "@tailwindcss/oxide": false
+  # The two tools below download their program in an install script.
+  bun: true
+  lefthook: true

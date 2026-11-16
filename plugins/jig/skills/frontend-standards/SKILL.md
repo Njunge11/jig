@@ -117,7 +117,7 @@ not restate them. This list is also the review checklist.
    The child is a single, non-Fragment element that spreads
    props. Mind HTML nesting validity: a button cannot contain a
    button — put interactive controls beside a trigger, not inside
-   it. Gate: `pnpm lint`, rule `no-restricted-syntax (frontend-standards 9)`.
+   it. Gate: `pnpm lint`, rule `jig/restricted-syntax (frontend-standards 9)`.
 10. Preserve copy verbatim. Do not invent labels, headings, or
     placeholder text that were not described; ask only when
     genuinely ambiguous.
@@ -147,7 +147,7 @@ not restate them. This list is also the review checklist.
     neutral: "text-muted-foreground" }`). Only a value with no
     fixed set (a user-picked color) goes through a CSS variable:
     `className="bg-[var(--tone)]"`, the variable set on the
-    element's `style`. Gate: `pnpm lint`, rule `no-restricted-syntax (frontend-standards 14)`.
+    element's `style`. Gate: `pnpm lint`, rule `jig/restricted-syntax (frontend-standards 14)`.
 
 ### Responsive — every form factor, breakpoint utilities only
 
@@ -191,11 +191,11 @@ the small breakpoint and up," never "on mobile."
        handler that caused it.
     c. It sets state from a value props or state already hold
        (rules 21 and 25).
-    Gate: `pnpm lint`, rule `react-hooks/set-state-in-effect`,
+    Gate: `pnpm lint`, rule `react/set-state-in-effect`,
     for c only; a and b are walked by hand.
 21. Derive values during render. Never store what props/state can
     compute, and never sync state in an effect (Gate: `pnpm lint`,
-    rule `react-hooks/no-deriving-state-in-effects`):
+    rule `react/no-deriving-state-in-effects`):
 
 ```tsx
 // Wrong: redundant state + effect
@@ -211,13 +211,13 @@ const fullName = first + " " + last;
     it.
 23. Effect dependencies are primitives (`[user.id]`), not objects
     (`[user]`) — objects re-run the effect on every unrelated
-    change. Gate: `pnpm lint`, rule `react-hooks/exhaustive-deps`.
+    change. Gate: `pnpm lint`, rule `react/exhaustive-deps`.
 24. `useMemo`/`useCallback` are performance tools for measured,
     expensive work or referential stability a consumer requires.
     Wrapping a small object literal or a trivial computation is
     noise — the default is no memoization.
 25. No derived state in `useState`. State holds what the user
-    did, not what can be computed from it. Gate: `pnpm lint`, rule `react-hooks/no-deriving-state-in-effects`.
+    did, not what can be computed from it. Gate: `pnpm lint`, rule `react/no-deriving-state-in-effects`.
 
 ### Accessibility — do not undo what Radix gives
 
@@ -449,7 +449,7 @@ export default async function Page() {
     version of a type"; each of these forms defeats that rule and
     hides a value that does not fit. Type it at its source: a
     typed fake, a schema parse, a narrowed union. Gate: `pnpm lint`,
-    rule `no-restricted-syntax (frontend-standards 64)`.
+    rule `jig/restricted-syntax (frontend-standards 64)`.
 
 ### State machines
 

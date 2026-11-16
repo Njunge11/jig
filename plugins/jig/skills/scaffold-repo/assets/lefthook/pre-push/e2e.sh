@@ -1,6 +1,6 @@
 # Runs, on the real build before a push, the Playwright end-to-end tests
 # that the push adds or changes. A failed test refuses the push. The full
-# suite is `pnpm flows:all`. HUSKY=0 skips every hook.
+# suite is `pnpm flows:all`. LEFTHOOK=0 skips every hook.
 
 # In a linked worktree, git gives a hook GIT_DIR and no work tree. A git
 # command in a subfolder then takes that subfolder as the top of the repo

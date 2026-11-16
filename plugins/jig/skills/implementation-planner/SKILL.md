@@ -15,7 +15,7 @@ The spec is the doc at `$ARGUMENTS`. Read the full document.
 
 ### Step 2: Audit the repo
 
-First check the repo's baseline: `CLAUDE.md`, `.github/workflows/ci.yml`, `.husky/pre-commit`, `.husky/commit-msg`, `.husky/pre-push`, `.env.example` and the e2e package (`packages/e2e/playwright.config.ts`, or `e2e/playwright.config.ts` in a repo with one app) exist, and `CLAUDE.md` says whether work goes straight to main. When one is missing, stop and tell the developer to run `/jig:scaffold-repo` on the repo first: a checklist built on a repo with no CI check, no hooks, no e2e package or no git-flow rule fails at its Done items, not at build time. Write the Done items in the form that matches `CLAUDE.md`: the straight-to-main form when it says so, the PR form otherwise.
+First check the repo's baseline: `CLAUDE.md`, `.github/workflows/ci.yml`, `lefthook.yml`, `.lefthook/pre-push/e2e.sh`, `.env.example` and the e2e package (`packages/e2e/playwright.config.ts`, or `e2e/playwright.config.ts` in a repo with one app) exist, and `CLAUDE.md` says whether work goes straight to main. When one is missing, stop and tell the developer to run `/jig:scaffold-repo` on the repo first: a checklist built on a repo with no CI check, no hooks, no e2e package or no git-flow rule fails at its Done items, not at build time. Write the Done items in the form that matches `CLAUDE.md`: the straight-to-main form when it says so, the PR form otherwise.
 
 Then read the codebase and collect the context this spec's implementation checklists need: what already exists, what must be added, what must change to implement the spec. Every fact about the repo that you write into an implementation checklist must be verified against the repo in this session, not from memory.
 

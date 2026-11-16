@@ -16,7 +16,7 @@ The Team page with its invite dialog is one PR. The page that the emailed link o
 No design exists for the two screens: build them with the stock components.
 MD
 cat > apps/admin/package.json <<'JSON'
-{ "name": "@store/admin", "private": true, "scripts": { "dev": "next dev -p 3000", "build": "next build", "lint": "eslint .", "typecheck": "tsc --noEmit" } }
+{ "name": "@store/admin", "private": true, "scripts": { "dev": "next dev -p 3000", "build": "next build", "lint": "oxlint", "typecheck": "bun check --no-script" } }
 JSON
 cat > apps/admin/src/features/team/ui/team-page.tsx <<'TSX'
 export function TeamPage() {

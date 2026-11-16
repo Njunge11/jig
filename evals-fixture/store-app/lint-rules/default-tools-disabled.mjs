@@ -15,7 +15,6 @@ const DEFAULT_TOOL_SLUGS = [
   "write_file",
 ];
 
-/** @type {import("eslint").Rule.RuleModule} */
 const defaultToolsDisabledRule = {
   meta: {
     type: "problem",

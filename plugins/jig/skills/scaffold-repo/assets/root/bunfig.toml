@@ -1,0 +1,10 @@
+# `bun fmt` skips each file that a .gitignore names. This list adds the files
+# that git keeps and the formatter must not change.
+[fmt]
+ignorePatterns = [
+  "pnpm-lock.yaml",
+  # Drizzle generates these; keep them byte for byte.
+  "**/drizzle/**",
+  "docs/designs/**",
+  "docs/flows/*.html",
+]

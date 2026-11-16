@@ -62,7 +62,7 @@ Type: feat. Branch: `feat/invites`.
 MD
 mkdir -p apps/admin/src/features/invites/api apps/admin/src/features/team/ui packages/e2e/flows/admin docs/designs
 cat > apps/admin/package.json <<'JSON'
-{ "name": "@store/admin", "private": true, "scripts": { "dev": "next dev -p 3000", "build": "next build", "lint": "eslint .", "typecheck": "tsc --noEmit" } }
+{ "name": "@store/admin", "private": true, "scripts": { "dev": "next dev -p 3000", "build": "next build", "lint": "oxlint", "typecheck": "bun check --no-script" } }
 JSON
 cat > apps/admin/src/features/invites/api/invites.router.ts <<'TS'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "@store/trpc";

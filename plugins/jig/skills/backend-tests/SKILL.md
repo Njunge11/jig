@@ -10,27 +10,29 @@ description: The quality checklist for backend tests — what an ideal TDD test 
 Run before a commit. Paste the output in the proof.
 
 1. `pnpm lint` exits `0` in the app root. It proves every Review item that ends with `Gate:`; walk the other items by hand.
+2. `pnpm test:changed` exits `0` in the repo root, before the push. It runs the tests that the changes since `origin/main` reach (Vitest `--changed`): a test runs when it imports a changed file. The script of a package is `vitest run --changed origin/main --passWithNoTests`. The CI run of the pushed commit runs each test.
 
 ## Review checklist
 
 Reject the test if any item is true. This list judges each test's quality, not the suite's breadth — coverage is the implementation checklist's job: its task list states which behaviors need tests.
 
-1. The test asserts that an **internal function was called** instead of observable behavior. Observable behavior is the response (success or thrown error), the DB state after the call, or a side effect. A side effect on an external system (item 6's fakes) is observed through the fake's record — assert its exact contents (`fakePayments.charges`), never through `toHaveBeenCalled` spy assertions. Gate: `pnpm lint`, rule `no-restricted-syntax (backend-tests 1)`.
+1. The test asserts that an **internal function was called** instead of observable behavior. Observable behavior is the response (success or thrown error), the DB state after the call, or a side effect. A side effect on an external system (item 6's fakes) is observed through the fake's record — assert its exact contents (`fakePayments.charges`), never through `toHaveBeenCalled` spy assertions. Gate: `pnpm lint`, rule `jig/restricted-syntax (backend-tests 1)`.
 2. The test is at the **wrong layer**. Each layer has one test setup: a repo runs on PGlite with the real schema; a service's behavior is tested through the entry point that exposes it, and only a branch no entry point reaches runs the service on an in-memory fake (item 16); an entry point is driven through its real interface — a tRPC procedure via `createCaller`, an MCP tool via its registered handler, an eve agent tool through the service it calls (the tool body is entry glue, `backend-entry-points`; no agent writes an eval), a route handler via a real request, a workflow step as a plain function with injected dependencies, a workflow function through the `@workflow/vitest` plugin, which runs it in-process with its real steps.
-3. The test does not have explicit **setup, invocation, or specific assertions**. Examples: no assertions, or a `toBeDefined()`-grade assertion where an exact value is knowable. Gate for the `toBeDefined` case: `pnpm lint`, rule `no-restricted-syntax (backend-tests 3)`; walk the rest by hand.
+3. The test does not have explicit **setup, invocation, or specific assertions**. Examples: no assertions, or a `toBeDefined()`-grade assertion where an exact value is knowable. Gate for the `toBeDefined` case: `pnpm lint`, rule `jig/restricted-syntax (backend-tests 3)`; walk the rest by hand.
 4. The test's expected values are **not computed by hand from the spec**: they are pasted from the implementation's output, or they restate the implementation's formula in the assertion.
-5. The test is **non-deterministic**: it reads the clock or randomness directly instead of the injected `now()` / `uuid()`. Gate: `pnpm lint`, rule `no-restricted-syntax (backend-tests 5)`.
-6. The test mocks **our own** repos or services. You may mock only systems outside ours (payments, email, OAuth). Gate: `pnpm lint`, rule `no-restricted-syntax (backend-tests 6)`.
+5. The test is **non-deterministic**: it reads the clock or randomness directly instead of the injected `now()` / `uuid()`. Gate: `pnpm lint`, rule `jig/restricted-syntax (backend-tests 5)`.
+6. The test mocks **our own** repos or services. You may mock only systems outside ours (payments, email, OAuth). Gate: `pnpm lint`, rule `jig/restricted-syntax (backend-tests 6)`.
 7. The test **shares state** with other tests: no rollback transaction (repo) or no fresh fake (service).
 8. The test fails the **rewrite litmus**: the test breaks if a developer rewrites the implementation (ORM → raw SQL, service restructured, auth strategy swapped).
-9. The test **reads poorly**: the name does not state the action and the expected outcome, or the body contains logic (loops, conditionals). Duplication between tests is acceptable when it helps clarity. Gate for the logic-in-the-body clause: `pnpm lint`, rule `no-restricted-syntax (backend-tests 9)`; walk the rest by hand.
+9. The test **reads poorly**: the name does not state the action and the expected outcome, or the body contains logic (loops, conditionals). Duplication between tests is acceptable when it helps clarity. Gate for the logic-in-the-body clause: `pnpm lint`, rule `jig/restricted-syntax (backend-tests 9)`; walk the rest by hand.
 10. The test is in the **wrong file**: the file mixes layers, or the file is not named after the source file it tests (`<source-file>.test.ts` — so `users.repo.test.ts`, `users.service.test.ts`, `users.router.test.ts`, `create-product-draft.tool.test.ts`).
 11. The test verifies **more than one specified behavior**. One behavior per test; a task with several behaviors gets several tests.
 12. The test targets **code that is not ours or has no behavior of its own**: a third-party library's correctness (Zod parsing, Drizzle SQL generation), a trivial pass-through, or a private helper already covered through its public API.
 13. The test asserts **behavior that lives in the fake**, not in the code under test: the fake re-implements production logic (filtering, stamping, ordering), and the assertion observes that logic. A stateful fake lives in `<source>.repo.fake.ts` beside the real repo, with a contract test that proves it against the real implementation — never inline in one test file.
-14. A **statement-budget test** runs through a fake repo or a mocked client instead of the real database, or asserts a bound (`toBeLessThan`) where the exact count is knowable, or the count it asserts was read off the implementation instead of listed from the behavior (item 4), or it is a second budget for a call that has one: one entry-point call has one budget, on its widest path (the input that reads or writes the most row sets), and a repo or service test holds none. Gate for the `toBeLessThan` clause: `pnpm lint`, rule `no-restricted-syntax (backend-tests 14)`; walk the rest by hand.
+14. A **statement-budget test** runs through a fake repo or a mocked client instead of the real database, or asserts a bound (`toBeLessThan`) where the exact count is knowable, or the count it asserts was read off the implementation instead of listed from the behavior (item 4), or it is a second budget for a call that has one: one entry-point call has one budget, on its widest path (the input that reads or writes the most row sets), and a repo or service test holds none. Gate for the `toBeLessThan` clause: `pnpm lint`, rule `jig/restricted-syntax (backend-tests 14)`; walk the rest by hand.
 15. The test asserts the **call trace** (`TRACE_LOG`): the printed `calling <name> to <purpose>` block, its lines or their order. The trace is a development aid a person reads; a test of it pins the call path, fails on every refactor, and catches no fault that the behavior tests and the statement budget miss.
 16. The test drives a **service on a fake** for a behavior an entry point exposes. The entry-point test runs the real service on the real database, so the service test proves the same behavior a second time, against a fake that is code too (item 13), and the suite grows by a layer with no new fault caught. A service test exists only for a branch no entry-point test reaches: a failure the repo raises, a race the fake stages, a service no entry point exposes yet. It uses the smallest fake the branch needs; a stateful fake repo with a contract test exists only when two such tests share it.
+17. The test, or a fixture, makes its caller from **the app router** instead of the routers that it calls (`callerFactoryOf`, **Router tests**). Such a test runs on each change of each feature. Gate: `pnpm lint`, rule `jig/restricted-syntax (backend-tests 17)`.
 
 ## A test that fails on and off
 
@@ -178,7 +180,7 @@ The expected count is written before the code, from the statements the task list
 
 ## Test setup
 
-When you create or extend the test setup, the **Backend test setup** section below holds the Vitest config, the PGlite setup, the fake-repo contract tests, the `createCaller` helper, and the `@workflow/vitest` plugin.
+When you create or extend the test setup, the **Backend test setup** section below holds the Vitest config, the PGlite setup, the fake-repo contract tests, the `callerFactoryOf` helper, and the `@workflow/vitest` plugin.
 
 ## Backend test setup
 
@@ -253,9 +255,35 @@ A service that writes in a transaction takes a `write` dependency (`backend-stan
 
 A fake is code too. Give each fake repo a contract test. The contract test runs the same assertions against the fake and against the PGlite-backed real repo. Then the fake cannot drift from the behavior it substitutes for.
 
-### Router tests — createCallerFactory
+### Router tests — callerFactoryOf
 
-Create the caller once in a test helper: `const createCaller = createCallerFactory(appRouter)`. Then do these steps per test. Build a context with a test session. Call procedures. Assert the response or the thrown error.
+A test file makes its caller from the feature routers that it calls, each under its key of the app router. So the test loads only those routers, and it calls a procedure by the path of the app (`caller.orders.cancel`). The helper is `test/caller.ts` of the app:
+
+```ts
+// test/caller.ts
+import { createCallerFactory, createTRPCRouter } from "<scope>/trpc/init";
+
+import type { AppRouter } from "@/lib/trpc/routers/_app";
+
+/** Each feature router of the app, under its key of the app router. */
+export type MountedRouters = AppRouter["_def"]["record"];
+
+/** The caller factory of a part of the app router. The type refuses a router under a key that is not its key of the app router. */
+export function callerFactoryOf<Key extends keyof MountedRouters>(
+  routers: Pick<MountedRouters, Key>,
+) {
+  return createCallerFactory(createTRPCRouter(routers));
+}
+```
+
+```ts
+// features/orders/api/__tests__/orders.router.test.ts
+const createCaller = callerFactoryOf({ orders: ordersRouter });
+```
+
+Then do these steps per test. Build a context with a test session. Call procedures. Assert the response or the thrown error.
+
+Never make a caller from the app router (`createCallerFactory(appRouter)`), in a test or in a fixture: that test imports each feature of the app, so it runs on each change of each feature (`vitest --changed` runs a test when it imports a changed file). Measured on an app with 116 test files: a change of one feature ran 84 files before this rule and 10 after it. A fixture that returns a caller takes the routers from the test: `export function makeCallerFor<Key extends keyof MountedRouters>(routers: Pick<MountedRouters, Key>)` returns the `callerFor` of that test file. One test file imports the app router: `lib/trpc/routers/__tests__/_app.test.ts`, which proves that each feature router is mounted, with an `oxlint-disable-next-line jig/restricted-syntax` comment on that import.
 
 ### Workflow tests — steps plain, workflows via @workflow/vitest
 
