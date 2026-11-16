@@ -19,6 +19,8 @@ First check the repo's baseline: `CLAUDE.md`, `.github/workflows/ci.yml`, `.husk
 
 Then read the codebase and collect the context this spec's implementation checklists need: what already exists, what must be added, what must change to implement the spec. Every fact about the repo that you write into an implementation checklist must be verified against the repo in this session, not from memory.
 
+**Parts that wait.** When the tracker exists, read it before the code. A section of the tracker lists the parts and the test lines of earlier specs that wait for a later spec. Each row that waits for this spec is work of this run: give it a task or an `E<n>` line in a checklist of this run, name in that task what is built already (the checklist that built it and the files), and take the row out of the waiting section. A part of this spec that needs a spec with no checklist yet goes in no checklist of this run: add a row for it to the waiting section, with the spec that it waits for. So no part is built two times and no part is lost between two specs.
+
 ### Step 3: Resolve gaps with the developer
 
 Two kinds of gap stop the work:
