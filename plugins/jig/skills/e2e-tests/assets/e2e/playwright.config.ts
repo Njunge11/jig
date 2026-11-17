@@ -66,6 +66,11 @@ export default defineConfig({
     baseURL: app.url,
     viewport: app.viewport,
     colorScheme: "light",
+    // The app shows no animation to a person who asks for less motion (the
+    // `prefers-reduced-motion` rule of the shared style file). A headless
+    // browser draws each frame of an animation on the processor: with this
+    // setting the browsers of a run used a third less processor time.
+    reducedMotion: "reduce",
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },

@@ -199,7 +199,7 @@ export default defineConfig({
   // Start with 2. Raise it only while a measured run gets shorter and no step runs out of time.
   workers: 2,
   forbidOnly: true,
-  use: { baseURL: app.url, viewport: app.viewport, colorScheme: "light", trace: "retain-on-failure" },
+  use: { baseURL: app.url, viewport: app.viewport, colorScheme: "light", reducedMotion: "reduce", trace: "retain-on-failure" },
   projects: [
     { name: "session", testDir: "support", testMatch: "session.setup.ts" },
     { name: "screens", testDir: "screens", dependencies: ["session"], use: { storageState: app.statePath } },
@@ -232,6 +232,23 @@ export default defineConfig({
 - **A flow that crosses apps** is in the folder of the app where it starts: the run also starts the peers of that app (`PEERS` in `support/apps.ts`).
 - **The number of workers is measured, not chosen.** Measure a slow run before a change: time one statement, and count the statements of one test with the call trace. With prepared statements (`scaffold-repo`, Step 3), 41 flows went from 24.8 to 5.2 minutes at 4 workers; at 6, steps ran out of time. Keep the fastest number at which each test passes, and write the measured numbers in the config.
 - Do not make data that the test does not use: each helper call costs run time.
+- **The run asks for reduced motion** (`reducedMotion: "reduce"`), and the shared style file of the apps ends each animation and transition at once for a person who asks for less motion (W3C, WCAG technique C39; web.dev, "prefers-reduced-motion"):
+
+  ```css
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  ```
+
+  A headless browser draws each frame of an animation on the processor. Measured on a suite of 209 flows: the browsers used a third less processor time and the tests took 11% less time. A test that passed only because an animation gave it time now fails: fix that test (Review items 5 and 6).
+- **One worker is more than one process**: a browser, a test process and its part of the server and the database. Measure the processor and the memory of a run before you raise the workers: sample `ps` during a run with 1, 2, 3 and more workers. On a machine with 6 fast cores, one worker used 1.4 cores, 4 workers were the fastest, and 6 were slower than 4. A machine that compresses or swaps memory during the run has too many workers, or too many other programs.
 - The scripts: `"flows": "dotenv -e ../../.env -- node support/run.ts flows"` and `"screens": "dotenv -e ../../.env -- node support/run.ts screens"`, with `pnpm flows` and `pnpm screens` at the root. `APP=<app>` picks the app, `pnpm flows <name>` runs one file, and `pnpm flows --workers=<n>` sets the workers of one run.
 - **One run at a time on a machine.** Each worktree of the repo uses the same ports and the same database server. A second run that starts while the first builds finds the first server on its port and tests that server: its emails are in the log of the other worktree, and its tests fail when the first run stops the server. `support/run.ts` makes a run wait for the run that holds `e2e.lock` in the shared git folder, and prints that it waits. Never start Playwright in a different way, never start a second run to get past the wait, and never remove the lock of a run that is active.
 - **A filter selects files of the package.** Playwright compares a filter with the full path of a file, and a worktree has the name of its checklist: in `12-order-export/`, the filter `order-export` selects each file, and the run is the full suite. `support/run.ts` compares such a filter with the path inside the package.
