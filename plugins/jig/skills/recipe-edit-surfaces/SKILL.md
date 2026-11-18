@@ -33,12 +33,12 @@ and the surface mechanics.
    `next/dynamic`.
 
 2. **Controlled dialog, form inside** per the `recipe-form-with-mutation` skill.
-   Success closes the dialog after the mutation settles — never
-   before:
+   Success closes the dialog after the mutation settles — never before:
 
    ```tsx
    const [open, setOpen] = useState(false);
    const mutation = useMutation(trpc.products.update.mutationOptions({
+     meta: { failureTitle: "Couldn't update the product" },
      onSuccess: () => {
        queryClient.invalidateQueries(trpc.products.list.queryFilter());
        toast.success("Product updated");
@@ -79,8 +79,8 @@ and the surface mechanics.
    focused). `Esc` reverts; blur or `Enter` commits.
 2. The commit is a mutation on the variables-only optimistic tier:
    the new value renders immediately from `variables`, a subtle
-   spinner marks pending, and a failure reverts the value with a
-   toast naming the action.
+   spinner marks pending, and a failure reverts the value; its
+   `failureTitle` names the action.
 3. The swap is one component owning one piece of state
    (`editing`), not a page-level mode.
 
@@ -127,7 +127,7 @@ and the surface mechanics.
 - [ ] Destructive confirms state the consequence and use the
       action verb on the button.
 - [ ] Inline edits commit on blur/Enter, revert on Esc, and fail
-      loudly (revert + named toast).
+      loudly (revert + a `failureTitle`).
 - [ ] Surface data prefetches on the trigger; no fresh spinner on
       open.
 - [ ] Closing the surface — button, Esc, or backdrop — leaves the

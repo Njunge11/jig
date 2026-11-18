@@ -1,7 +1,7 @@
 /** The product draft resource's procedures. */
 import { z } from "zod";
 import type { Db } from "@/db/types";
-import { createTRPCRouter, orgProcedure } from "@/lib/trpc/init";
+import { createTRPCRouter, orgProcedure, orThrow } from "@/lib/trpc/init";
 import { makeDraftsRepo } from "../db/drafts.repo";
 import { makeReadDraftService } from "./read-draft.service";
 import { makeSendDraftEventService } from "./send-draft-event.service";
@@ -20,6 +20,6 @@ export const productDraftRouter = createTRPCRouter({
     .meta({ purpose: "move the draft by the seller's event" })
     .input(z.object({ draftId: z.string(), event: draftEvent }))
     .mutation(({ ctx, input }) =>
-      makeSendDraftEventService(deps(ctx)).sendDraftEvent(input.draftId, ctx.storeId, input.event),
+      orThrow(makeSendDraftEventService(deps(ctx)).sendDraftEvent(input.draftId, ctx.storeId, input.event)),
     ),
 });

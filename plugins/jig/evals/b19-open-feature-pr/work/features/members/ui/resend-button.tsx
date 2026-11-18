@@ -9,9 +9,8 @@ export function ResendButton({ invitationId }: { invitationId: string }) {
   const trpc = useTRPC();
   const resend = useMutation(
     trpc.invitations.resend.mutationOptions({
-      onSuccess: (result) =>
-        result.status === "resent" ? toast.success("Invitation resent") : toast.error(result.message),
-      onError: () => toast.error("Couldn't resend the invitation"),
+      meta: { failureTitle: "Couldn't resend the invitation" },
+      onSuccess: () => toast.success("Invitation resent"),
     }),
   );
   return (

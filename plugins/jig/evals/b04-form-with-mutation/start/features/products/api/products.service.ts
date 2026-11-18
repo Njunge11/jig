@@ -13,7 +13,9 @@ export function makeProductsService(deps: ProductsServiceDeps) {
     const taken = await trace("calling repo.findByTitle to check the title is free", () =>
       deps.repo.findByTitle(storeId, input.title),
     );
-    if (taken) return { status: "titleTaken" as const };
+    if (taken) {
+      return { status: "invalid" as const, field: "title", message: "A product has this title. Enter a different title." };
+    }
     const product = await trace("calling repo.insert to add the product", () =>
       deps.repo.insert({ id: deps.uuid(), storeId, createdAt: deps.now(), ...input }),
     );

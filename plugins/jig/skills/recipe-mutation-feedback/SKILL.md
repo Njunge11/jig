@@ -45,9 +45,9 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
 
 3. **The toast contract.** Success names the action and the
    object, past tense: `toast.success("Product archived")`. Failure
-   names what failed: `toast.error("Couldn't archive the product")`.
-   Toasts are for mutations only — read failures belong to the
-   error boundary.
+   is `meta: { failureTitle: "Couldn't archive the product" }` on
+   the mutation: the query client's handler shows that toast
+   (`frontend-standards` 56).
 
 4. **Settle: invalidate what the write changed**, in `onSettled`
    (not `onSuccess` — it must also run after an error rollback):
@@ -86,6 +86,7 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
    ```ts
    const filter = trpc.promo.list.queryFilter();
    useMutation(trpc.promo.markPaid.mutationOptions({
+     meta: { failureTitle: "Couldn't mark the promo paid" },
      onMutate: async (vars, context) => {
        await context.client.cancelQueries(filter);                // 1 cancel
        const prev = context.client.getQueryData(filter.queryKey); // 2 snapshot
@@ -95,7 +96,6 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
      onError: (_e, _v, onMutateResult, context) => {
        if (onMutateResult) // undefined when onMutate threw
          context.client.setQueryData(filter.queryKey, onMutateResult.prev); // rollback
-       toast.error("Couldn't mark the promo paid");
      },
      onSettled: (_d, _e, _v, _r, context) =>
        context.client.invalidateQueries(filter),                  // reconcile
@@ -140,7 +140,8 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
      procedure: `isMutating({ mutationKey }) === 1` (the settling
      save still counts as pending). A refetch between two saves
      flips the control back for a moment.
-   - One toast per control, by `id`, so ten clicks show one toast.
+   - One toast per control: the success toast takes `id`, and the
+     handler gives the failure toast the `scope.id`.
 
    This control alone skips step 6's rollback: a failed save
    toasts, and the last `onSettled` refetches what the server
@@ -152,6 +153,7 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
    const toastId = `featured-${id}`;
    const setFeatured = useMutation(trpc.products.setFeatured.mutationOptions({
      scope: { id: toastId },
+     meta: { failureTitle: "Couldn't change the product" },
      onMutate: async ({ featured }, context) => {
        await context.client.cancelQueries(filter);
        context.client.setQueryData(filter.queryKey, (rows) =>
@@ -159,7 +161,6 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
      },
      onSuccess: (_d, { featured }) =>
        toast.success(featured ? "Product featured" : "Product unfeatured", { id: toastId }),
-     onError: () => toast.error("Couldn't change the product", { id: toastId }),
      onSettled: (_d, _e, _v, _r, context) => {
        const key = trpc.products.setFeatured.mutationKey();
        if (context.client.isMutating({ mutationKey: key }) === 1) {
@@ -178,10 +179,8 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
 
 - Don't ship a silent mutation — every write shows pending and
   reports its outcome.
-- Don't toast "Something went wrong" — name the action that
-  failed.
-- Don't route a mutation failure to the error boundary, or a read
-  failure to a toast.
+- Don't call `toast.error`, and don't read a failure status in
+  `onSuccess` — the handler shows each failure.
 - Don't invalidate in `onSuccess` — `onSettled`, so
   reconciliation also runs after a rollback.
 - Don't cache-write when variables-only covers it; don't
@@ -199,10 +198,10 @@ toggles, inline buttons). Library: `sonner` via the kit's toaster.
       click at once: never disabled or dimmed while pending, and
       no click is dropped. Its saves share one `scope.id`, the
       cache holds the new value, `onSettled` refetches only when
-      `isMutating({ mutationKey }) === 1`, and its toasts share
-      one `id`.
-- [ ] Success and failure toasts name the action; no boundary
-      shows a mutation failure.
+      `isMutating({ mutationKey }) === 1`, and its success
+      toasts share one `id`.
+- [ ] Each mutation has `meta: { failureTitle }` that names the
+      action, or `showsOwnFailure`; no `toast.error`.
 - [ ] Invalidation runs in `onSettled` through the derived
       `queryFilter`.
 - [ ] Cache-write optimism follows cancel → snapshot → set →

@@ -385,19 +385,18 @@ export default async function Page() {
 
 ### Error UI
 
-54. Every fetching route segment has an `error.tsx`: a Client
-    Component receiving `{ error, reset }`, with `reset()` wired
-    to a "Try again" action.
+54. The app has one error page, `RouteError` (`components/ui/route-error.tsx`). The `error.tsx` of each fetching route
+    segment is one statement: `export { RouteError as default } from "@/components/ui/route-error";`. `app/` holds
+    `error.tsx`, `global-error.tsx` (`<html>`, `<body>`, `<RouteError>`) and `not-found.tsx`. Gate: `pnpm lint`, rule `jig/error-file-is-shared-page`.
 55. Isolate a failing section with an inner
     `react-error-boundary` around its `<Suspense>`, so one broken
     card does not take the page.
-56. Route errors by channel: read failures render in the
-    boundary; mutation failures surface as a toast naming the
-    action; form-field validation renders inline at the field. Do
-    not mix the channels. Each channel shows the message the
-    server returned: a `refused`, `notFound` or `forbidden` result
-    becomes a sentence, never `null`, and a thrown mutation error
-    shows the server's message, never a fixed line.
+56. A feature holds no failure code. A read failure renders in the boundary; a query that answers a returned failure
+    draws its message, never `null`. A failed mutation is one toast from the handler of the query client
+    (`frontend-wiring`): give the mutation `meta: { failureTitle: "Couldn't archive the product" }`. A mutation that
+    draws its failure itself (at a field, on the record) gives `meta: { showsOwnFailure: true }` and draws
+    `describeFailure(mutation.error)`. Never call `toast.error`, never read a failure status from the data of a
+    mutation, never make an error reference in the browser. Gate: `pnpm lint`, rule `jig/failure-channel`.
 
 ### Optimistic updates
 

@@ -27,11 +27,8 @@ export function ProductEditForm({ productId }: { productId: string }) {
   });
   const save = useMutation(
     trpc.products.update.mutationOptions({
-      onSuccess: (result) => {
-        if (result.status === "saved") toast.success("Product saved");
-        else toast.error(result.message);
-      },
-      onError: () => toast.error("Couldn't save the product"),
+      meta: { failureTitle: "Couldn't save the product" },
+      onSuccess: () => toast.success("Product saved"),
       onSettled: () => queryClient.invalidateQueries(trpc.products.byId.queryFilter({ productId })),
     }),
   );

@@ -49,8 +49,8 @@ type's specifics.
    `queryOptions`; compound parts; semantic tokens; no loading
    branch inside a suspending component.
 
-6. **Add the route states**: `loading.tsx` + `error.tsx`; derive
-   the skeleton from the real component's containers.
+6. **Add the route states**: `loading.tsx`, and `error.tsx` per `frontend-standards` 54;
+   derive the skeleton from the real component's containers.
 
 7. **Responsive pass**: mobile first, a deliberate `md:` step,
    verify at 375 / 768 / 1024 / 1440.

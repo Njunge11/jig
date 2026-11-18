@@ -1,7 +1,7 @@
 /** The products resource's procedures. */
 import { z } from "zod";
 import type { Db } from "@/db/types";
-import { createTRPCRouter, orgProcedure } from "@/lib/trpc/init";
+import { createTRPCRouter, orgProcedure, orThrow } from "@/lib/trpc/init";
 import { makeProductsRepo } from "../db/products.repo";
 import { productEditSchema } from "./product-edit.schema";
 import { makeProductsService } from "./products.service";
@@ -23,6 +23,6 @@ export const productsRouter = createTRPCRouter({
     .meta({ purpose: "save the product's edits" })
     .input(productEditSchema.extend({ productId: z.string() }))
     .mutation(({ ctx, input: { productId, ...values } }) =>
-      makeProductsService(deps(ctx)).update(productId, ctx.storeId, values),
+      orThrow(makeProductsService(deps(ctx)).update(productId, ctx.storeId, values)),
     ),
 });

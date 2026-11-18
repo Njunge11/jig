@@ -201,7 +201,7 @@ export function makeCancelOrderService(deps: {
     }
 
     const order = await deps.write(cancelAndRelease);
-    if (!order) return { status: "notFound" as const, message: "No such order." };
+    if (!order) return { status: "notFound" as const, message: "This order is not in the store. Refresh the list." };
     await trace("calling email.send to tell the customer the order is cancelled", () =>
       deps.email.send({ to: order.customerEmail, template: "order-cancelled", data: { orderId } }),
     );
@@ -213,10 +213,10 @@ export function makeCancelOrderService(deps: {
 
 // api/orders.router.ts — the composition root binds the mechanism
 cancel: orgProcedure.input(cancelOrderInput).mutation(({ ctx, input }) =>
-  makeCancelOrderService({
+  orThrow(makeCancelOrderService({
     write: (run) => ctx.db.transaction((tx) => run(makeOrdersRepo(tx))),
     email,
-  }).cancelOrder(input.orderId, ctx.storeId),
+  }).cancelOrder(input.orderId, ctx.storeId)),
 ),
 ```
 - Do not wrap independent read-only operations in a transaction.
@@ -230,8 +230,9 @@ Errors flow up: Repository → Service → Entry → the global handler (tRPC) o
 - Do not wrap every function in `try/catch`.
 - Catch **only** for these purposes: to add context, to convert an infrastructure error into a domain error, or to recover from an expected failure.
 - Never discard an error — let it propagate.
-- **Log every failure an entry hands to a client.** A `refused`, `notFound` or `forbidden` return and a thrown mutation error reach the server log with the procedure or tool name, the ids and the message. A failure the server does not log cannot be read when the user reports a dead screen.
-- **A client never gets the text of a failure nobody threw on purpose.** A failed query, a driver error or a bug reaches the handler as `INTERNAL_SERVER_ERROR`, and its message holds SQL, params and file paths. The tRPC `errorFormatter` in `init.ts` answers one fixed sentence for that code and removes `data.stack`; the server log keeps the real message and its root cause. An error a service throws on purpose (`TRPCError` with another code) keeps its message: the screen shows it.
+- **An expected failure is a returned value:** `{ status: "notFound" | "forbidden" | "refused" | "invalid", message, field? }`. Its message says what happened and what to do next, and states only what the server checked. A service throws only what nobody expects.
+- **A mutation procedure wraps a service call that can return a failure in `orThrow`** (`returned-failure.ts` beside `init.ts`; when it is missing, copy `../scaffold-repo/assets/failures/trpc/returned-failure.ts`, relative to the folder of this skill): the failure leaves as a `TRPCError` with its message. Gate: `pnpm typecheck`. A new status is one line of `FAILURE_CODE`.
+- **Each request has one `requestId`,** made in `createTRPCContext`. The base procedure logs each failure with it: `[<requestId>] <path> <code>: <message>`, with the cause. `errorFormatter: formatFailure` sends it in `data.requestId`, answers one fixed sentence for `INTERNAL_SERVER_ERROR` and removes `data.stack`; a `TRPCError` with another code keeps its message.
 
 ## The call trace
 
@@ -447,7 +448,7 @@ Reject the change if any item is true. Items 5–9 and 26 live in the `backend-e
 25. A call takes a function of more than one line, or an object literal of more than a few lines, as an inline argument — instead of a named function or a named constant declared above the call. Gate for the inline-function clause: `pnpm lint`, rule `jig/restricted-syntax (backend-standards 25)`; walk the rest by hand.
 26. Moved — `backend-entry-points` Review item 6 (eve tool `execute` shape and failure returns).
 27. Removed — evals are the developer's; no agent writes or requires one (`eve-agent` § Evals).
-28. An entry hands a failure to a client that the server does not log with the procedure or tool name, the ids and the message.
+28. An entry hands a failure to a client that the server does not log with the identifier of the request, the procedure or tool name and the message.
 29. An entry-point call has no statement-budget test or more than one, or the diff raises a call's statement count without the behavior that needs the extra statement named in the task.
 30. A feature router holds the procedures of more than one resource, or holds input schemas or composition, instead of merging one `<resource>.router.ts` per resource as the `structure` skill lays out.
 31. A non-test file forces a type with `as never` or a double assertion (`as any as T`, `as unknown as T`). Gate: `pnpm lint`, rule `jig/restricted-syntax (backend-standards 31)`.
@@ -455,4 +456,5 @@ Reject the change if any item is true. Items 5–9 and 26 live in the `backend-e
 33. An external call (email, HTTP API, LLM, queue) runs inside an open transaction, or a send that must not be lost has no outbox row written with the business writes, or an outbox row has no step that sends it.
 34. A file holds more than one concern: what it owns cannot be stated in one sentence without "and", or a change to one decision it holds would touch code that another decision owns. Line count is never the test.
 35. An entry-point call opens no trace root where the request enters, or the diff relies on a root middleware it does not show, or a call a service makes (a repo method, another service, a model, a workflow start, the machine move) runs outside `trace`, or a trace line names no purpose, holds an id or message text, or writes its result by hand instead of reading it off the call (The call trace).
-36. The tRPC `errorFormatter` hands a client the message or the stack of an `INTERNAL_SERVER_ERROR` (query text, params, a driver error) instead of one fixed sentence, or no test proves it through `fetchRequestHandler`.
+36. The tRPC `errorFormatter` hands a client the message or the stack of an `INTERNAL_SERVER_ERROR` (query text, params, a driver error) instead of one fixed sentence, or sends no `requestId`, or no test proves it through `fetchRequestHandler`.
+37. A failure message does not say what to do next, or states what the server did not check.

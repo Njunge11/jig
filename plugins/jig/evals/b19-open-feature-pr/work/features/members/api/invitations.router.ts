@@ -2,7 +2,7 @@
 import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import type { Db } from "@/db/types";
-import { createTRPCRouter, orgProcedure } from "@/lib/trpc/init";
+import { createTRPCRouter, orgProcedure, orThrow } from "@/lib/trpc/init";
 import { makeInvitationsRepo } from "../db/invitations.repo";
 import { makeInvitationsService } from "./invitations.service";
 
@@ -19,5 +19,5 @@ export const invitationsRouter = createTRPCRouter({
   resend: orgProcedure
     .meta({ purpose: "resend a pending invitation with a new token" })
     .input(z.object({ invitationId: z.string().min(1) }))
-    .mutation(({ ctx, input }) => makeInvitationsService(deps(ctx)).resend(input.invitationId, ctx.storeId)),
+    .mutation(({ ctx, input }) => orThrow(makeInvitationsService(deps(ctx)).resend(input.invitationId, ctx.storeId))),
 });

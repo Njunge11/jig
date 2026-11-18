@@ -633,6 +633,23 @@ export default defineConfig({
       },
     },
 
+    // --- frontend-standards 56: the one handler shows a failed mutation ---
+    {
+      files: [...v2Glob("**/*.ts"), ...v2Glob("**/*.tsx")],
+      excludeFiles: ["lib/trpc/failure.ts"],
+      rules: {
+        "jig/failure-channel": "error",
+      },
+    },
+
+    // --- frontend-standards 54: each error file is the shared error page ---
+    {
+      files: ["app/layout.tsx", "app/**/error.tsx", "app/global-error.tsx"],
+      rules: {
+        "jig/error-file-is-shared-page": "error",
+      },
+    },
+
     // --- docs/lint-gates.md §6.1 eve-agent 5 (agent/agent.ts) ---
     {
       files: ["agent/agent.ts"],

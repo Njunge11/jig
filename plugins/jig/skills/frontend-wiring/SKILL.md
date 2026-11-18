@@ -8,15 +8,23 @@ user-invocable: false
 
 The modern integration: `@trpc/tanstack-react-query` (`createTRPCOptionsProxy` + `useTRPC`), **not** the legacy `createHydrationHelpers`. You wire this once per app; per-feature work just calls `prefetch` / `useSuspenseQuery` against it.
 
-**`lib/trpc/query-client.ts`** — one factory, used both sides:
+**`lib/trpc/query-client.ts`** — one factory, used both sides. It holds the one handler of a failed mutation:
 
 ```ts
-import { defaultShouldDehydrateQuery, QueryClient } from "@tanstack/react-query";
+import { defaultShouldDehydrateQuery, isServer, MutationCache, QueryClient } from "@tanstack/react-query";
+import { isExpectedFailure, showMutationFailure } from "./failure";
 
 export function makeQueryClient() {
   return new QueryClient({
+    mutationCache: new MutationCache({
+      onError: (error, _variables, _onMutateResult, mutation) => showMutationFailure(error, mutation),
+    }),
     defaultOptions: {
-      queries: { staleTime: 60 * 1000 }, // non-zero → don't refetch right after SSR hydration
+      queries: {
+        staleTime: 60 * 1000, // non-zero → don't refetch right after SSR hydration
+        // the server does not retry; the browser does not retry a failure that the server sends on purpose
+        retry: (failureCount, error) => !isServer && failureCount < 3 && !isExpectedFailure(error),
+      },
       dehydrate: {
         // include in-flight queries so streaming works
         shouldDehydrateQuery: (q) =>
@@ -28,6 +36,15 @@ export function makeQueryClient() {
   });
 }
 ```
+
+**The failure parts** — the app holds each file of this table one time. Copy a file that is missing from `../scaffold-repo/assets/failures/app/` (relative to the folder of this skill); never write one by hand:
+
+| File | Holds |
+| --- | --- |
+| `lib/trpc/failure.ts` | the type of `meta` (`Register.mutationMeta`: `{ failureTitle: string }` or `{ showsOwnFailure: true }`), `showMutationFailure` (the toast: the `failureTitle`, then the message of the server), `describeFailure` (the message, the reference and the field of a failure), `isExpectedFailure` |
+| `components/ui/route-error.tsx` | `RouteError`, the one error page; "Try again" resets the failed queries, then calls `retry()` |
+| `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx` | the app-wide error files (`frontend-standards` 54) |
+| `components/ui/offline-banner.tsx` | `OfflineBanner`, from `onlineManager` |
 
 **`lib/trpc/server.tsx`** — server caller, `prefetch`, `HydrateClient`:
 
@@ -47,11 +64,15 @@ export const trpc = createTRPCOptionsProxy({ ctx: createTRPCContext, router: app
 export function HydrateClient({ children }: { children: React.ReactNode }) {
   return <HydrationBoundary state={dehydrate(getQueryClient())}>{children}</HydrationBoundary>;
 }
+// oxlint-disable-next-line typescript/no-explicit-any
 export function prefetch<T extends ReturnType<TRPCQueryOptions<any>>>(queryOptions: T) {
   const qc = getQueryClient();
-  queryOptions.queryKey[1]?.type === "infinite"
-    ? void qc.prefetchInfiniteQuery(queryOptions as any)
-    : void qc.prefetchQuery(queryOptions);
+  if (queryOptions.queryKey[1]?.type === "infinite") {
+    // oxlint-disable-next-line typescript/no-explicit-any
+    void qc.prefetchInfiniteQuery(queryOptions as any);
+  } else {
+    void qc.prefetchQuery(queryOptions);
+  }
 }
 ```
 
@@ -104,4 +125,4 @@ export function TRPCReactProvider({ children }: { children: React.ReactNode }) {
 }
 ```
 
-The root `app/layout.tsx` wraps `{children}` in `<TRPCReactProvider>`. A data transformer (superjson) goes in three places at once: the router's `initTRPC.create({ transformer })`, the link's `transformer`, and `serializeData` / `deserializeData` in `makeQueryClient`'s `dehydrate` / `hydrate` options.
+The root `app/layout.tsx` wraps `{children}` in `<TRPCReactProvider>` and draws `<OfflineBanner />` as its first child: one banner for the app, and no screen draws a second one. A data transformer (superjson) goes in three places at once: the router's `initTRPC.create({ transformer })`, the link's `transformer`, and `serializeData` / `deserializeData` in `makeQueryClient`'s `dehydrate` / `hydrate` options.

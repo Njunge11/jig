@@ -133,7 +133,8 @@ const backendTestSelectors = [
 /**
  * @param {string[]} trees The top-level folders the gates apply to.
  * @param {{ pages?: string[] }} [options] `pages`: globs of the route files
- *   that need loading.tsx and error.tsx beside them.
+ *   that need loading.tsx and error.tsx beside them. With `pages`, the error
+ *   files of `app/` are checked too.
  */
 export function gates(trees, options = {}) {
   const glob = (suffix) => trees.map((tree) => `${tree}/${suffix}`);
@@ -336,12 +337,24 @@ export function gates(trees, options = {}) {
       rules: { "jig/test-named-after-source": "error" },
     },
 
-    // --- frontend-standards 50, 54: a fetching segment has loading and error files ---
+    // --- frontend-standards 56: the one handler shows a failed mutation ---
+    {
+      files: [...tsFiles, ...tsxFiles],
+      excludeFiles: ["lib/trpc/failure.ts"],
+      rules: { "jig/failure-channel": "error" },
+    },
+
+    // --- frontend-standards 50, 54: a fetching segment has loading and error
+    // files, and each error file is the shared error page ---
     ...(options.pages
       ? [
           {
             files: options.pages,
             rules: { "jig/segment-has-loading-and-error": "error" },
+          },
+          {
+            files: ["app/layout.tsx", "app/**/error.tsx", "app/global-error.tsx"],
+            rules: { "jig/error-file-is-shared-page": "error" },
           },
         ]
       : []),

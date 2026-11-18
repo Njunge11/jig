@@ -78,6 +78,7 @@ the `frontend-standards` skill apply throughout. Libraries: `react-hook-form`,
 
    ```tsx
    const mutation = useMutation(trpc.products.create.mutationOptions({
+     meta: { failureTitle: "Couldn't create the product" },
      onSuccess: () => {
        queryClient.invalidateQueries(trpc.products.list.queryFilter());
        toast.success("Product created");
@@ -93,12 +94,18 @@ the `frontend-standards` skill apply throughout. Libraries: `react-hook-form`,
    </form>
    ```
 
-5. **Server errors land in the right channel.** Write one
-   error-mapping helper for the app's error contract and use it
-   in `onError`: a failure tied to a field goes to that field via
-   `form.setError(name, { message })`; everything else is a toast
-   naming the action. The user's input stays intact either way —
-   never reset on error.
+5. **A failure of a field lands on the field.** When the
+   procedure can answer a failure with `field`, the form draws its
+   failures itself, with `form.formState.errors.root` in a
+   `FieldError` above the submit button.
+
+   ```tsx
+   meta: { showsOwnFailure: true }, // in place of failureTitle
+   onError: (error) => {
+     const { field, message } = describeFailure(error); // lib/trpc/failure.ts
+     form.setError(field ? (field as Path<Values>) : "root", { message });
+   },
+   ```
 
 6. **Reset semantics.** A create form resets on success (or
    navigates away). An edit form does not reset — the invalidated
@@ -107,18 +114,11 @@ the `frontend-standards` skill apply throughout. Libraries: `react-hook-form`,
 ## Don't — common failures
 
 - Don't hand-roll label + error `<div>`s around inputs — the
-  `Field` family carries the ids, `aria-invalid`, and error
-  wiring.
+  `Field` family carries the ids, `aria-invalid`, and error wiring.
 - Don't write a second client-only schema — it drifts from the
   procedure input; share the one module.
-- Don't trust client validation alone — the server re-validates
-  before side effects; the client schema is UX, not enforcement.
 - Don't clear or reset the form on a failed submit.
-- Don't leave the submit button enabled while the mutation is
-  pending — double submits create duplicates.
-- Don't render a mutation failure in the route error boundary —
-  boundaries are for read failures; mutations toast or set field
-  errors.
+- Don't leave submit enabled while pending — double submits create duplicates.
 
 ## Verify
 
@@ -127,8 +127,8 @@ the `frontend-standards` skill apply throughout. Libraries: `react-hook-form`,
 - [ ] Every field renders through `Controller` + `Field`, with
       `htmlFor`/`id` paired and `aria-invalid` on the control.
 - [ ] Submit is disabled while pending; no double-submit.
-- [ ] A server field error lands on its field; other failures
-      toast with the action's name; input survives.
+- [ ] `meta` has `failureTitle`, or `showsOwnFailure` with each
+      failure on its field or on `root`; input survives.
 - [ ] Success invalidates the affected `queryFilter` and gives
       feedback (toast, navigation, or reset).
 - [ ] Create resets on success; edit re-syncs from the

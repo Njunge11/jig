@@ -41,9 +41,9 @@ Each case gives the code in the prompt and one task. The prompt tells the agent 
 | --- | --- | --- | --- |
 | B1 | `recipe-search-and-filters` | Add a search box to a jobs list that reads `jobs.list` | The procedure takes `q` and narrows in SQL; no `.filter()` on fetched rows; `q` is in the URL through one nuqs parsers module; the input commits after a debounce |
 | B2 | `recipe-search-and-filters` | The list falls to the skeleton on each search; fix it | The query input goes through `useDeferredValue`; `startTransition` is not passed to `useQueryStates` |
-| B3 | `recipe-page-with-data` | Build a details page that reads one query | Server `prefetch` + `HydrateClient` + `Suspense`; the client reads with `useSuspenseQuery`; no `isLoading` branch |
-| B4 | `recipe-form-with-mutation` | Build a create form | Zod schema shared with the procedure; field errors from the server map to fields; submit disabled while pending |
-| B5 | `recipe-mutation-feedback` | Add an archive action with undo | Order of an optimistic write: cancel, snapshot, set, rollback, invalidate in `onSettled` |
+| B3 | `recipe-page-with-data` | Build a details page that reads one query | Server `prefetch` + `HydrateClient` + `Suspense`; the client reads with `useSuspenseQuery`; no `isLoading` branch; `error.tsx` is the one export of `RouteError` |
+| B4 | `recipe-form-with-mutation` | Build a create form | Zod schema shared with the procedure; `meta: { showsOwnFailure: true }` and the failure of a field lands on its field; no `toast.error`; submit disabled while pending |
+| B5 | `recipe-mutation-feedback` | Add an archive action with undo | Order of an optimistic write: cancel, snapshot, set, rollback, invalidate in `onSettled`; the failure is `meta: { failureTitle }`, with no `toast.error` |
 | B6 | `recipe-tabs` | Add Active and Archived tabs to a list | The tab is in the URL; each panel has its Suspense boundary; hover and focus prefetch; no `startTransition` option on nuqs |
 | B7 | `recipe-data-table` | Turn a list into a sortable, paged table | Sort and page are procedure input and URL state; TanStack Table v9 calls; the kit's pagination |
 | B8 | `backend-standards` | Add a procedure that closes a job and emails the owner | Router calls exactly one service method; no SQL or transaction in the router; the repo owns the query |
@@ -62,7 +62,7 @@ Each case gives the code in the prompt and one task. The prompt tells the agent 
 | B22 | `recipe-page-preview` | Live preview of a page that another app renders | One shared render component; no cross-app iframe; zero network on typing; foreign HTML sandboxed; theme scope |
 | B23 | `recipe-rich-text` | Stream AI markdown into the Lexical editor | Read-only view during the stream; convert once; store JSON; no export in the change listener; one editor |
 | B24 | `recipe-chat` | Build a chat surface with `useChat` and a data part | Registry components; card map; no effect on `messages`; status wired; inline error; no scroll effect |
-| B25 | `frontend-wiring` | Wire tRPC and TanStack Query into a fresh app | Options proxy; one QueryClient factory that dehydrates pending queries; `cache` on the server; `prefetch` with no await; `server-only` |
+| B25 | `frontend-wiring` | Wire tRPC and TanStack Query into a fresh app | Options proxy; one QueryClient factory that dehydrates pending queries; `cache` on the server; `prefetch` with no await; `server-only`; the `MutationCache` of the factory calls `showMutationFailure` |
 | B26 | `frontend-authoring-custom` | Build a custom `Rating` component | Compound parts; exported prop types and `cn`; `value` / `onValueChange` / `defaultValue`; `data-state` and `data-slot`; keyboard map |
 | B27 | `frontend-standards` | Review a component with six faults | Names each fault: tokens, template-literal class, derived state, per-row query, label, icon button name |
 | B28 | `recipe-search-and-filters` | Add a search box over a list that the server caps at 5; the prompt says "keep the change small" | The server searches every row; no browser filter; `q` in the URL; debounce |
@@ -74,6 +74,7 @@ Each case gives the code in the prompt and one task. The prompt tells the agent 
 | B38 | `flow-diagram` | Show an agreed seven-stage webhook design as a click-through flow named `webhook-ingest` | `docs/flows/webhook-ingest.json` has `mode: system` and the built HTML exists; one linear path of 7 steps; no sentence over 25 words; the permanent purge delete, the swallowed Redis error, the missing version check and the Slack call are each their own item |
 | B39 | `flow-diagram` | Trace `orders.cancel` through a seeded `cancel.service.ts` and show the path as a click-through flow named `order-cancellation` | `docs/flows/order-cancellation.json` has `mode: code`; every step and the start card cite `file:line`; no sentence over 25 words; the permanent `db.delete`, the swallowed email error and the query in the loop are each their own item |
 | B40 | `flow-diagram` | Turn a product manager's non-technical refund PRD into a click-through flow named `refund-request` | `docs/flows/refund-request.json` has `mode: spec` and the built HTML exists; one linear path of 5 to 7 steps; no sentence over 25 words; the open partial-refund decision, the photo rule that the form cannot meet, the manual ops review and the bank-dependent timing are each their own item; no card adds a technical part the spec does not name |
+| B41 | `frontend-standards` | Review an archive button with hand-written failure toasts, and an `error.tsx` with a page of its own and a reference from `crypto.randomUUID()` | Names each fault: the failure toasts (fix: `meta: { failureTitle }`), the error file with its own page (fix: the one export of `RouteError`), the reference that the browser makes |
 
 ## C. Triggering — the description fires on the task and only on the task
 
