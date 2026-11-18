@@ -68,6 +68,13 @@ type's specifics.
   fetch.
 - Don't branch on `isLoading` inside a component that uses
   `useSuspenseQuery`.
+- Don't call `redirect()` below a `<Suspense>` or a `loading.tsx`
+  for a check that must stop the page (an access gate). The answer
+  has started there: the browser gets status 200 with the frame,
+  then loads a second page (Next.js, `redirect`: "When used in a
+  streaming context, this will insert a meta tag to emit the
+  redirect on the client side"). Await the check above each
+  boundary, so the answer of the request is the redirect.
 
 ## Verify
 
@@ -79,6 +86,9 @@ type's specifics.
 - [ ] Every rendered query has a matching server `prefetch`;
       inputs identical on both sides.
 - [ ] No awaited prefetch without a stated initial-HTML reason.
+- [ ] A gate that redirects is above each `<Suspense>` and each
+      `loading.tsx` of its route: a request that the gate refuses
+      answers with the redirect status, not with 200.
 - [ ] `loading.tsx` + `error.tsx` exist; the skeleton matches the
       real layout's containers and sizes.
 - [ ] A deliberate `md:` step exists; checked at
