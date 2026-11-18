@@ -1,5 +1,5 @@
 ---
-description: "frontend-standards 47: the router keeps a seen page, the nav links prefetch it"
+description: "frontend-standards 47: the router keeps a seen page, the nav links prefetch the full route on intent"
 tags: [obedience, frontend, regression]
 max_turns: 40
 timeout_seconds: 1200

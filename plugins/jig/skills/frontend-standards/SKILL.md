@@ -340,8 +340,13 @@ export default async function Page() {
     seconds by default, so set it in `next.config.ts`:
     `experimental: { staleTimes: { dynamic: 300 } }`. The links of
     the app's own navigation (the side menu, the header) set
-    `prefetch={true}`: the default prefetch of a dynamic route
-    stops at `loading.tsx`, so the first click shows the skeleton.
+    `prefetch={intent ? true : null}`, and `onPointerEnter` and
+    `onFocus` set `intent` (Next.js prefetching guide). In view,
+    the default prefetch stops at `loading.tsx`: a slow click
+    shows the skeleton at once. On intent the full route comes: a
+    usual click shows the page with no skeleton. Never set
+    `prefetch={true}` from the start: a click before the route
+    arrives leaves the old page on screen with no sign.
     A kept page never overwrites newer data: TanStack's `hydrate`
     skips a query whose cache holds newer data.
 
